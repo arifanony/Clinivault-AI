@@ -1,8 +1,42 @@
 # Clinivault AI — How This Project Is Run
 
-This project builds a production-oriented Healthcare RAG system, and the build
-process itself is documented so every important decision can be explained and
-defended later.
+## What Clinivault Is
+
+Clinivault AI is an **evidence-grounded clinical knowledge system**. It helps
+users explore clinical questions using curated clinical guidelines and research
+evidence, while showing where the answer came from.
+
+For the MVP we deliberately focus on **one clinical domain: Type 2 Diabetes** —
+not because other domains don't matter, but because a focused domain lets us
+build a serious, curated evidence system instead of a generic "ask anything
+about medicine" chatbot. (See [DECISION-003](./decisions/DECISION-003-product-direction.md).)
+
+Basic product flow:
+
+```
+User clinical question
+        ↓
+Retrieve relevant evidence
+        ↓
+Generate a grounded answer
+        ↓
+Show supporting sources / evidence
+        ↓
+User can see where the answer came from
+```
+
+**Errata is a separate product.** It will eventually evaluate stages of an
+AI/RAG system (ingestion quality, extraction quality, metadata completeness,
+retrieval quality, grounding, citation quality, answer reliability). Clinivault
+does not implement Errata — it only preserves the evidence, provenance, and
+execution information that would let Errata evaluate this pipeline later
+through a shared contract. Future integration is possible; integration is
+**not** a current MVP goal.
+
+---
+
+This project builds the above system, and the build process itself is documented
+so every important decision can be explained and defended later.
 
 Two rules drive everything else:
 

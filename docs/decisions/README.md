@@ -15,7 +15,8 @@ never rewritten — if it changes, mark it Replaced and write a new document.
 
 | # | Decision | Status | Date |
 |---|---|---|---|
-| — | — | — | — |
+| [DECISION-003](./DECISION-003-product-direction.md) | Product direction: Type 2 Diabetes as the initial domain | Chosen | 2026-09-07 |
+| [DECISION-004](./DECISION-004-corpus-strategy.md) | Corpus strategy: question-driven T2D evidence (replacing the original general-corpus plan) | Chosen | 2026-09-07 |
 
 ## Decisions in Progress
 

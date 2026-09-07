@@ -8,9 +8,12 @@ Planned contents, written only as things actually exist:
 - How the system fits together: contracts, ingestion, embedding, vector
   storage, retrieval, context construction, generation, recording
 - Which layers may depend on which, and why
-- The structured evidence this system produces (execution records, ingestion
-  records) and how the external Errata product consumes it — Errata itself
-  is a separate product and lives in its own repository
+- **The two-products rule:** Clinivault is a standalone clinical evidence
+  product; Errata is a separate, reusable AI evaluation product that lives in
+  its own repository. Clinivault preserves the structured evidence,
+  provenance, and execution records that would let Errata evaluate this
+  pipeline later through a shared contract — but integration is not a
+  current MVP goal, and no Errata logic lives here
 - Which components are deliberately replaceable (parser, embedding model,
   vector database, LLM) and where we chose NOT to add seams
 
