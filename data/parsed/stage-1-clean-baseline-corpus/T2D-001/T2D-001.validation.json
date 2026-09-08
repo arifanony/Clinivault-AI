@@ -1,0 +1,76 @@
+{
+  "document_id": "T2D-001",
+  "validated_at_utc": "2026-09-08T17:09:06+00:00",
+  "checks": [
+    {
+      "name": "source_sha256_matches_manifest",
+      "status": "pass",
+      "detail": "source SHA-256 verified against manifest: 97D8CC13CD7356BE84B148A9FFF47C6E115131B9657DD0A746A834F2C70017B8"
+    },
+    {
+      "name": "page_count_matches_manifest",
+      "status": "pass",
+      "detail": "expected 23 pages, parsed 23"
+    },
+    {
+      "name": "document_text_present",
+      "status": "pass",
+      "detail": "total extracted characters: 158398"
+    },
+    {
+      "name": "page_provenance_complete",
+      "status": "pass",
+      "detail": "all page records carry document_id + filename + page_number"
+    },
+    {
+      "name": "extraction_failures",
+      "status": "pass",
+      "detail": "no page-level extraction failures"
+    },
+    {
+      "name": "empty_pages_reported",
+      "status": "info",
+      "detail": "pages with no extractable text (kept, not dropped): none"
+    },
+    {
+      "name": "control_char_anomalies",
+      "status": "info",
+      "detail": "pages above 1% control-character ratio (reported only): none"
+    },
+    {
+      "name": "low_text_pages",
+      "status": "info",
+      "detail": "reporting-only low-text rule: none"
+    },
+    {
+      "name": "json_reload_equivalent",
+      "status": "pass",
+      "detail": "reloaded JSON equals the in-memory document (semantic compare)"
+    }
+  ],
+  "statistics": {
+    "page_count": 23,
+    "total_chars": 158398,
+    "total_words": 23224,
+    "chars_per_page": {
+      "mean": 6886.9,
+      "median": 6762,
+      "min": 4046,
+      "max": 9669
+    },
+    "words_per_page": {
+      "mean": 1009.7,
+      "median": 1030,
+      "min": 541,
+      "max": 1385
+    },
+    "empty_pages": [],
+    "failed_pages": [],
+    "low_text_pages_reported_only": {
+      "rule": "char_count < 10% of median (6762)",
+      "pages": []
+    },
+    "control_char_anomaly_pages": []
+  },
+  "overall_status": "pass"
+}

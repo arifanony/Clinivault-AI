@@ -81,6 +81,14 @@ evaluate later.
 |---|---|
 | [`corpus-selection-guide.md`](./corpus-selection-guide.md) | How to evaluate a candidate PDF before adding it |
 | [`corpus-manifest.md`](./corpus-manifest.md) | One record per document — why it's in the corpus |
+| [`initial-corpus-manifest.md`](./initial-corpus-manifest.md) | Curated acquisition input for the initial corpus (sources + official routes) — input only, not the source of truth |
+
+**Two manifest files, two roles.** `initial-corpus-manifest.md` (copied from the
+root `clinivault_initial_corpus_manifest.md`) is the curated acquisition input:
+what we intend to acquire and from where. [`corpus-manifest.md`](./corpus-manifest.md)
+is the source of truth for documents actually present in the corpus, including
+acquisition status, dates, and checksums. A source is never substituted with a
+different paper; failures are recorded honestly with a status.
 
 Raw PDFs live in `data/raw/`, in per-stage folders:
 `stage-1-clean-baseline-corpus/`, `stage-2-domain-evidence-corpus/`,

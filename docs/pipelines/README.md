@@ -1,7 +1,9 @@
 # Pipelines
 
-Status: none written yet. Pipeline docs are created as pipelines are actually
-built, using [`docs/templates/pipeline-doc-template.md`](../templates/pipeline-doc-template.md).
+Status: ingestion parsing implemented for the first document (T2D-001) —
+see [`ingestion-parsing.md`](./ingestion-parsing.md). Further pipeline docs are
+created as pipelines are actually built, using
+[`docs/templates/pipeline-doc-template.md`](../templates/pipeline-doc-template.md).
 
 Planned documents (each written when that pipeline exists, not before):
 

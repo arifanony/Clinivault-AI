@@ -15,15 +15,17 @@ never rewritten — if it changes, mark it Replaced and write a new document.
 
 | # | Decision | Status | Date |
 |---|---|---|---|
+| [DECISION-002](./DECISION-002-python-version.md) | Python version: 3.14 (project runtime contract) | Chosen | 2026-09-08 |
 | [DECISION-003](./DECISION-003-product-direction.md) | Product direction: Type 2 Diabetes as the initial domain | Chosen | 2026-09-07 |
 | [DECISION-004](./DECISION-004-corpus-strategy.md) | Corpus strategy: question-driven T2D evidence (replacing the original general-corpus plan) | Chosen | 2026-09-07 |
+| [DECISION-005](./DECISION-005-initial-clinical-scope.md) | Initial MVP clinical scope: frozen T2D boundary (five question families, explicit out-of-scope list) | Chosen | 2026-09-08 |
+| [DECISION-006](./DECISION-006-pdf-parser.md) | PDF parser: pdfplumber for ingestion text extraction (pypdf for validation only; PyMuPDF rejected on licensing) | Chosen | 2026-09-08 |
 
 ## Decisions in Progress
 
 | # | Decision | Status | Milestone |
 |---|---|---|---|
 | DECISION-001 | Project architecture (repo layout, layer boundaries) | Proposed | M1 |
-| DECISION-002 | Python version | Proposed | M1 |
 
 ## Not Decided Yet
 

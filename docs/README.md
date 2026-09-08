@@ -11,6 +11,15 @@ not because other domains don't matter, but because a focused domain lets us
 build a serious, curated evidence system instead of a generic "ask anything
 about medicine" chatbot. (See [DECISION-003](./decisions/DECISION-003-product-direction.md).)
 
+The initial MVP clinical scope inside that domain is **frozen**: five question
+families (diagnosis and classification, glycemic management, pharmacological
+treatment, cardiovascular and kidney considerations, evidence comparison and
+synthesis) with an explicit out-of-scope list (Type 1 / gestational / pediatric
+diabetes, individual diagnosis, personalized prescriptions, emergencies, and
+general healthcare questions unrelated to T2D). This is a starting boundary,
+not a permanent product limitation. (See
+[DECISION-005](./decisions/DECISION-005-initial-clinical-scope.md).)
+
 Basic product flow:
 
 ```

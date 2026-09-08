@@ -10,6 +10,27 @@ the MVP domain (see [DECISION-003](../decisions/DECISION-003-product-direction.m
 A beautiful, clean, trustworthy PDF on an unrelated condition is still corpus
 noise for now.
 
+## The Frozen Clinical Scope
+
+The MVP clinical scope is frozen in
+[DECISION-005](../decisions/DECISION-005-initial-clinical-scope.md). Every
+document must earn its place against one of the five in-scope question
+families:
+
+1. Diagnosis and classification
+2. Glycemic management
+3. Pharmacological treatment
+4. Cardiovascular and kidney considerations (T2D with cardiovascular or
+   kidney-related clinical considerations)
+5. Evidence comparison and synthesis
+
+And must not exist in the corpus for topics on the explicit out-of-scope list:
+Type 1 Diabetes, Gestational Diabetes, pediatric diabetes, individual patient
+diagnosis, personalized treatment prescriptions, emergency medical
+decision-making, or general healthcare questions unrelated to Type 2 Diabetes.
+
+## Example Questions That Guide Selection
+
 Useful clinical questions to keep in mind while selecting (examples that guide
 selection — not questions we hard-code into the system):
 
