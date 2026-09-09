@@ -93,8 +93,9 @@ def extract_page_text_column_aware(
     """
     with pdfplumber.open(pdf_path) as pdf:
         page = pdf.pages[page_number - 1]
-
-    words = page.extract_words(use_text_flow=False, keep_blank_chars=False)
+        # Extract words while the PDF is still open — page objects become
+        # unusable ("seek of closed file") once the context manager exits.
+        words = page.extract_words(use_text_flow=False, keep_blank_chars=False)
 
     split_x = detect_column_split(words, page.width, gap_threshold, edge_margin)
     is_two_column = split_x is not None and split_x > 0
