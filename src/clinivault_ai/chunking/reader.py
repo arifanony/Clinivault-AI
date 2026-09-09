@@ -58,6 +58,14 @@ Baseline-aligned columns share row tops, so this split is what keeps column
 detection (and side-volume validation) from merging columns into full-width
 lines."""
 
+DEFAULT_TABLE_CELL_PROXIMITY = 10.0
+"""A candidate gutter whose midpoint lies within this distance (pt) of a
+detected table cell column boundary is rejected as a document region boundary.
+Evidence (T2D-001 semantic-guard investigation): Table 2.7's internal column
+separator sits 5 pt from a detected cell boundary, while the nearest
+genuine-gutter/cell-boundary distance observed was ~26 pt — 10 pt separates
+the two populations without page-specific tuning."""
+
 
 def _line_segments(words: list[dict], split_gap: float) -> list[dict]:
     """Group words into visual rows, then split rows at large horizontal gaps.
@@ -170,6 +178,54 @@ def detect_region_gutters(
     return gutters
 
 
+def table_cell_x_boundaries(tables: list) -> list[float]:
+    """Collect deduplicated vertical (column) x-boundaries from table cells.
+
+    Uses only the geometry of individual cells — never table.bbox — so the
+    table's outer bounding box cannot by itself look like a column boundary.
+    A cell is a (x0, top, x1, bottom) tuple; its x0/x1 are vertical rule
+    positions shared by the column it belongs to. Horizontal row separators
+    contribute nothing here because we only read x coordinates.
+    """
+    bounds: set[float] = set()
+    for table in tables:
+        for cell in getattr(table, "cells", None) or []:
+            try:
+                x0, _top, x1, _bottom = cell
+            except (TypeError, ValueError):
+                continue
+            if x0 is not None:
+                bounds.add(round(float(x0), 1))
+            if x1 is not None:
+                bounds.add(round(float(x1), 1))
+    return sorted(bounds)
+
+
+def reject_table_internal_gutters(
+    gutters: list[dict],
+    cell_x_bounds: list[float],
+    proximity: float = DEFAULT_TABLE_CELL_PROXIMITY,
+) -> tuple[list[dict], list[dict]]:
+    """Semantic guard: reject candidates that are table-internal separators.
+
+    Invariant: a candidate gutter whose midpoint lies within `proximity` of
+    any detected table cell column boundary is a table's internal column
+    separator, not a document region boundary, and must not become one.
+    Bounding-box overlap alone never rejects a candidate, and the absence of
+    detected tables (empty cell_x_bounds) rejects nothing — find_tables() can
+    miss visible tables, so "no table detected" is not positive evidence.
+
+    Returns (kept, rejected) gutter lists, both sorted left to right.
+    """
+    kept, rejected = [], []
+    for gutter in gutters:
+        near_cell = any(
+            abs(gutter["mid"] - b) <= proximity for b in cell_x_bounds
+        )
+        (rejected if near_cell else kept).append(gutter)
+    return kept, rejected
+
+
 def detect_column_split(
     words: list[dict],
     page_width: float,
@@ -238,18 +294,22 @@ def extract_page_text_column_aware(
     """Extract a single page's text with region-aware reading order.
 
     Text regions are detected with detect_region_gutters() (page-relative
-    line-coverage profile). Text is assigned to regions per word (whole
-    segments when single-region, split into per-region runs when a segment
-    spans a gutter), so no extracted row contains words from two distinct
-    regions. Each region is read top-to-bottom, regions are concatenated
-    left to right. When no valid gutter exists the page falls back to the
-    plain top-then-x0 ordering.
+    line-coverage profile), then filtered by a semantic guard: candidates
+    within DEFAULT_TABLE_CELL_PROXIMITY of a detected table cell column
+    boundary are rejected as table-internal separators (bbox overlap alone
+    and undetected tables never reject anything). Text is assigned to regions
+    per word (whole segments when single-region, split into per-region runs
+    when a segment spans a gutter), so no extracted row contains words from
+    two distinct regions. Each region is read top-to-bottom, regions are
+    concatenated left to right. When no valid gutter exists the page falls
+    back to the plain top-then-x0 ordering.
 
     Returns a dict with:
       - page_number
       - is_two_column: True when at least one gutter was detected
       - split_x: first gutter midpoint (compatibility; None in fallback)
       - gutters: list of detected gutter dicts (empty in fallback)
+      - rejected_gutters: candidates rejected by the table-cell semantic guard
       - region_count: number of text regions (1 in fallback)
       - fallback_used: True when no gutter was found
       - text: region-major reading-order text
@@ -264,8 +324,13 @@ def extract_page_text_column_aware(
         # Extract words while the PDF is still open — page objects become
         # unusable ("seek of closed file") once the context manager exits.
         words = page.extract_words(use_text_flow=False, keep_blank_chars=False)
+        # Semantic-guard evidence: table cell geometry must also be read while
+        # the page is open. Default find_tables() settings only — the guard
+        # treats undetected tables as unknown, never as evidence of absence.
+        cell_x_bounds = table_cell_x_boundaries(page.find_tables())
 
     gutters = detect_region_gutters(words, page.width, edge_margin=edge_margin)
+    gutters, rejected_gutters = reject_table_internal_gutters(gutters, cell_x_bounds)
     region_bounds = [g["mid"] for g in gutters]
 
     if not region_bounds:
@@ -275,6 +340,7 @@ def extract_page_text_column_aware(
             "is_two_column": False,
             "split_x": None,
             "gutters": [],
+            "rejected_gutters": rejected_gutters,
             "region_count": 1,
             "fallback_used": True,
             "column_boundaries": None,
@@ -305,6 +371,7 @@ def extract_page_text_column_aware(
         "is_two_column": True,
         "split_x": region_bounds[0],
         "gutters": gutters,
+        "rejected_gutters": rejected_gutters,
         "region_count": len(regions),
         "fallback_used": False,
         "column_boundaries": {

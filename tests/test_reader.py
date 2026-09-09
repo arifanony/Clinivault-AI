@@ -185,5 +185,114 @@ class CrossRegionLeakageTests(unittest.TestCase):
         )
 
 
+class TableGuardTests(unittest.TestCase):
+    """Semantic guard: table-internal separators must not become doc regions.
+
+    Synthetic stand-ins mimic pdfplumber Table objects; only `.cells`
+    ((x0, top, x1, bottom) tuples) is read — bbox is deliberately absent to
+    prove it plays no role in the guard.
+    """
+
+    @staticmethod
+    def table(cells):
+        class _T:
+            pass
+
+        t = _T()
+        t.cells = cells
+        return t
+
+    def gutter(self, mid, pw=600.0):
+        return {
+            "start": mid - 5.0,
+            "end": mid + 5.0,
+            "width": 10.0,
+            "mid": mid,
+            "max_coverage": 0.0,
+            "left_lines": 30,
+            "right_lines": 30,
+        }
+
+    def test_candidate_near_cell_boundary_rejected(self):
+        # p16 pattern: candidate mid 0.358*pw sits ~5 pt from a cell boundary.
+        pw = 600.0
+        candidate = self.gutter(pw * 0.358)
+        cells = [
+            (pw * 0.25, 50, pw * 0.367, 90),   # interior column boundary 0.367
+            (pw * 0.367, 50, pw * 0.60, 90),
+        ]
+        kept, rejected = reader.reject_table_internal_gutters(
+            [candidate], reader.table_cell_x_boundaries([self.table(cells)])
+        )
+        self.assertEqual(kept, [])
+        self.assertEqual([g["mid"] for g in rejected], [candidate["mid"]])
+
+    def test_candidate_far_from_cell_boundaries_retained(self):
+        pw = 600.0
+        candidate = self.gutter(pw * 0.649)
+        cells = [(pw * 0.25, 50, pw * 0.40, 90), (pw * 0.40, 50, pw * 0.55, 90)]
+        kept, rejected = reader.reject_table_internal_gutters(
+            [candidate], reader.table_cell_x_boundaries([self.table(cells)])
+        )
+        self.assertEqual(rejected, [])
+        self.assertEqual([g["mid"] for g in kept], [candidate["mid"]])
+
+    def test_bbox_overlap_alone_does_not_reject(self):
+        # p6 0.649 pattern: cells live only in the left part of the page, so
+        # any bounding box spanning the gutter would overlap it — but no cell
+        # COLUMN boundary is near the gutter, so it must survive.
+        pw = 600.0
+        candidate = self.gutter(pw * 0.649)
+        cells = [(pw * 0.25, 50, pw * 0.40, 90), (pw * 0.40, 50, pw * 0.45, 90)]
+        kept, rejected = reader.reject_table_internal_gutters(
+            [candidate], reader.table_cell_x_boundaries([self.table(cells)])
+        )
+        self.assertEqual(rejected, [])
+        self.assertEqual(len(kept), 1)
+
+    def test_no_tables_rejects_nothing(self):
+        pw = 600.0
+        candidates = [self.gutter(150.0), self.gutter(400.0)]
+        for empty in ([], [self.table([])]):
+            kept, rejected = reader.reject_table_internal_gutters(
+                candidates, reader.table_cell_x_boundaries(empty)
+            )
+            self.assertEqual(rejected, [])
+            self.assertEqual([g["mid"] for g in kept], [150.0, 400.0])
+
+    def test_table_cell_x_boundaries_dedupes_and_ignores_rows(self):
+        cells = [
+            (100.0, 50, 200.0, 90),   # shares x edges with the cells below
+            (100.0, 90, 200.0, 130),  # horizontal row boundary only
+            (200.0, 50, 300.0, 90),
+        ]
+        bounds = reader.table_cell_x_boundaries([self.table(cells)])
+        self.assertEqual(bounds, [100.0, 200.0, 300.0])
+
+    def test_single_region_detection_unchanged_with_guard(self):
+        pw = 600.0
+        words = grid_words([40], pw)
+        gutters = reader.detect_region_gutters(words, pw)
+        kept, rejected = reader.reject_table_internal_gutters(
+            gutters, [pw * 0.5]
+        )
+        self.assertEqual(gutters, [])
+        self.assertEqual(kept, [])
+        self.assertEqual(rejected, [])
+
+    def test_two_region_detection_survives_guard_with_far_table(self):
+        pw = 600.0
+        words = grid_words([40, 40], pw)
+        gutters = reader.detect_region_gutters(words, pw)
+        self.assertEqual(len(gutters), 1)
+        # Table cells far from the gutter: nothing rejected.
+        cells = [(50.0, 700, 90.0, 740)]
+        kept, rejected = reader.reject_table_internal_gutters(
+            gutters, reader.table_cell_x_boundaries([self.table(cells)])
+        )
+        self.assertEqual(rejected, [])
+        self.assertEqual(len(kept), 1)
+
+
 if __name__ == "__main__":
     unittest.main()
