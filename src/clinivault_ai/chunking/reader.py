@@ -66,6 +66,9 @@ def detect_column_split(
     if best_gap > 0 and best_gap < page_width * 0.05:
         return None
 
+    return best_mid
+
+
 def extract_page_text_column_aware(
     pdf_path: str,
     page_number: int,
@@ -145,7 +148,7 @@ def extract_page_text_column_aware(
         "words": words,
     }
 
-(words: list[dict]) -> list[dict]:
+def _words_to_lines(words: list[dict]) -> list[dict]:
     """Group words into lines by top position (within 3pt tolerance).
 
     Each line is a dict with:
