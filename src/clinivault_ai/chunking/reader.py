@@ -186,6 +186,49 @@ def detect_column_split(
     return gutters[0]["mid"] if gutters else None
 
 
+def _assign_regions(
+    words: list[dict],
+    region_bounds: list[float],
+    row_split_gap: float = None,
+) -> list[list[dict]]:
+    """Assign words to text regions, guaranteeing no cross-region rows.
+
+    Segments are the same row-segmentation used by detection (rows split at
+    horizontal gaps > row_split_gap). A segment whose words all belong to one
+    region is assigned intact. A segment that spans a gutter (possible when
+    two regions share a baseline and the gap at the gutter is within the
+    row-split threshold) is split into contiguous per-region runs, so no
+    extracted row can contain words from two distinct detected regions.
+
+    Returns one word list per region, ordered left to right.
+    """
+    if row_split_gap is None:
+        row_split_gap = DEFAULT_ROW_SPLIT_GAP
+
+    def region_index(x: float) -> int:
+        idx = 0
+        for mid in region_bounds:
+            if x >= mid:
+                idx += 1
+        return idx
+
+    regions: list[list[dict]] = [[] for _ in range(len(region_bounds) + 1)]
+    for seg in _line_segments(words, row_split_gap):
+        seg_words = sorted(seg["words"], key=lambda w: w["x0"])
+        indices = [region_index((w["x0"] + w["x1"]) / 2.0) for w in seg_words]
+        if len(set(indices)) == 1:
+            regions[indices[0]].extend(seg_words)
+            continue
+        # Split into contiguous runs of same-region words (x0-ordered), so
+        # opposite sides of a gutter never merge into one extracted row.
+        run_start = 0
+        for i in range(1, len(seg_words) + 1):
+            if i == len(seg_words) or indices[i] != indices[run_start]:
+                regions[indices[run_start]].extend(seg_words[run_start:i])
+                run_start = i
+    return regions
+
+
 def extract_page_text_column_aware(
     pdf_path: str,
     page_number: int,
@@ -195,9 +238,10 @@ def extract_page_text_column_aware(
     """Extract a single page's text with region-aware reading order.
 
     Text regions are detected with detect_region_gutters() (page-relative
-    line-coverage profile). Reconstructed lines are assigned to regions by
-    their horizontal center (full-width lines such as running headers stay
-    intact), each region is read top-to-bottom, and regions are concatenated
+    line-coverage profile). Text is assigned to regions per word (whole
+    segments when single-region, split into per-region runs when a segment
+    spans a gutter), so no extracted row contains words from two distinct
+    regions. Each region is read top-to-bottom, regions are concatenated
     left to right. When no valid gutter exists the page falls back to the
     plain top-then-x0 ordering.
 
@@ -242,20 +286,12 @@ def extract_page_text_column_aware(
             "words": words,
         }
 
-    # Assign whole line segments (same segmentation as detection) to regions by
-    # their horizontal center, so column segments are never split across
-    # regions. Full-width lines (running headers) land in whichever region
-    # their center falls — a known, accepted limitation.
-    segments = _line_segments(words, DEFAULT_ROW_SPLIT_GAP)
-
-    regions: list[list[dict]] = [[] for _ in range(len(region_bounds) + 1)]
-    for seg in segments:
-        center = (seg["x0"] + seg["x1"]) / 2.0
-        idx = 0
-        for mid in region_bounds:
-            if center >= mid:
-                idx += 1
-        regions[idx].extend(seg["words"])
+    # Assign text to regions (see _assign_regions: whole segments when they
+    # sit in one region, split into per-region runs when they span a gutter,
+    # so no extracted row contains words from two distinct regions). Genuinely
+    # page-wide lines (running headers) land in whichever region their center
+    # falls — a known, accepted limitation.
+    regions = _assign_regions(words, region_bounds)
 
     region_lines = []
     region_texts = []
