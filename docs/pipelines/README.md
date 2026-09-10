@@ -3,7 +3,9 @@
 Status: ingestion parsing implemented for the first document (T2D-001) —
 see [`ingestion-parsing.md`](./ingestion-parsing.md); baseline structural
 chunking and baseline embedding generation implemented — see
-[`embedding-baseline.md`](./embedding-baseline.md). Further pipeline docs are
+[`embedding-baseline.md`](./embedding-baseline.md); baseline vector
+storage and similarity retrieval implemented — see
+[`retrieval-baseline.md`](./retrieval-baseline.md). Further pipeline docs are
 created as pipelines are actually built, using
 [`docs/templates/pipeline-doc-template.md`](../templates/pipeline-doc-template.md).
 
