@@ -1,7 +1,9 @@
 # Pipelines
 
 Status: ingestion parsing implemented for the first document (T2D-001) —
-see [`ingestion-parsing.md`](./ingestion-parsing.md). Further pipeline docs are
+see [`ingestion-parsing.md`](./ingestion-parsing.md); baseline structural
+chunking and baseline embedding generation implemented — see
+[`embedding-baseline.md`](./embedding-baseline.md). Further pipeline docs are
 created as pipelines are actually built, using
 [`docs/templates/pipeline-doc-template.md`](../templates/pipeline-doc-template.md).
 
