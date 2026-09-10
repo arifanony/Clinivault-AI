@@ -26,7 +26,7 @@ from .parsing import parse_pages
 from .source import verify_source
 from .validation import build_validation_report, roundtrip_equivalent
 
-PIPELINE_VERSION = "0.1.0"
+PIPELINE_VERSION = "0.2.0"
 PARSER_NAME = "pdfplumber"
 
 

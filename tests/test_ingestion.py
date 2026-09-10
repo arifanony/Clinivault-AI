@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 from pypdf import PdfWriter
@@ -23,6 +24,7 @@ from clinivault_ai.ingestion import run_ingestion
 from clinivault_ai.ingestion.errors import IngestionError
 from clinivault_ai.ingestion.output import load_json
 from clinivault_ai.ingestion.source import compute_sha256
+from clinivault_ai.ingestion.validation import REQUIRED_PAGE_FIELDS
 
 
 def _make_blank_pdf(path: Path) -> str:
@@ -97,6 +99,94 @@ class IngestionTests(unittest.TestCase):
         self.assertIn("pages", parsed)
         self.assertIn("checks", validation)
         self.assertTrue(summary["reload_ok"])
+
+
+class ColumnAwareIngestionTests(unittest.TestCase):
+    """Ingestion must extract page text through the column-aware reader.
+
+    Focused on the integration seam only: which extraction path parsing.py
+    calls, that the reader's text lands in the page record with provenance
+    and status semantics intact, that reader metadata does not leak into
+    the parsed page schema, and that a reader failure stays isolated per
+    page. Reader behavior itself (gutter detection, fallback ordering) is
+    covered by tests/test_reader.py and is deliberately not duplicated here.
+    """
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.tmp = Path(self._tmp.name)
+        self.out_dir = self.tmp / "parsed"
+        self.blank_pdf = self.tmp / "T2D-998-blank-fixture.pdf"
+        self.sha = _make_blank_pdf(self.blank_pdf)
+
+    def _run(self):
+        return run_ingestion(
+            source_path=self.blank_pdf,
+            output_dir=self.out_dir,
+            expected_sha256=self.sha,
+            expected_pages=1,
+            document_id="T2D-998",
+        )
+
+    def test_ingestion_uses_column_aware_reader(self):
+        extraction = {
+            "text": "Region one line.\nRegion two line.",
+            "fallback_used": False,
+            "region_count": 2,
+            "gutters": [{"mid": 297.0}],
+        }
+        with mock.patch(
+            "clinivault_ai.ingestion.parsing.extract_page_text_column_aware",
+            return_value=extraction,
+        ) as fake:
+            summary = self._run()
+        fake.assert_called_once_with(str(self.blank_pdf), 1)
+        parsed = load_json(Path(summary["parsed_path"]))
+        page = parsed["pages"][0]
+        self.assertEqual(page["text"], "Region one line.\nRegion two line.")
+        self.assertEqual(page["extraction_status"], "ok")
+        self.assertEqual(page["word_count"], 6)
+        self.assertEqual(page["char_count"], len(page["text"]))
+
+    def test_reader_failure_is_isolated_per_page(self):
+        with mock.patch(
+            "clinivault_ai.ingestion.parsing.extract_page_text_column_aware",
+            side_effect=RuntimeError("reader boom"),
+        ):
+            summary = self._run()
+        parsed = load_json(Path(summary["parsed_path"]))
+        page = parsed["pages"][0]
+        # The record still exists with full provenance -- never dropped.
+        self.assertEqual(page["document_id"], "T2D-998")
+        self.assertEqual(page["page_number"], 1)
+        self.assertEqual(page["extraction_status"], "failed")
+        self.assertIn("RuntimeError: reader boom", page["extraction_error"] or "")
+        validation = load_json(Path(summary["validation_path"]))
+        by_name = {c["name"]: c for c in validation["checks"]}
+        self.assertEqual(by_name["extraction_failures"]["status"], "fail")
+        self.assertEqual(validation["overall_status"], "fail")
+
+    def test_reader_metadata_does_not_leak_into_page_schema(self):
+        extraction = {
+            "text": "Region text.",
+            "fallback_used": False,
+            "gutters": [{"mid": 297.0}],
+            "rejected_gutters": [{"mid": 212.0}],
+            "column_boundaries": {"regions": []},
+            "lines": [],
+            "words": [{"x0": 1.0, "x1": 2.0, "top": 1.0, "text": "Region"}],
+        }
+        with mock.patch(
+            "clinivault_ai.ingestion.parsing.extract_page_text_column_aware",
+            return_value=extraction,
+        ):
+            summary = self._run()
+        parsed = load_json(Path(summary["parsed_path"]))
+        page = parsed["pages"][0]
+        # Parsed page schema is exactly the required provenance set:
+        # reader-specific observability must not change the contract.
+        self.assertEqual(set(page.keys()), set(REQUIRED_PAGE_FIELDS))
 
 
 if __name__ == "__main__":

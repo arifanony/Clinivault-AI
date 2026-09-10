@@ -32,8 +32,10 @@ INPUT (one raw PDF + expected SHA-256 + expected page count)
    Hard failure here aborts ingestion; the raw file is never touched.
   ↓
 [2. Page-level parsing] (ingestion/parsing.py, pdfplumber per DECISION-006)
-   every page → text extraction → per-page record; per-page exceptions are
-   captured as extraction_status="failed" (never silently dropped)
+   every page → region-aware text extraction (chunking/reader.py; plain
+   top-then-x0 fallback when a page has no valid gutter) → per-page
+   record; per-page exceptions are captured as extraction_status="failed"
+   (never silently dropped)
   ↓
 [3. Page-level structured representation]
    {document_id, filename, page_number, text, text_sha256, char_count,
@@ -72,7 +74,8 @@ python -m clinivault_ai.ingestion <pdf> --document-id T2D-001 \
 ## 5. Which components are involved?
 
 `src/clinivault_ai/ingestion/`: `source.py` (verification), `parsing.py`
-(pdfplumber extraction), `validation.py` (checks + statistics),
+(region-aware extraction via `chunking/reader.py`), `validation.py`
+(checks + statistics),
 `output.py` (serialization), `__init__.py` (orchestration + CLI),
 `errors.py`. Deliberately no deeper abstraction.
 
@@ -108,8 +111,9 @@ statistics (total chars/words, per-page distributions, anomaly lists). See
 
 ## 10. What consumes the output next?
 
-Chunking (not built yet). Every chunk will be traceable through
-`(document_id, page_number)` back to the raw PDF via the corpus manifest.
+Chunking. The baseline structural chunker (`chunking/chunker.py`) consumes
+this output; every chunk is traceable through `(document_id, page_number)`
+back to the raw PDF via the corpus manifest.
 
 ## Observed behavior — first real run (T2D-001, 2026-09-08)
 
@@ -127,6 +131,22 @@ Chunking (not built yet). Every chunk will be traceable through
   observed distribution (4,046–9,669 chars/page, no outliers) gives us a
   baseline to compare future documents against.
 
+## Observed behavior — region-aware re-ingestion (T2D-001, 2026-09-10)
+
+The pipeline was switched from plain `extract_text()` to the column-aware
+reader (pipeline version 0.1.0 → 0.2.0) and T2D-001 was re-ingested:
+
+- 23 pages parsed, 0 empty, 0 failed; validation `pass`; JSON reload ok.
+- Whitespace-token sequence preserved on all 23 pages (same 23,224 words;
+  only line order changed on multi-region pages).
+- Regions observed: p2 2 regions (gutter ~385.6 pt); p6 3 regions
+  (219.6/385.6 pt — includes the known false-positive gutter); p13 and
+  p23 3 regions (207.6/373.6 pt); p16 falls back to plain ordering (its
+  only candidate, 212.6 pt, was correctly rejected as a table-internal
+  separator by the table guard).
+- Mean extracted line length dropped on every page (e.g., p2 64→44 chars,
+  p6 69→34): cross-column line merging is gone from the parsed text.
+
 ## Related decisions
 
 - [DECISION-006: PDF parser](../decisions/DECISION-006-pdf-parser.md)
@@ -134,8 +154,14 @@ Chunking (not built yet). Every chunk will be traceable through
 
 ## Known limitations
 
-- Reading order on multi-column layouts is not corrected (accepted for now;
-  revisit if it damages retrieval quality later).
+- Reading order on multi-column layouts is corrected region by region
+  (chunking/reader.py, integrated 2026-09-10). Remaining extraction
+  limits: the page-6 false-positive gutter (~0.370·page width) still
+  splits that page into three regions; page 16 falls back to plain
+  ordering; the cover page interleaves title/credit blocks; genuinely
+  page-wide lines (running headers) land in whichever region their center
+  falls; the "Downloaded from ..." watermark text is part of the page
+  text layer and is recorded verbatim.
 - No cleaning/normalization — parser output is passed through as-is by design.
 - Only T2D-001 ingested so far; the other 8 Stage-1 documents follow in the
   next phase, each re-verified against its manifest facts.
