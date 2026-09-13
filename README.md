@@ -27,15 +27,19 @@ The reasoning is documented in
 Early-stage MVP development:
 
 - **Done:** the Stage 1 clean baseline corpus (nine documents) is acquired and
-  validated, and the ingestion/parsing baseline is implemented and tested for
-  the first corpus document (T2D-001).
-- **In progress:** the chunking phase — layout- and reading-order-aware text
-  extraction for real clinical PDFs.
-- **Not yet built:** the structural chunker and validation, embeddings, vector
-  storage, retrieval, context construction, and generation. No end-to-end
-  pipeline exists yet.
+  validated; the full baseline pipeline is implemented, tested, and verified
+  end-to-end on the first corpus document (T2D-001): ingestion with
+  column-aware reading order, structural chunking (107 validated chunks),
+  baseline embedding generation, in-memory vector storage with cosine
+  top-k retrieval, and context construction into inspectable evidence
+  bundles. Foundational architecture recorded in DECISION-001.
+- **In progress:** next milestone steps (generation/evaluation) are not yet
+  started; the semantic embedding model remains an open, undecided decision.
+- **Not yet built:** generation (LLM/provider, prompts, answers), abstention,
+  retrieval evaluation, multi-document corpus ingestion (pipeline contracts
+  support it; only T2D-001 is ingested), and deployment infrastructure.
 - Architecture documentation is written as components actually take shape,
-  not before.
+  not before — see [docs/architecture/](./docs/architecture/README.md).
 
 ## Documentation
 
