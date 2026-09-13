@@ -103,10 +103,12 @@ answers:
 
 ### Automated verification
 
-- 32 generation tests covering: prompt construction, valid input, input
+- 36 generation tests covering: prompt construction, valid input, input
   validation, empty evidence, provider failure, timings, usage metadata,
-  credential handling.
-- Full project suite at verification checkpoint: **118/118 passing**.
+  credential handling, malformed evidence items (GenerationError contract).
+- Full project suite at verification checkpoint: **122/122 passing**
+  (reader 16, ingestion 9, chunking 11, embedding 19, retrieval 19,
+  context 12, generation 36).
 - All tests use in-memory fake providers; no network, no API keys.
 
 ### Real T2D-001 verification
@@ -115,6 +117,13 @@ answers:
 - **Document:** T2D-001 (107 chunks, 107 embeddings indexed, dim 256)
 - **Provider:** google_gemini / `gemini-2.5-flash`
 - **Status:** ok
+
+A second reproduction run was performed after the GenerationError
+contract-leak fix (narrow ValueError-to-GenerationError wrap in
+generate_answer()). The reproduction confirmed: same retrieval path,
+same evidence, same grounding pattern (10/12 supported, 2/12
+unsupported), no regression. Measurements below reflect the
+final-code reproduction run.
 
 **Retrieved evidence supplied to Gemini (top-5):**
 
@@ -201,13 +210,13 @@ than inventing them.
 
 | Stage | Latency | Scope |
 |-------|---------|-------|
-| Query embedding | 0.24 ms | Measured in run script (not in generator) |
-| Retrieval (top-5) | 3.43 ms | Measured in run script (not in generator) |
-| Context construction | 0.07 ms | Measured in run script (not in generator) |
-| Prompt construction | 0.06 ms | Measured inside generator |
-| LLM generation | 13,032.69 ms | Measured inside generator |
-| **Generation-stage total** | **13,032.76 ms** | `total_ms` from generator — covers prompt construction + LLM generation only |
-| **Approximate full pipeline end-to-end** | **~13,036.49 ms** | Sum of all stages: 0.24 + 3.43 + 0.07 + 0.06 + 13,032.69 |
+| Query embedding | 0.21 ms | Measured in run script (not in generator) |
+| Retrieval (top-5) | 2.50 ms | Measured in run script (not in generator) |
+| Context construction | 0.06 ms | Measured in run script (not in generator) |
+| Prompt construction | 0.03 ms | Measured inside generator |
+| LLM generation | 14,130.50 ms | Measured inside generator |
+| **Generation-stage total** | **14,130.54 ms** | `total_ms` from generator — covers prompt construction + LLM generation only |
+| **Approximate full pipeline end-to-end** | **~14,130.78 ms** | Sum of all stages: 0.21 + 2.50 + 0.06 + 0.03 + 14,130.50 |
 
 Note: The generator's `total_ms` field covers only the generation stage
 (prompt construction + LLM generation + result assembly overhead). It does
@@ -220,12 +229,15 @@ correct interpretation.
 **Provider usage metadata:**
 
 - promptTokenCount: 2,477
-- candidatesTokenCount: 740
-- totalTokenCount: 5,034
-- thoughtsTokenCount: 1,817 (internal reasoning tokens)
+- candidatesTokenCount: 628
+- totalTokenCount: 5,159
+- thoughtsTokenCount: 2,054 (internal reasoning tokens)
+- serviceTier: standard
 
-Note: totalTokenCount (5,034) = prompt (2,477) + candidates (740) +
-thinking (1,817). Do not assume input + output = total for Gemini.
+Note: totalTokenCount (5,159) = prompt (2,477) + candidates (628) +
+thinking (2,054). Do not assume input + output = total for Gemini.
+Token counts vary between runs (LLM variability); the values above are
+from the final-code reproduction run.
 
 ### OBSERVED
 
@@ -236,8 +248,8 @@ thinking (1,817). Do not assume input + output = total for Gemini.
   via the citation identifiers from the prompt.
 - The model indicated where specific numeric thresholds were absent
   from the supplied evidence, rather than inventing them.
-- Generation latency (~13 s) is dominated by the LLM call; all
-  pre-LLM stages combined are under 4 ms.
+- Generation latency (~14 s) is dominated by the LLM call; all
+  pre-LLM stages combined are under 3 ms.
 - Provider returned full token accounting including internal
   thinking tokens.
 - No API key, credential, or secret appeared in any output.
@@ -265,7 +277,7 @@ engineering stage because:
 3. All execution measurements (timings, token usage, provenance)
    were captured and preserved.
 4. No silent failures, no metadata loss, no credential leakage.
-5. Automated tests (118/118) continue to pass alongside the real
+5. Automated tests (122/122) continue to pass alongside the real
    run.
 
 Systematic retrieval/generation quality evaluation remains a future

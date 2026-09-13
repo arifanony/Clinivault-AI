@@ -65,7 +65,10 @@ def generate_answer(
 
     # Prompt construction timing.
     prompt_begin = time.perf_counter()
-    prompt_text = build_prompt(bundle)
+    try:
+        prompt_text = build_prompt(bundle)
+    except ValueError as exc:
+        raise GenerationError(f"malformed context bundle: {exc}") from exc
     prompt_ms = (time.perf_counter() - prompt_begin) * 1000.0
 
     if not evidence:

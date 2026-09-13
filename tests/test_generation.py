@@ -216,6 +216,41 @@ class InputValidationTests(unittest.TestCase):
             generate_answer(bundle, FakeProvider())
 
 
+class MalformedEvidenceTests(unittest.TestCase):
+    """Valid top-level bundle, but evidence item missing a required field.
+
+    The generation module's public error contract is GenerationError.
+    ValueError from prompt.py must not leak across the boundary.
+    """
+
+    def test_evidence_missing_text_raises_generation_error(self):
+        bundle = make_bundle()
+        del bundle["evidence"][0]["text"]
+        with self.assertRaises(GenerationError):
+            generate_answer(bundle, FakeProvider())
+
+    def test_evidence_missing_chunk_id_raises_generation_error(self):
+        bundle = make_bundle()
+        del bundle["evidence"][0]["chunk_id"]
+        with self.assertRaises(GenerationError):
+            generate_answer(bundle, FakeProvider())
+
+    def test_evidence_missing_field_message_identifies_field(self):
+        bundle = make_bundle()
+        del bundle["evidence"][0]["text"]
+        with self.assertRaises(GenerationError) as ctx:
+            generate_answer(bundle, FakeProvider())
+        self.assertIn("text", str(ctx.exception))
+
+    def test_evidence_missing_field_does_not_call_provider(self):
+        bundle = make_bundle()
+        del bundle["evidence"][0]["text"]
+        provider = FakeProvider()
+        with self.assertRaises(GenerationError):
+            generate_answer(bundle, provider)
+        self.assertIsNone(provider.last_prompt)
+
+
 class EmptyEvidenceTests(unittest.TestCase):
     def test_empty_evidence_no_answer(self):
         provider = FakeProvider(answer="should not be called")
