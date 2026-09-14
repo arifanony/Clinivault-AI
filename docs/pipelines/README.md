@@ -7,7 +7,15 @@ chunking and baseline embedding generation implemented — see
 storage and similarity retrieval implemented — see
 [`retrieval-baseline.md`](./retrieval-baseline.md); baseline context
 construction implemented — see
-[`context-construction.md`](./context-construction.md). Further pipeline
+[`context-construction.md`](./context-construction.md); end-to-end trace
+observability implemented — see [`retrieval-baseline.md`](./retrieval-baseline.md),
+[`context-construction.md`](./context-construction.md), and
+[`generation-baseline.md`](./generation-baseline.md); observability UI V1
+(manual query mode, debug console) implemented — see
+[`observability-ui.md`](./observability-ui.md); T2D-002 document
+generalization validated — see
+[`document-generalization-validation.md`](./document-generalization-validation.md).
+Further pipeline
 docs are created as pipelines are actually built, using
 [`docs/templates/pipeline-doc-template.md`](../templates/pipeline-doc-template.md).
 
