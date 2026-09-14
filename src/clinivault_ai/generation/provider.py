@@ -180,15 +180,25 @@ class GeminiProvider:
     """Google Gemini generation provider for gemini-2.5-flash.
 
     Reads ``GOOGLE_API_KEY`` from the environment at request time.
+    For local UI / request-scoped use, an API key may be supplied at
+    construction time; that key is used only for that provider instance
+    and is never written to disk, the environment, or the trace.
     """
 
     name: str = "google_gemini"
     model: str = "gemini-2.5-flash"
 
-    def __init__(self, *, model: str | None = None, timeout: float = 60.0) -> None:
+    def __init__(
+        self,
+        *,
+        model: str | None = None,
+        timeout: float = 60.0,
+        api_key: str | None = None,
+    ) -> None:
         if model:
             self.model = model
         self.timeout = timeout
+        self._api_key = api_key.strip() if isinstance(api_key, str) and api_key.strip() else None
 
     def generate(self, prompt: str, timeout: float | None = None) -> dict[str, Any]:
         if not isinstance(prompt, str) or not prompt.strip():
@@ -198,7 +208,7 @@ class GeminiProvider:
         if t <= 0:
             raise GenerationError("GeminiProvider timeout must be positive")
 
-        api_key = _env_api_key()
+        api_key = self._api_key or _env_api_key()
         url = (
             f"{API_ROOT}{GENERATE_CONTENT_PATH.format(model=urllib.parse.quote(self.model, safe=''))}"
             f"?key={urllib.parse.quote(api_key, safe='')}"

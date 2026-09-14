@@ -36,12 +36,27 @@ not a product surface.
 Architecture / data flow:
 
 ```
-browser: query + top_k
-  → POST /api/query
-  → run_query(store, query, embedder, gemini, top_k=...)   # existing backend
+browser: query + top_k + optional api_key (password field, never stored)
+  → POST /api/query {query, top_k, api_key}
+  → create_trace_response() normalizes blank key → None
+  → per-request GeminiProvider(api_key=...) (request key wins, else GOOGLE_API_KEY)
+  → run_query(store, query, embedder, provider, top_k=...)   # existing backend
   → RunTrace {query, retrieval_trace, context_trace, generation_trace, result}
   → JSON response → render RunTrace panels
 ```
+
+BYOK contract (implemented, fake-provider tested):
+
+- The page exposes `input#api_key[type=password]` with no default value,
+  `autocomplete="off"`, no `localStorage`/`sessionStorage` use, and sends
+  `api_key` in the POST body on every run. Reset clears the field.
+- `create_trace_response(..., api_key=None)` strips blank keys to `None` and
+  calls legacy `run_fn(query, top_k)` when the callable does not accept the
+  keyword (backward compatible).
+- `GeminiProvider(api_key=None)` uses the request key when non-empty,
+  otherwise falls back to `GOOGLE_API_KEY` at request time. The key is only
+  embedded in the request URL; it is never written to disk, env, logs, or
+  the trace/result, and error bodies never echo it.
 
 Error handling: exceptions are returned as a safe JSON error body
 (`{"ok": false, "error": ...}`); no API key or environment secret is ever
@@ -56,7 +71,7 @@ Exact command:
 .venv\Scripts\python -m unittest tests.test_ui
 ```
 
-Exact result: **Ran 11 tests — OK** (0 failures).
+Exact result: **Ran 28 tests — OK** (0 failures).
 
 Full suite:
 
@@ -64,13 +79,17 @@ Full suite:
 .venv\Scripts\python -m unittest discover -s tests
 ```
 
-Exact result: **Ran 152 tests — OK** (141 pre-existing + 11 new UI tests).
+Exact result: **Ran 170 tests — OK** (142 pre-existing + 28 UI tests).
 
 Coverage: query submission validation, trace rendering, retrieval
 candidate rendering, selected-flag rendering (uses the trace's `selected`
 value, not inferred rank), context evidence rendering with exact text,
 exact prompt rendering, generation metadata rendering, answer rendering,
-empty-evidence state, error state, and a no-secrets check.
+empty-evidence state, error state, and a no-secrets check. BYOK additions use
+fake providers/mocks only (no real API key): password-type key input with no
+default value, key included in the request payload, no browser storage,
+request key reaching the provider, request-over-env precedence, env fallback,
+safe missing-key error, and no key leakage into trace/result/error/logs.
 
 ## Real T2D-001 Verification
 

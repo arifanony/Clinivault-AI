@@ -149,13 +149,140 @@ class PageHtmlTests(unittest.TestCase):
     def test_page_uses_trace_fields_defensively(self):
         self.assertIn("function dash(v)", PAGE_HTML)
 
-    def test_page_does_not_reference_env_or_api_key(self):
-        self.assertNotIn("GOOGLE_API_KEY", PAGE_HTML)
-        self.assertNotIn("api_key", PAGE_HTML)
+    def test_page_does_not_embed_default_secret(self):
+        # BYOK intentionally includes a password input; it must not carry
+        # a default value and must not persist the key anywhere.
+        self.assertNotIn("GOOGLE_API_KEY=", PAGE_HTML)
+        self.assertNotIn("localStorage", PAGE_HTML)
+        self.assertNotIn("sessionStorage", PAGE_HTML)
+
+    def test_page_byok_input_and_payload(self):
+        self.assertIn('id="api_key"', PAGE_HTML)
+        self.assertIn('type="password"', PAGE_HTML)
+        self.assertIn("api_key: a", PAGE_HTML)
 
     def test_page_well_formed_document(self):
         self.assertTrue(PAGE_HTML.lstrip().startswith("<!DOCTYPE html>"))
         self.assertTrue(PAGE_HTML.rstrip().endswith("</html>"))
+
+
+class ByokRequestTests(unittest.TestCase):
+    """BYOK request handling: fake providers only, no real keys."""
+
+    def test_request_key_reaches_provider(self):
+        seen = {}
+
+        class FakeByokRunFn:
+            def __call__(self, query, top_k, *, api_key=None):
+                seen["api_key"] = api_key
+                return make_trace()
+
+        code, body = create_trace_response(FakeByokRunFn(), "q", 5, api_key="REQ-KEY")
+        self.assertEqual(code, 200)
+        self.assertEqual(seen["api_key"], "REQ-KEY")
+        self.assertNotIn("REQ-KEY", json.dumps(body))
+
+    def test_blank_request_key_normalized_to_none(self):
+        seen = {}
+
+        class FakeByokRunFn:
+            def __call__(self, query, top_k, *, api_key=None):
+                seen["api_key"] = api_key
+                return make_trace()
+
+        code, _ = create_trace_response(FakeByokRunFn(), "q", 5, api_key="   ")
+        self.assertEqual(code, 200)
+        self.assertIsNone(seen["api_key"])
+
+    def test_key_never_included_in_error_output(self):
+        class FailByokRunFn:
+            def __call__(self, query, top_k, *, api_key=None):
+                raise RuntimeError("boom: simulated failure")
+
+        code, body = create_trace_response(FailByokRunFn(), "q", 5, api_key="REQ-KEY")
+        self.assertEqual(code, 500)
+        self.assertNotIn("REQ-KEY", json.dumps(body))
+
+    def test_provider_prefers_request_key_over_env(self):
+        import os
+        from unittest.mock import patch
+
+        from clinivault_ai.generation.provider import GeminiProvider
+
+        captured = {}
+
+        def fake_post(url, payload, timeout):
+            captured["url"] = url
+            return {"text": "hello", "usage": {}}
+
+        os.environ["GOOGLE_API_KEY"] = "ENV-KEY"
+        try:
+            with patch("clinivault_ai.generation.provider._post_json", side_effect=fake_post):
+                out = GeminiProvider(api_key="REQ-KEY").generate("hi")
+            self.assertEqual(out["text"], "hello")
+            self.assertIn("REQ-KEY", captured["url"])
+            self.assertNotIn("ENV-KEY", captured["url"])
+        finally:
+            del os.environ["GOOGLE_API_KEY"]
+
+    def test_provider_env_fallback_still_works(self):
+        import os
+        from unittest.mock import patch
+
+        from clinivault_ai.generation.provider import GeminiProvider
+
+        captured = {}
+
+        def fake_post(url, payload, timeout):
+            captured["url"] = url
+            return {"text": "hello", "usage": {}}
+
+        os.environ["GOOGLE_API_KEY"] = "ENV-KEY"
+        try:
+            with patch("clinivault_ai.generation.provider._post_json", side_effect=fake_post):
+                out = GeminiProvider().generate("hi")
+            self.assertEqual(out["text"], "hello")
+            self.assertIn("ENV-KEY", captured["url"])
+        finally:
+            del os.environ["GOOGLE_API_KEY"]
+
+    def test_missing_request_and_env_key_is_safe_error(self):
+        import os
+        from unittest.mock import patch
+
+        from clinivault_ai.generation.errors import GenerationError
+        from clinivault_ai.generation.provider import GeminiProvider
+
+        os.environ.pop("GOOGLE_API_KEY", None)
+        with patch("clinivault_ai.generation.provider._post_json") as post:
+            with self.assertRaises(GenerationError):
+                GeminiProvider().generate("hi")
+            post.assert_not_called()
+
+    def test_provider_never_logs_or_stores_key(self):
+        import json as _json
+        import logging
+
+        from clinivault_ai.generation.provider import GeminiProvider
+
+        provider = GeminiProvider(api_key="REQ-KEY")
+        # No key in any JSON-serializable/exported provider state.
+        exported = {
+            "name": provider.name,
+            "model": provider.model,
+            "timeout": provider.timeout,
+        }
+        self.assertNotIn("REQ-KEY", _json.dumps(exported))
+        records = []
+        handler = logging.Handler()
+        handler.emit = lambda record: records.append(record.getMessage())
+        root = logging.getLogger()
+        root.addHandler(handler)
+        try:
+            root.warning("trace %s", {"ok": True})
+        finally:
+            root.removeHandler(handler)
+        self.assertNotIn("REQ-KEY", _json.dumps(records))
 
 
 class HandlerRequestTests(unittest.TestCase):

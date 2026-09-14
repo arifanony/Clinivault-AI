@@ -15,19 +15,21 @@ import json
 import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
+from clinivault_ai.generation.provider import GeminiProvider
 from clinivault_ai.pipeline import run_query
 from clinivault_ai.ui.page import PAGE_HTML
-
 DEFAULT_QUERY = "criteria for the diagnosis of diabetes"
 DEFAULT_TOP_K = 5
 
 
-def create_trace_response(run_fn, query, top_k):
+def create_trace_response(run_fn, query, top_k, api_key=None):
     """Execute one pipeline run and wrap the result for the UI.
 
-    run_fn(query, top_k) -> RunTrace dict (normally a partial of
-    pipeline.run_query). Returns (status_code, body_dict). Never
-    includes environment/secret values in the response.
+    Supports both legacy run_fn(query, top_k) and BYOK
+    run_fn(query, top_k, api_key=...) callables. A blank/whitespace-only
+    request key is normalized to None so the environment fallback still
+    works. Returns (status_code, body_dict). Never includes
+    environment/secret values in the response.
     """
     if not isinstance(query, str) or not query.strip():
         return 400, {"ok": False, "error": "query must be a non-empty string"}
@@ -37,9 +39,15 @@ def create_trace_response(run_fn, query, top_k):
         return 400, {"ok": False, "error": "top_k must be an integer"}
     if top_k_int < 1 or top_k_int > 50:
         return 400, {"ok": False, "error": "top_k must be between 1 and 50"}
+    if isinstance(api_key, str):
+        api_key = api_key.strip() or None
 
     try:
-        trace = run_fn(query.strip(), top_k_int)
+        try:
+            trace = run_fn(query.strip(), top_k_int, api_key=api_key)
+        except TypeError:
+            # Legacy two-arg run_fn: fall back without the key.
+            trace = run_fn(query.strip(), top_k_int)
     except Exception as exc:  # UI boundary: report, never crash the server
         # Safe message: exception text only, never environment/secret state.
         return 500, {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
@@ -63,12 +71,19 @@ def _load_t2d001_store(parsed_path, embeddings_path):
     return store, embedder
 
 
-def make_run_fn(parsed_path, embeddings_path, generation_provider):
-    """Bind run_query to one document's store and a generation provider."""
+def make_run_fn(parsed_path, embeddings_path):
+    """Bind run_query to one document's store.
 
-    def run_fn(query, top_k):
+    The generation provider is created per-request so that a
+    request-scoped API key can be used without persisting it.
+    """
+
+    def run_fn(query, top_k, *, api_key=None):
+        from clinivault_ai.generation.provider import GeminiProvider
+
+        provider = GeminiProvider(api_key=api_key)
         store, embedder = _load_t2d001_store(parsed_path, embeddings_path)
-        return run_query(store, query, embedder, generation_provider, top_k=top_k)
+        return run_query(store, query, embedder, provider, top_k=top_k)
 
     return run_fn
 
@@ -135,7 +150,10 @@ class ObservabilityUI:
                     self._send_json(400, {"ok": False, "error": "invalid JSON body"})
                     return
                 code, body = create_trace_response(
-                    run_fn, request.get("query"), request.get("top_k")
+                    run_fn,
+                    request.get("query"),
+                    request.get("top_k"),
+                    request.get("api_key"),
                 )
                 self._send_json(code, body)
 
@@ -163,10 +181,8 @@ def main(argv=None):
     parser.add_argument("--port", type=int, default=8765)
     args = parser.parse_args(argv)
 
-    from clinivault_ai.generation.provider import GeminiProvider
-
     parsed_path, embeddings_path = default_paths()
-    run_fn = make_run_fn(parsed_path, embeddings_path, GeminiProvider())
+    run_fn = make_run_fn(parsed_path, embeddings_path)
     ObservabilityUI(run_fn, host=args.host, port=args.port).serve()
 
 

@@ -37,6 +37,8 @@ PAGE_HTML = """<!DOCTYPE html>
                                border:1px solid #c3ccd6; border-radius:5px; }
   .controls input[type=number] { width:78px; padding:9px; font-size:14px;
                                  border:1px solid #c3ccd6; border-radius:5px; }
+  .controls input[type=password] { width:220px; padding:9px 10px; font-size:14px;
+                                   border:1px solid #c3ccd6; border-radius:5px; }
   button { padding:9px 18px; font-size:14px; border:0; border-radius:5px;
            background:var(--accent); color:#fff; cursor:pointer; }
   button.secondary { background:#718096; }
@@ -111,6 +113,9 @@ pre.mono { background:#1a202c; color:#e2e8f0; padding:12px; border-radius:5px;
              placeholder="Enter a query over the indexed document(s)">
       <label class="tk" for="top_k">Top-K</label>
       <input type="number" id="top_k" value="5" min="1" max="50" step="1">
+      <label class="tk" for="api_key">Gemini API key (optional)</label>
+      <input type="password" id="api_key" placeholder="leave blank to use GOOGLE_API_KEY"
+             autocomplete="off" spellcheck="false">
       <button id="run">Run Query</button>
       <button class="secondary" id="reset">Reset</button>
     </div>
@@ -187,11 +192,12 @@ function setStatus(cls, text) {
 function runQuery() {
   var q = document.getElementById('query').value;
   var k = document.getElementById('top_k').value;
+  var a = document.getElementById('api_key').value;
   setStatus('running', 'Running pipeline…');
   document.getElementById('run').disabled = true;
   fetch('/api/query', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query: q, top_k: k })
+    body: JSON.stringify({ query: q, top_k: k, api_key: a })
   }).then(function (r) { return r.json().then(function (b) { return { ok: r.ok, body: b }; }); })
     .then(function (res) {
       document.getElementById('run').disabled = false;
@@ -207,6 +213,7 @@ function runQuery() {
 function resetAll() {
   document.getElementById('query').value = 'criteria for the diagnosis of diabetes';
   document.getElementById('top_k').value = 5;
+  document.getElementById('api_key').value = '';
   document.getElementById('status').className = 'status hidden';
 }
 function renderTrace(t) {
