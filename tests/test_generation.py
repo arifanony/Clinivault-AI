@@ -291,5 +291,74 @@ class ProviderFailureTests(unittest.TestCase):
             self.fail("expected GenerationError, no fallback answer expected")
 
 
+class GenerationTraceTests(unittest.TestCase):
+    """Observability trace tests (additive; result contract unchanged)."""
+
+    def _usage(self):
+        return {
+            "promptTokenCount": 10,
+            "candidatesTokenCount": 5,
+            "totalTokenCount": 15,
+        }
+
+    def test_trace_ok_populated_and_json_serializable(self):
+        import json
+
+        provider = FakeProvider(usage=self._usage())
+        trace: dict = {}
+        result = generate_answer(make_bundle(), provider, trace=trace)
+        self.assertEqual(trace["provider"], "fake")
+        self.assertEqual(trace["model"], "fake-model-v1")
+        self.assertEqual(trace["query"], result["query"])
+        self.assertEqual(trace["answer"], result["answer"])
+        self.assertEqual(trace["status"], "ok")
+        self.assertTrue(trace["provider_called"])
+        self.assertEqual(trace["prompt_text"], result["prompt_text"])
+        self.assertEqual(trace["evidence"], result["evidence"])
+        self.assertEqual(trace["timings"], result["timings"])
+        self.assertEqual(trace["usage"], self._usage())
+        json.dumps(trace)  # must not raise
+
+    def test_trace_timings_present(self):
+        provider = FakeProvider()
+        trace: dict = {}
+        generate_answer(make_bundle(), provider, trace=trace)
+        timings = trace["timings"]
+        for key in ("prompt_construction_ms", "llm_generation_ms", "total_ms"):
+            self.assertIn(key, timings)
+            self.assertIsInstance(timings[key], float)
+            self.assertGreaterEqual(timings[key], 0.0)
+
+    def test_trace_no_evidence_provider_not_called(self):
+        provider = FakeProvider()
+        trace: dict = {}
+        result = generate_answer(
+            make_bundle(evidence=[]), provider, trace=trace
+        )
+        self.assertEqual(trace["status"], "no_evidence")
+        self.assertFalse(trace["provider_called"])
+        self.assertIsNone(trace["answer"])
+        self.assertIsNone(trace["usage"])
+        self.assertEqual(trace["evidence"], [])
+        self.assertEqual(result["status"], "no_evidence")
+        # Provider was genuinely never invoked.
+        self.assertIsNone(provider.last_prompt)
+
+    def test_trace_evidence_preserved_verbatim(self):
+        provider = FakeProvider()
+        trace: dict = {}
+        generate_answer(make_bundle(), provider, trace=trace)
+        self.assertEqual(trace["evidence"], make_bundle()["evidence"])
+        self.assertIn(
+            "France capital city is Paris.", trace["prompt_text"]
+        )
+
+    def test_no_trace_backward_compatible(self):
+        provider = FakeProvider(usage=self._usage())
+        result = generate_answer(make_bundle(), provider)
+        self.assertEqual(result["status"], "ok")
+        self.assertNotIn("provider_called", result)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -24,6 +24,7 @@ def generate_answer(
     bundle: dict[str, Any],
     provider: Any,
     *,
+    trace: dict | None = None,
     measure_nested: bool = False,
 ) -> dict[str, Any]:
     """Generate a grounded answer from a context bundle and provider.
@@ -31,6 +32,11 @@ def generate_answer(
     Args:
         bundle: output of ``clinivault_ai.context.build_context``.
         provider: an object implementing ``GenerationProvider``.
+        trace: if provided (a dict), populated with observability
+            metadata for the run: provider/model, query, evidence,
+            prompt text, answer, status, timings, usage, and whether
+            the provider was actually called. The return value is
+            unchanged, preserving backward compatibility.
         measure_nested: if True, also measure query embedding /
             retrieval / context-construction latencies supplied via
             ``bundle[_nested_timings]`` and mirror them into the
@@ -40,7 +46,7 @@ def generate_answer(
     Returns:
         A dict containing at least:
             query, answer, status, provider, model, evidence,
-            timings, usage.
+            prompt_text, timings, usage, nested_timings.
 
     Raises:
         GenerationError on malformed input or provider failure.
@@ -73,6 +79,26 @@ def generate_answer(
 
     if not evidence:
         total_ms = (time.perf_counter() - total_begin) * 1000.0
+        if trace is not None:
+            trace.update(
+                {
+                    "provider": getattr(provider, "name", None),
+                    "model": getattr(provider, "model", None),
+                    "query": query,
+                    "evidence": evidence,
+                    "prompt_text": prompt_text,
+                    "answer": None,
+                    "status": "no_evidence",
+                    "provider_called": False,
+                    "timings": {
+                        "prompt_construction_ms": prompt_ms,
+                        "llm_generation_ms": 0.0,
+                        "total_ms": total_ms,
+                    },
+                    "usage": None,
+                    "nested_timings": _extract_nested_timings(bundle),
+                }
+            )
         return {
             "query": query,
             "status": "no_evidence",
@@ -103,7 +129,7 @@ def generate_answer(
 
     usage = response.get("usage") or None
 
-    return {
+    result = {
         "query": query,
         "status": "ok",
         "answer": text.strip(),
@@ -119,6 +145,12 @@ def generate_answer(
         "usage": usage,
         "nested_timings": _extract_nested_timings(bundle),
     }
+
+    if trace is not None:
+        trace.update(result)
+        trace["provider_called"] = True
+
+    return result
 
 
 def _extract_nested_timings(bundle: dict[str, Any]) -> dict[str, Any] | None:

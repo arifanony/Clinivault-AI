@@ -99,6 +99,58 @@ answers:
 - No abstention system beyond the explicit no-answer status.
 - No evaluation framework.
 
+## Observability trace
+
+`generate_answer` accepts an optional `trace` dict (default `None`).
+When provided, it is populated with the full generation record:
+provider name, model, query, exact evidence supplied, the exact
+constructed prompt text (`prompt_text`), answer, status
+(`ok` / `no_evidence`), `provider_called` (True/False — whether the
+provider was actually invoked; always False for `no_evidence`),
+timings (`prompt_construction_ms`, `llm_generation_ms`, `total_ms`),
+usage metadata, and nested timings. The trace is JSON-serializable.
+The return value is unchanged; this is additive observability only.
+
+### End-to-end trace contract
+
+`clinivault_ai.pipeline.run_query(store, query, embedding_provider,
+generation_provider, top_k=5)` executes retrieval → context →
+generation unchanged and returns one JSON-serializable dict:
+
+```
+{
+  "query": ...,
+  "retrieval_trace":  {...},
+  "context_trace":    {...},
+  "generation_trace": {...},
+  "result":           {...}
+}
+```
+
+Purpose: a single real run can be reconstructed from one structure,
+so future grounding investigations no longer require manual
+reconstruction across components. This is the backend contract the
+future observability UI will consume. No UI, persistence, or
+evaluation logic is implemented.
+
+### Real T2D-001 verification (final code state)
+
+- Query: `criteria for the diagnosis of diabetes`, Top-K=5,
+  baseline hash embeddings, `gemini-2.5-flash` (one real request).
+- Retrieval ranks confirmed: p014-c003 (0.6018), p002-c002 (0.5851),
+  p023-c006 (0.5814), p002-c003 (0.5680, rank 4), p017-c003 (0.5641,
+  rank 5) — identical to the baseline run.
+- Context trace evidence matches the bundle exactly; all evidence text
+  appears in the prompt trace; `context_ms` = 0.025 ms.
+- Generation: status `ok`, provider_called=True, prompt 0.06 ms,
+  LLM 13,925.09 ms, generation-stage total 13,925.17 ms.
+- Usage: prompt 2,477, candidates 776, thinking 2,480, total 5,733.
+- End-to-end trace verified JSON-serializable.
+- Test command: `.venv\Scripts\python -m unittest discover -s tests`
+  → 141 tests, OK (11 new trace tests: 4 context, 5 generation,
+  2 pipeline).
+
+## Verification Performed
 ## Verification Performed
 
 ### Automated verification

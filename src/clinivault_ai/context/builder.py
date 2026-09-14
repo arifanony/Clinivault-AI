@@ -67,15 +67,25 @@ def _validate_result(item, index: int) -> dict:
     return item
 
 
-def build_context(results, query: str | None = None) -> dict:
+def build_context(results, query: str | None = None, trace: dict | None = None) -> dict:
     """Package ranked retrieval results into an inspectable evidence bundle.
 
     ``results`` is the best-first output of ``retrieval.search``. The
     order is preserved; rank is explicit. Raises ContextError on
     malformed input; empty results yield an explicit empty bundle.
+
+    If *trace* is provided (a dict), it is populated with observability
+    metadata: input query, input retrieval count, constructed evidence
+    (with exact text and provenance), the documents summary, evidence
+    count, and construction timing. The returned bundle is unchanged,
+    preserving backward compatibility with downstream callers.
     """
+    import time as _time
+
     if not isinstance(results, (list, tuple)):
         raise ContextError("results must be a list of retrieval results")
+
+    t_start = _time.perf_counter()
 
     evidence = []
     seen: set[str] = set()
@@ -103,16 +113,28 @@ def build_context(results, query: str | None = None) -> dict:
             }
         )
 
-    return {
+    documents_summary = [
+        {
+            "document_id": doc["document_id"],
+            "chunk_count": doc["chunk_count"],
+            "pages": sorted(doc["pages"]),
+        }
+        for doc in documents.values()
+    ]
+
+    bundle = {
         "query": query,
         "evidence_count": len(evidence),
-        "documents": [
-            {
-                "document_id": doc["document_id"],
-                "chunk_count": doc["chunk_count"],
-                "pages": sorted(doc["pages"]),
-            }
-            for doc in documents.values()
-        ],
+        "documents": documents_summary,
         "evidence": evidence,
     }
+
+    if trace is not None:
+        trace["query"] = query
+        trace["input_retrieval_count"] = len(results)
+        trace["evidence_count"] = len(evidence)
+        trace["documents"] = documents_summary
+        trace["evidence"] = evidence
+        trace["context_ms"] = (_time.perf_counter() - t_start) * 1000.0
+
+    return bundle

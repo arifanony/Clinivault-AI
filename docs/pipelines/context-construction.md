@@ -50,6 +50,27 @@ ranked retrieval results
   outcome; whether to answer or abstain belongs to the generation stage).
 - Malformed input raises `ContextError` and produces no bundle.
 
+## Observability trace
+
+`build_context` accepts an optional `trace` dict (default `None`). When
+provided, it is populated with JSON-serializable observability metadata:
+
+- `query` — input query as supplied
+- `input_retrieval_count` — number of retrieval results received
+- `evidence_count` — number of evidence items constructed
+- `documents` — the per-document summary (identical to the bundle's)
+- `evidence` — the exact evidence items constructed (rank, chunk_id,
+  document_id, page_number, score, text), identical to the bundle's
+- `context_ms` — wall-clock construction time in milliseconds
+
+The returned bundle is unchanged when tracing is requested or not;
+this is additive observability only. When `trace=None` (the default),
+behavior is identical to the original contract.
+
+Verification: `tests/test_context.py::ContextTraceTests` covers trace
+population, exact evidence preservation, rank ordering, JSON
+serializability, and backward compatibility without a trace.
+
 ## Out of scope
 
 LLM/answer generation, prompt text, model providers, context-limit or

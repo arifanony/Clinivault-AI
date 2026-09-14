@@ -162,5 +162,43 @@ class EndToEndTests(unittest.TestCase):
             self.assertEqual(entry["document_id"], "T-300")
 
 
+class ContextTraceTests(unittest.TestCase):
+    """Observability trace tests (additive; bundle contract unchanged)."""
+
+    def test_trace_populated_and_json_serializable(self):
+        import json
+
+        trace: dict = {}
+        build_context([result(1), result(2)], query="q", trace=trace)
+        self.assertEqual(trace["query"], "q")
+        self.assertEqual(trace["input_retrieval_count"], 2)
+        self.assertEqual(trace["evidence_count"], 2)
+        self.assertEqual(
+            trace["documents"],
+            [{"document_id": "D-1", "chunk_count": 2, "pages": [1, 2]}],
+        )
+        self.assertIsInstance(trace["context_ms"], float)
+        json.dumps(trace)  # must not raise
+
+    def test_trace_evidence_matches_bundle_exactly(self):
+        trace: dict = {}
+        bundle = build_context([result(2, page=5, score=0.3)], query="q", trace=trace)
+        self.assertEqual(trace["evidence"], bundle["evidence"])
+        self.assertEqual(trace["evidence"][0]["text"], "evidence text 2")
+        self.assertEqual(trace["evidence"][0]["page_number"], 5)
+        self.assertEqual(trace["evidence"][0]["score"], 0.3)
+        self.assertEqual(trace["evidence"][0]["rank"], 1)
+
+    def test_trace_rank_order_preserved(self):
+        trace: dict = {}
+        build_context([result(3), result(1), result(2)], trace=trace)
+        self.assertEqual([e["rank"] for e in trace["evidence"]], [1, 2, 3])
+
+    def test_no_trace_backward_compatible(self):
+        bundle = build_context([result(1)])
+        self.assertEqual(bundle["evidence_count"], 1)
+        self.assertNotIn("context_ms", bundle)
+
+
 if __name__ == "__main__":
     unittest.main()
