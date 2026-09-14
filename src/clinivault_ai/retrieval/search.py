@@ -32,6 +32,7 @@ def search(
     query: str,
     provider,
     top_k: int,
+    trace: dict | None = None,
 ) -> list[dict]:
     """Embed ``query`` via the provider seam and return the top-k matches.
 
@@ -40,7 +41,16 @@ def search(
 
     Provider failures (e.g. EmbeddingError) propagate unchanged; query
     vectors are re-validated against the index dimension.
+
+    If *trace* is provided (a dict), it is populated with observability
+    metadata for the run: query, provider/model info, embedding timing,
+    configured top_k, total candidates scored, and the full ranked
+    candidate list with ``selected`` flags. The return value is unchanged
+    and remains the list of top-k results, preserving backward
+    compatibility with downstream callers.
     """
+    import time as _time
+
     if not isinstance(query, str) or not query.strip():
         raise RetrievalError("query must be a non-empty string")
     if not isinstance(top_k, int) or isinstance(top_k, bool) or top_k < 1:
@@ -50,11 +60,13 @@ def search(
             f"top_k {top_k} exceeds the number of indexed records ({len(store.records)})"
         )
 
+    t_embed_start = _time.perf_counter()
     query_vector = provider.embed_texts([query])[0]
     query_vector = _validate_vector(
         query_vector, store.dimension, f"query {query!r}"
     )
     query_norm = sum(v * v for v in query_vector) ** 0.5
+    t_embed_end = _time.perf_counter()
 
     scored = []
     for record in store.records:
@@ -64,7 +76,8 @@ def search(
 
     # Deterministic ranking: descending score, ties broken by chunk_id.
     scored.sort(key=lambda item: (-item[0], item[1]))
-    return [
+
+    results = [
         {
             "chunk_id": chunk_id,
             "document_id": store.document_id,
@@ -74,3 +87,32 @@ def search(
         }
         for score, chunk_id, record in scored[:top_k]
     ]
+
+    if trace is not None:
+        embedding_ms = (t_embed_end - t_embed_start) * 1000.0
+        trace["query"] = query
+        trace["provider"] = {
+            "name": getattr(provider, "name", None),
+            "dimension": getattr(provider, "dimension", store.dimension),
+        }
+        trace["embedding_ms"] = embedding_ms
+        trace["top_k"] = top_k
+        trace["total_candidates"] = len(scored)
+        trace["store"] = {
+            "document_id": store.document_id,
+            "dimension": store.dimension,
+            "records": len(store.records),
+        }
+        trace["candidates"] = [
+            {
+                "rank": rank + 1,
+                "chunk_id": chunk_id,
+                "document_id": store.document_id,
+                "page_number": record["page_number"],
+                "score": score,
+                "selected": rank < top_k,
+            }
+            for rank, (score, chunk_id, record) in enumerate(scored)
+        ]
+
+    return results

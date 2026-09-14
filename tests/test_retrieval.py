@@ -249,3 +249,99 @@ class SearchTests(unittest.TestCase):
             self.assertEqual(result["text"], chunk["text"])
             self.assertEqual(result["page_number"], chunk["page_number"])
             self.assertTrue(-1.0000001 <= result["score"] <= 1.0000001)
+
+    def test_trace_none_preserves_backward_compatibility(self):
+        """Not passing trace must return the same results as before."""
+        provider = ControlledQueryProvider([1.0] + [0.0] * 7)
+        results_no_trace = search(self.store, "diabetes", provider, 2)
+        trace = {}
+        results_with_trace = search(self.store, "diabetes", provider, 2, trace=trace)
+        self.assertEqual(results_no_trace, results_with_trace)
+        self.assertIn("candidates", trace)
+
+
+class RetrievalTraceTests(unittest.TestCase):
+    """Tests for the optional observability trace in search()."""
+
+    def setUp(self):
+        records = [
+            {"chunk_id": "T-200-p001-c001", "page_number": 1, "text": "alpha",
+             "vector": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "norm": 1.0},
+            {"chunk_id": "T-200-p001-c002", "page_number": 1, "text": "beta",
+             "vector": [0.6, 0.8, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "norm": 1.0},
+            {"chunk_id": "T-200-p002-c001", "page_number": 2, "text": "gamma",
+             "vector": [0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "norm": 1.0},
+        ]
+        self.store = VectorStore(document_id="T-200", dimension=8, records=records)
+        self.provider = ControlledQueryProvider([1.0, 0.0] + [0.0] * 6)
+
+    def test_trace_contains_all_required_fields(self):
+        trace = {}
+        search(self.store, "diabetes screening", self.provider, 2, trace=trace)
+        self.assertEqual(trace["query"], "diabetes screening")
+        self.assertEqual(trace["top_k"], 2)
+        self.assertEqual(trace["total_candidates"], 3)
+        self.assertIn("provider", trace)
+        self.assertEqual(trace["provider"]["name"], "controlled-query-provider")
+        self.assertEqual(trace["provider"]["dimension"], 8)
+        self.assertIn("store", trace)
+        self.assertEqual(trace["store"]["document_id"], "T-200")
+        self.assertEqual(trace["store"]["dimension"], 8)
+        self.assertEqual(trace["store"]["records"], 3)
+        self.assertIn("embedding_ms", trace)
+        self.assertIsInstance(trace["embedding_ms"], float)
+        self.assertGreaterEqual(trace["embedding_ms"], 0.0)
+
+    def test_trace_candidates_are_ranked_and_complete(self):
+        trace = {}
+        search(self.store, "diabetes", self.provider, 2, trace=trace)
+        cands = trace["candidates"]
+        self.assertEqual(len(cands), 3)
+        # Check rank order
+        ranks = [c["rank"] for c in cands]
+        self.assertEqual(ranks, [1, 2, 3])
+        # Check descending scores
+        scores = [c["score"] for c in cands]
+        self.assertEqual(scores, sorted(scores, reverse=True))
+
+    def test_trace_selected_vs_not_selected(self):
+        trace = {}
+        search(self.store, "diabetes", self.provider, 2, trace=trace)
+        cands = trace["candidates"]
+        self.assertTrue(cands[0]["selected"])
+        self.assertTrue(cands[1]["selected"])
+        self.assertFalse(cands[2]["selected"])
+
+    def test_trace_preserves_provenance(self):
+        trace = {}
+        search(self.store, "diabetes", self.provider, 1, trace=trace)
+        cands = trace["candidates"]
+        ids = {c["chunk_id"] for c in cands}
+        self.assertEqual(ids, {"T-200-p001-c001", "T-200-p001-c002", "T-200-p002-c001"})
+        for c in cands:
+            self.assertIn("page_number", c)
+            self.assertIn("document_id", c)
+            self.assertEqual(c["document_id"], "T-200")
+
+    def test_trace_deterministic_ordering(self):
+        """Same query must produce identical trace across runs."""
+        trace1 = {}
+        trace2 = {}
+        search(self.store, "diabetes", self.provider, 2, trace=trace1)
+        search(self.store, "diabetes", self.provider, 2, trace=trace2)
+        self.assertEqual(trace1["candidates"], trace2["candidates"])
+
+    def test_trace_k_equals_total_returns_all_selected(self):
+        trace = {}
+        search(self.store, "diabetes", self.provider, 3, trace=trace)
+        cands = trace["candidates"]
+        self.assertTrue(all(c["selected"] for c in cands))
+
+    def test_trace_json_serializable(self):
+        """Trace must be plain-dict / JSON-serializable."""
+        import json
+        trace = {}
+        search(self.store, "diabetes", self.provider, 2, trace=trace)
+        serialized = json.loads(json.dumps(trace))
+        self.assertEqual(serialized["query"], "diabetes")
+        self.assertEqual(len(serialized["candidates"]), 3)

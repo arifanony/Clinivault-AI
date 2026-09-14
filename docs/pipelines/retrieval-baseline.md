@@ -168,6 +168,53 @@ progression. Systematic retrieval-quality evaluation remains a future
 validation step (the project brief requires baseline measurements before
 any retrieval improvement work).
 
+## Retrieval Trace (Observability)
+
+### What Was Added
+
+`search()` now accepts an optional mutable `trace` dict. When supplied, it is populated with a JSON-serializable record of the retrieval execution:
+
+- `query` — the exact query string
+- `provider` — embedding provider name and dimension
+- `embedding_ms` — query embedding wall-clock time
+- `top_k` — the configured Top-K
+- `store` — document ID, record count, dimension
+- `retrieval_ms` — retrieval wall-clock time
+- `total_candidates` — number of chunks in the store (candidates considered)
+- `candidates` — ALL retrieved candidates in rank order, each with: `rank`, `chunk_id`, `document_id`, `page_number`, `score`, `selected`
+
+`selected=True` marks candidates passed downstream (top `top_k`); the contract of the returned results list is unchanged — the trace is purely additive metadata.
+
+### Why It Was Needed
+
+The T2D-001 forensic investigation initially misclassified two generated claims as unsupported because supporting evidence could not be confirmed by manual inspection. Subsequent investigation showed both claims were supported by chunks already inside the Top-K=5 (p002-c003 at rank 4, p017-c003 at rank 5). A durable retrieval trace removes the need to reconstruct runs manually.
+
+### Verification (T2D-001)
+
+Test command: `.venv\Scripts\python -m unittest discover -s tests`
+Result: **130/130 passed** (8 new trace tests, 0 failures).
+
+Real retrieval run (no generation, no API call):
+
+- Query: `"criteria for the diagnosis of diabetes"`
+- Provider: `clinivault-baseline-hash-v1` (256-dim)
+- Store: T2D-001, 107 records, top_k=5
+
+| Rank | Chunk ID | Page | Score | Selected |
+|------|----------|------|-------|----------|
+| 1 | T2D-001-p014-c003 | 14 | 0.6018 | True |
+| 2 | T2D-001-p002-c002 | 2 | 0.5851 | True |
+| 3 | T2D-001-p023-c006 | 23 | 0.5814 | True |
+| 4 | T2D-001-p002-c003 | 2 | 0.5680 | True |
+| 5 | T2D-001-p017-c003 | 17 | 0.5641 | True |
+
+Scores reproduce the previously recorded baseline exactly (deterministic hash embeddings). `total_candidates=107` reflects the full store; only the 5 selected candidates were passed downstream — the trace does not imply non-returned corpus chunks were retrieved candidates.
+
+### Limitations
+
+- The trace records candidates returned by the vector store; chunks never scored against the query are not enumerated individually (only the store-wide `total_candidates` count is recorded).
+- `selected` is meaningful only when `trace` is supplied; without it, behavior is identical to the previous implementation.
+
 ## Out of scope
 
 LLM generation, answers, prompts, context windows, chat UI, production
