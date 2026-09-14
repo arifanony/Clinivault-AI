@@ -183,6 +183,117 @@ Implications recorded honestly, per the project's evidence rule:
   here. They remain outstanding as real UI verification until provider
   quota permits.
 
+## V1.1 — RAG Investigation Console
+
+### Why V1.1 was needed
+
+V1 exposed trace metadata (tables, meta key-values, a raw JSON dump) but was
+too shallow for practical RAG debugging: retrieval rows were not expandable,
+no retrieval chunk text was shown, and the relationship between what the
+retriever returned and what actually reached the generator was not visible on
+the same screen. The console existed but did not make the RAG chain (retrieval
+→ context → prompt → generation → answer) directly inspectable.
+
+### V1.1 scope
+
+Turn the page into a genuine RAG investigation console. The primary flow is:
+
+```
+QUERY
+  ↓ EMBEDDING
+  ↓ RETRIEVAL        (expandable rows: exact text, selected state)
+  ↓ CONTEXT          (exact evidence sent to the model)
+  ↓ PROMPT           (exact prompt text, verbatim)
+  ↓ GENERATION
+  ↓ ANSWER
+```
+
+Latency is secondary; evidence visibility, provenance, and selected/non-selected
+state are primary.
+
+### Data flow
+
+```
+RunTrace (run_query result)
+  → Retrieval inspection   (all scored candidates, rank/score/page/selected,
+                             exact retrieved text; each row expandable)
+  → Context inspection     (exact evidence list that reached generation)
+  → Prompt inspection      (generation_trace.prompt_text, verbatim)
+  → Generation inspection  (provider/model/status/timings/usage)
+  → Answer
+  → Raw RunTrace           (full JSON, source of truth)
+```
+
+### Retrieval ↔ context relationship
+
+Each retrieval row shows:
+
+- **Selected: YES/NO** — read directly from `candidate.selected` (never
+  inferred from rank).
+- **Passed to Context: YES/NO** — derived by matching the candidate's
+  `chunk_id` against the evidence ids in `context_trace.evidence` (never
+  fabricated).
+- A `↓ see in Context` anchor links the retrieval row to its context evidence
+  card when present.
+
+### Exact retrieved text
+
+The retrieval trace candidates now carry the exact chunk `text` (additive
+backend change to `retrieval/search.py`). This was genuinely required: the UI
+cannot show what the retriever returned for non-selected candidates without it.
+The change is additive — no stage semantics, ranking, selection, or return
+value changed. A test asserts every candidate exposes its exact text
+(tests/test_retrieval.py).
+
+### T2D-001 forensic acceptance (data-level)
+
+Offline retrieval run, query `criteria for the diagnosis of diabetes`, Top-K 5
+(T2D-001 store):
+
+| Rank | Chunk ID | Page | Score | Selected | Text present | Contains probe |
+|------|----------|------|-------|----------|--------------|----------------|
+| 1 | T2D-001-p014-c003 | 14 | 0.6018 | true | yes | — |
+| 2 | T2D-001-p002-c002 | 2 | 0.5851 | true | yes | — |
+| 3 | T2D-001-p023-c006 | 23 | 0.5814 | true | yes | — |
+| 4 | T2D-001-p002-c003 | 2 | 0.5680 | true | yes | "repeat testing is required" → true |
+| 5 | T2D-001-p017-c003 | 17 | 0.5641 | true | yes | "one-step" → true |
+
+Both forensic pieces of evidence are now directly inspectable in the UI at the
+data level: `T2D-001-p002-c003` (rank 4, score 0.5680, selected) contains the
+repeat-testing evidence and `T2D-001-p017-c003` (rank 5, score 0.5641,
+selected) contains the one-step IADPSG evidence. A developer can open each
+retrieval row in the page and read the exact text without opening source code.
+
+### Tests
+
+Exact commands and results:
+
+```
+.venv\Scripts\python -m unittest tests.test_ui          → Ran 20 tests — OK
+.venv\Scripts\python -m unittest discover -s tests       → Ran 162 tests — OK
+```
+
+Coverage added in V1.1: investigation-console title, exact chunk text in
+expandable retrieval rows, selected state read from `candidate.selected`,
+retrieval→context relationship (via context evidence id matching), exact prompt
+rendering, exact answer rendering, token usage + raw trace rendering,
+`no_evidence` handling, defensive field handling, no env/API-key references,
+balanced HTML document, and retrieval trace candidate text.
+
+### Manual verification
+
+The page was served through the actual launcher entry point
+(`python -m clinivault_ai.ui`) and the page body was fetched successfully
+(HTTP 200), confirming the full document — title, run area, Pipeline, Retrieval,
+Context, Prompt, Generation, Grounding placeholder, and Raw Run Trace — is
+served with all panels present.
+
+**Bounded by environment:** an interactive browser could not be driven here, so
+real in-browser case inspection of all five representative queries
+(EVAL-1…EVAL-5) and a human screenshot were NOT performed. That remains for the
+user to run manually via `python -m clinivault_ai.ui`. The deterministic
+data-level evidence (retrieval ranks/scores/text, selected flags, context
+membership) is verified above and by the automated tests.
 ## Limitations
 
 - Debug console only: no authentication, no persistence, no run history.

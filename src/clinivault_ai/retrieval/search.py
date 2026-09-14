@@ -110,6 +110,7 @@ def search(
                 "document_id": store.document_id,
                 "page_number": record["page_number"],
                 "score": score,
+                "text": record["text"],
                 "selected": rank < top_k,
             }
             for rank, (score, chunk_id, record) in enumerate(scored)

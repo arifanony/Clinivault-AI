@@ -345,3 +345,14 @@ class RetrievalTraceTests(unittest.TestCase):
         serialized = json.loads(json.dumps(trace))
         self.assertEqual(serialized["query"], "diabetes")
         self.assertEqual(len(serialized["candidates"]), 3)
+
+    def test_trace_candidates_carry_exact_chunk_text(self):
+        """Every candidate exposes the exact retrieved chunk text (incl.
+        non-selected candidates) so the UI can show what retrieval returned
+        without reconstructing it."""
+        trace = {}
+        search(self.store, "diabetes", self.provider, 2, trace=trace)
+        by_id = {c["chunk_id"]: c for c in trace["candidates"]}
+        self.assertEqual(by_id["T-200-p001-c001"]["text"], "alpha")
+        self.assertEqual(by_id["T-200-p001-c002"]["text"], "beta")
+        self.assertEqual(by_id["T-200-p002-c001"]["text"], "gamma")

@@ -100,6 +100,10 @@ class CreateTraceResponseTests(unittest.TestCase):
 
 
 class PageHtmlTests(unittest.TestCase):
+    def test_page_is_investigation_console(self):
+        self.assertIn("RAG Observability / Investigation Console", PAGE_HTML)
+        self.assertIn("<h1>Clinivault AI</h1>", PAGE_HTML)
+
     def test_page_contains_grounding_disclaimer(self):
         self.assertIn(
             "Automatic claim-to-evidence evaluation is not available yet.",
@@ -107,17 +111,51 @@ class PageHtmlTests(unittest.TestCase):
         )
 
     def test_page_renders_selected_flag_from_trace_not_rank(self):
-        self.assertIn("c.selected ? 'sel' : 'unsel'", PAGE_HTML)
+        # Selection is read from the trace's actual selected value (c.selected),
+        # never inferred from rank position.
+        self.assertIn("!!c.selected", PAGE_HTML)
+
+    def test_page_distinguishes_selected_unselected_chips(self):
+        self.assertIn("Selected: ' + (sel ? 'YES' : 'NO')", PAGE_HTML)
+
+    def test_page_renders_retrieval_to_context_relationship(self):
+        # A candidate is marked TO CONTEXT only by matching context_trace
+        # evidence chunk ids (ctxIds), never fabricated.
+        self.assertIn("ctxIds[c.chunk_id]", PAGE_HTML)
+        self.assertIn("'NOT to context'", PAGE_HTML)
+        self.assertIn("'TO CONTEXT'", PAGE_HTML)
+
+    def test_page_expands_exact_retrieved_chunk_text(self):
+        self.assertIn('<details class="chunk"', PAGE_HTML)
+        self.assertIn("c.text", PAGE_HTML)  # exact retrieved text rendered
+
+    def test_page_links_retrieval_row_to_context_card(self):
+        self.assertIn('href="#ctx-', PAGE_HTML)
 
     def test_page_renders_exact_prompt_from_trace(self):
         self.assertIn("gt.prompt_text", PAGE_HTML)
 
+    def test_page_renders_exact_answer_from_trace(self):
+        self.assertIn("gt.answer", PAGE_HTML)
+
+    def test_page_renders_usage_and_track_raw_trace(self):
+        self.assertIn("JSON.stringify(gt.usage)", PAGE_HTML)
+        self.assertIn("JSON.stringify(t, null, 2)", PAGE_HTML)
+
+    def test_page_handles_no_evidence_state(self):
+        self.assertIn("'no_evidence'", PAGE_HTML)
+        self.assertIn("generation was not called", PAGE_HTML)
+
     def test_page_uses_trace_fields_defensively(self):
-        self.assertIn("function dash(s)", PAGE_HTML)
+        self.assertIn("function dash(v)", PAGE_HTML)
 
     def test_page_does_not_reference_env_or_api_key(self):
         self.assertNotIn("GOOGLE_API_KEY", PAGE_HTML)
         self.assertNotIn("api_key", PAGE_HTML)
+
+    def test_page_well_formed_document(self):
+        self.assertTrue(PAGE_HTML.lstrip().startswith("<!DOCTYPE html>"))
+        self.assertTrue(PAGE_HTML.rstrip().endswith("</html>"))
 
 
 class HandlerRequestTests(unittest.TestCase):
@@ -136,7 +174,7 @@ class HandlerRequestTests(unittest.TestCase):
         try:
             with urlopen(base + "/") as r:
                 page = r.read().decode()
-            self.assertIn("Observability Console", page)
+            self.assertIn("RAG Investigation Console", page)
 
             req = Request(
                 base + "/api/query",
