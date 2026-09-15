@@ -1,0 +1,81 @@
+{
+  "document_id": "T2D-007",
+  "validated_at_utc": "2026-09-15T13:14:53+00:00",
+  "checks": [
+    {
+      "name": "source_sha256_matches_manifest",
+      "status": "pass",
+      "detail": "source SHA-256 verified against manifest: FE9B91697FABF5C687A27BBFE8E4CC73BB0B7888344177D23A7ACC4991C45592"
+    },
+    {
+      "name": "page_count_matches_manifest",
+      "status": "pass",
+      "detail": "expected 19 pages, parsed 19"
+    },
+    {
+      "name": "document_text_present",
+      "status": "pass",
+      "detail": "total extracted characters: 52582"
+    },
+    {
+      "name": "page_provenance_complete",
+      "status": "pass",
+      "detail": "all page records carry document_id + filename + page_number"
+    },
+    {
+      "name": "extraction_failures",
+      "status": "pass",
+      "detail": "no page-level extraction failures"
+    },
+    {
+      "name": "empty_pages_reported",
+      "status": "info",
+      "detail": "pages with no extractable text (kept, not dropped): none"
+    },
+    {
+      "name": "control_char_anomalies",
+      "status": "info",
+      "detail": "pages above 1% control-character ratio (reported only): none"
+    },
+    {
+      "name": "low_text_pages",
+      "status": "info",
+      "detail": "reporting-only low-text rule: [18]"
+    },
+    {
+      "name": "json_reload_equivalent",
+      "status": "pass",
+      "detail": "reloaded JSON equals the in-memory document (semantic compare)"
+    }
+  ],
+  "statistics": {
+    "page_count": 19,
+    "total_chars": 52582,
+    "total_words": 7337,
+    "chars_per_page": {
+      "mean": 2767.5,
+      "median": 3032,
+      "min": 163,
+      "max": 4435
+    },
+    "words_per_page": {
+      "mean": 386.2,
+      "median": 425,
+      "min": 24,
+      "max": 569
+    },
+    "empty_pages": [],
+    "failed_pages": [],
+    "low_text_pages_reported_only": {
+      "rule": "char_count < 10% of median (3032)",
+      "pages": [
+        {
+          "page_number": 18,
+          "char_count": 163
+        }
+      ]
+    },
+    "control_char_anomaly_pages": []
+  },
+  "overall_status": "pass"
+}
