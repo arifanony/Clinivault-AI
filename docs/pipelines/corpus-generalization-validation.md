@@ -77,6 +77,16 @@ but the embedding stage for these documents must be re-run and persisted to
 the canonical locations defined in `docs/architecture/artifact-storage.md`
 by a dedicated unit. T2D-002 additionally has no persisted parsed artifact.
 
+UPDATE (artifact-persistence unit, 2026-09-16): the missing artifacts have
+now been regenerated with the unchanged baseline implementation and
+persisted to the canonical paths — `data/embedded/stage-1-clean-baseline-corpus/<DOC>/<DOC>.embeddings.json`
+for T2D-002, T2D-003, T2D-005, T2D-006, T2D-007, T2D-008, T2D-009, T2D-010,
+plus `data/parsed/stage-1-clean-baseline-corpus/T2D-002/` (parsed +
+validation). All counts, dimensions, and chunk↔embedding agreements match
+the figures recorded in this document exactly, and a T2D-001 determinism
+check reproduced the committed artifact bit-for-bit. See
+`docs/pipelines/artifact-persistence.md`.
+
 ### E.2 T2D-003 — Kaur et al., "Diagnostic accuracy of tests for type 2 diabetes and prediabetes" (PLOS ONE, systematic review/meta-analysis)
 
 Query 1: "What were the pooled sensitivity and specificity of HbA1c at 6.5%

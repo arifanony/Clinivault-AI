@@ -84,40 +84,47 @@ Never store secrets, API keys, `.env` contents, or credentials in any data
 artifact. Data artifacts contain corpus content and pipeline provenance
 only.
 
-## J. Current known corpus artifact state (audit 2026-09-16)
+## J. Current known corpus artifact state (audit 2026-09-16; persisted 2026-09-16)
 
-CANONICAL RULE vs CURRENT ACTUAL STATE — the rule above is the contract;
-the table below is what actually exists (verified: filesystem recursion +
-`git ls-tree -r HEAD`):
+CANONICAL RULE vs CURRENT ACTUAL STATE — the rule above is the contract; the
+table below is what actually exists. Original audit found only T2D-001
+durable (embeddings for the other documents had been computed in memory
+during validation and never written; T2D-002 was never parsed to disk). The
+durability unit of 2026-09-16 regenerated and persisted the missing
+artifacts using the unchanged baseline implementation
+(`docs/pipelines/artifact-persistence.md`); all are now committed.
 
-| Document | RAW (PDF) | PARSED (parsed+validation.json) | EMBEDDED |
-|---|---|---|---|
-| T2D-001 | present, committed | present, committed | **present, committed** |
-| T2D-002 | present, committed | **missing** | **missing** |
-| T2D-003 | present, committed | present, committed (e190b22) | **missing** |
-| T2D-005 | present, committed | present, committed (e190b22) | **missing** |
-| T2D-006 | present, committed | present, committed (e190b22) | **missing** |
-| T2D-007 | present, committed | present, committed (e190b22) | **missing** |
-| T2D-008 | present, committed | present, committed (e190b22) | **missing** |
-| T2D-009 | present, committed | present, committed (e190b22) | **missing** |
-| T2D-010 | present, committed | present, committed (e190b22) | **missing** |
+| Document | Raw | Parsed | Validation | Embedded | Verification |
+|---|---|---|---|---|---|
+| T2D-001 | OK | OK | OK | OK (pre-existing) | reproduced bit-identical (determinism check) |
+| T2D-002 | OK | OK | OK | OK | validated (8 pages, 50,445 chars, 34 chunks, 34×256) |
+| T2D-003 | OK | OK | OK | OK | validated (44×256, 1:1 chunk agreement) |
+| T2D-005 | OK | OK | OK | OK | validated (84×256, 1:1) |
+| T2D-006 | OK | OK | OK | OK | validated (142×256, 1:1) |
+| T2D-007 | OK | OK | OK | OK | validated (38×256, 1:1) |
+| T2D-008 | OK | OK | OK | OK | validated (66×256, 1:1) |
+| T2D-009 | OK | OK | OK | OK | validated (142×256, 1:1) |
+| T2D-010 | OK | OK | OK | OK | validated (71×256, 1:1) |
 
-The only embedding artifact in the entire worktree is
-`data/embedded/stage-1-clean-baseline-corpus/T2D-001/T2D-001.embeddings.json`
-(587,624 B, tracked, present in HEAD). No `*.embeddings.json` exists
-anywhere else, tracked or untracked.
+T2D-004 remains blocked and has NO artifacts at any stage.
 
-Explanation of the discrepancy: the document-generalization and
-corpus-generalization validation units computed chunking and embeddings
-**in memory** (chunk_pages + generate_embeddings feeding VectorStore
-directly) and never wrote embedding artifacts to `data/embedded/`. The
-validation results themselves are valid (deterministic pipeline, replayed
-and confirmed), but their embedding artifacts were transient. T2D-002's
-parsed artifact was likewise never persisted.
+Exact paths (all committed):
 
-Consequence: regeneration of the missing embedding artifacts (T2D-002's
-parsed artifact too) is required in a SEPARATE implementation unit. This
-audit intentionally did not regenerate, move, or rewrite any artifact.
+- `data/parsed/stage-1-clean-baseline-corpus/<DOC>/<DOC>.parsed.json` and
+  `<DOC>.validation.json` for T2D-001, T2D-002, T2D-003, T2D-005, T2D-006,
+  T2D-007, T2D-008, T2D-009, T2D-010
+- `data/embedded/stage-1-clean-baseline-corpus/<DOC>/<DOC>.embeddings.json`
+  for the same nine documents
+
+Historical note (preserved): the corpus-generalization validation unit
+generated T2D-003..T2D-010 embeddings in memory; that run's results were
+valid but its embedding artifacts were transient until this persistence
+unit. Reproducibility evidence: re-embedding T2D-001 from its committed
+parsed artifact with the unchanged baseline provider reproduced the
+committed artifact bit-for-bit (identical chunk IDs, vectors, model
+metadata, statistics); all persisted chunk counts match the previously
+documented validation figures exactly (T2D-002: 34, T2D-003: 44, T2D-005:
+84, T2D-006: 142, T2D-007: 38, T2D-008: 66, T2D-009: 142, T2D-010: 71).
 
 policy allows (all `data/parsed` and `data/embedded` JSON artifacts and raw
 PDFs of the current corpus are committed); exact paths referenced by
