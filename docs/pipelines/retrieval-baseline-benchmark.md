@@ -59,9 +59,10 @@ it is one of the ambiguous cases. The four known weakness cases are
 deliberately included (`T2D-006-second-line`, `T2D-009-statins`,
 `T2D-010-ckd-screening`, `T2D-010-kidney-protection`), together with previously
 successful cases so the set is not biased toward failures. Documents with only
-one defensible labeled query contribute one case (T2D-002);
-T2D-001/T2D-008/T2D-009 contribute a third because their documented evidence
-supports it.
+one defensible labeled query contribute one case (T2D-002); T2D-001 contributes
+four (all of the representative evaluation's cases) and T2D-008/T2D-009
+contribute three each, because their documented evidence supports an additional
+reformulated query.
 
 Benchmark definition (static, code-level):
 `src/clinivault_ai/evaluation/cases.py` — each case records `case_id`,
@@ -351,8 +352,9 @@ Severity is not uniform: one case is a 1-rank miss, three are shallow
    full-rank positions recorded in `retrieval-ranking-investigation.md`
    reproduced exactly for `T2D-006-second-line` (rank 6), `T2D-009-statins`
    (21/42/98), `T2D-010-ckd-screening` (28) and `T2D-010-kidney-protection`
-   (12/13). The only record not reproduced is EVAL-5's recorded Top-5 (see
-   section H and the engineering-log entry); no other divergence was found.
+   (12/13). The only record not reproduced is EVAL-5's recorded Top-5 (see §C's
+   ambiguous-case table and the engineering-log entry); no other divergence
+   was found.
 10. **Reproducibility: two consecutive full runs are byte-identical.** Serializing
     the report as `json.dumps(report, sort_keys=True)` (UTF-8) yields SHA-256
     `ED98F678F8770EA1F02276E3CAAF00130907BB9DE56D4255CBF2ED612D88A093` on both
