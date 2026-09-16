@@ -45,6 +45,9 @@ its input and raises its own error type instead of dropping records.
 Detailed stage behavior lives in the pipeline docs
 ([pipelines/](../pipelines/README.md)); the engineering log records the
 problems that shaped this architecture (reader.py reading-order work).
+The canonical artifact directory structure, naming, and persistence rules
+are defined in [artifact-storage.md](artifact-storage.md), which also tracks
+the current per-document artifact state.
 
 ## Deliberately replaceable
 

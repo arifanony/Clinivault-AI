@@ -64,6 +64,19 @@ rather than an explicit zero. Text-based PDFs throughout (no OCR needed).
 Every chunk obtained exactly one 256-dim embedding; chunk IDs and embedding
 keys agreed for all seven documents.
 
+RECONCILIATION (artifact-storage audit, 2026-09-16): the chunk/embedding
+figures above were measured from in-memory generation during this unit
+(`chunk_pages` + `generate_embeddings` feeding `VectorStore` directly); the
+embedding artifacts were **not persisted** — no `T2D-003/005/006/007/008/
+009/010.embeddings.json` exists under `data/embedded/stage-1-clean-baseline-corpus/`,
+and none was committed (commit e190b22 added only the parsed artifacts).
+The only durable embedding artifact in the repository is T2D-001's. The
+results recorded here remain valid for the runs performed (deterministic
+baseline; replayed and confirmed by the retrieval-ranking investigation),
+but the embedding stage for these documents must be re-run and persisted to
+the canonical locations defined in `docs/architecture/artifact-storage.md`
+by a dedicated unit. T2D-002 additionally has no persisted parsed artifact.
+
 ### E.2 T2D-003 — Kaur et al., "Diagnostic accuracy of tests for type 2 diabetes and prediabetes" (PLOS ONE, systematic review/meta-analysis)
 
 Query 1: "What were the pooled sensitivity and specificity of HbA1c at 6.5%
