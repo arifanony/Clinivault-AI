@@ -208,6 +208,22 @@ Claim-level findings:
 Failure classification: **NO SIGNIFICANT FAILURE**. This was the
 designed evidence-gap probe: the model did the correct thing (explicit
 gap statement) rather than inventing numbers.
+> **Reconciliation note (added 2026-09-16, historical text unchanged).**
+> The retrieval numbers recorded above for EVAL-5 were **not reproducible**
+> when the controlled baseline retrieval benchmark replayed this exact query
+> against the persisted corpus artifacts: the recorded rank-1/rank-2 chunks
+> (`p002-c002`, `p002-c003`) actually sit at full ranks **48** and **32**, and
+> the actual Top-5 is
+> `1:p012-c002:0.3959, 2:p009-c004:0.3651, 3:p012-c001:0.3361,
+> 4:p004-c003:0.3333, 5:p023-c004:0.3272`. The quoted evidence phrase
+> `"either A1C or glucose criteria"` also does not exist anywhere in the
+> T2D-001 chunk text. EVAL-1/EVAL-2/EVAL-3/EVAL-4 *do* reproduce exactly, and
+> the committed T2D-001 embedding artifact reproduces bit-for-bit, so this is
+> a **record inconsistency, not a retrieval defect**. The generation finding
+> above is unaffected in substance. Details:
+> `docs/engineering-log/2026-09-16-eval5-retrieval-record-not-reproducible.md`
+> and `docs/pipelines/retrieval-baseline-benchmark.md` (case
+> `T2D-001-hba1c`, marked AMBIGUOUS).
 
 ## E. Cross-case findings
 

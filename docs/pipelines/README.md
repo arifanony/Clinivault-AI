@@ -14,7 +14,15 @@ observability implemented — see [`retrieval-baseline.md`](./retrieval-baseline
 (manual query mode, debug console) implemented — see
 [`observability-ui.md`](./observability-ui.md); T2D-002 document
 generalization validated — see
-[`document-generalization-validation.md`](./document-generalization-validation.md).
+[`document-generalization-validation.md`](./document-generalization-validation.md);
+broader corpus generalization validated across the 9 available documents — see
+[`corpus-generalization-validation.md`](./corpus-generalization-validation.md);
+validated artifacts persisted durably — see
+[`artifact-persistence.md`](./artifact-persistence.md); baseline retrieval
+ranking weakness investigated — see
+[`retrieval-ranking-investigation.md`](./retrieval-ranking-investigation.md);
+controlled baseline retrieval benchmark established — see
+[`retrieval-baseline-benchmark.md`](./retrieval-baseline-benchmark.md).
 Further pipeline
 docs are created as pipelines are actually built, using
 [`docs/templates/pipeline-doc-template.md`](../templates/pipeline-doc-template.md).
