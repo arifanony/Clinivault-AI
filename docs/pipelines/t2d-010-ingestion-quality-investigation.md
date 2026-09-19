@@ -18,6 +18,13 @@ All three canonical artifact sets exist for T2D-010 at corpus version `stage-1-c
 | parsed | `data/parsed/stage-1-clean-baseline-corpus/T2D-010/` | `T2D-010.parsed.json`, `T2D-010.validation.json` |
 | embedded | `data/embedded/stage-1-clean-baseline-corpus/T2D-010/` | `T2D-010.embeddings.json` (71 records, dim 256) |
 
+> **Artifact-count note (2026-09-19):** as of `b705d60` the committed embedding
+> artifact contains **70** records (the 116-char `p011-c005` chunk of this
+> investigation no longer has a committed embedding), and the committed parsed
+> artifact still yields 71 chunks — the committed pair is inconsistent. See
+> [`docs/engineering-log/2026-09-19-stale-t2d-010-embedding-artifact.md`](../engineering-log/2026-09-19-stale-t2d-010-embedding-artifact.md).
+> Everything else in this investigation is unaffected.
+
 ## 3. Problem queries and expected evidence (from existing records)
 
 - **q1 (CKD screening):** expected support = the 11.1a/11.1b screening recommendations in chunk `T2D-010-p001-c002`; observed rank **28** (offline replay). Top-5 dominated by citation/boilerplate chunks (DCCT/EDIC, FIGARO, EMPEROR, FDA, cystatin-C).

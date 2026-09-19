@@ -126,6 +126,30 @@ the `VectorStore.from_artifacts` no-silent-drops invariant) but does **not**
 resolve the T2D-010 retrieval weakness, which is a scoring/specificity issue on
 reference-heavy content (per the forensic investigation).
 
+> **Audit correction (2026-09-19).** The attribution and the artifact pairing
+> above were re-verified against the repository and do not hold as written:
+>
+> - Commit `896c7af` ("guard table internal gutter candidates") did **not** remove
+>   `p011-c005`. The committed parsed artifact is byte-identical to re-extraction
+>   with the committed reader on all 15 T2D-010 pages and still chunks to **71**
+>   chunks including `p011-c005`; the pre-guard reader produces byte-identical
+>   page-11 text.
+> - `p011-c005` is not a table-cell fragment. It is the 116-char **tail of page
+>   11's body text** ("…Vanek et al. (156), in a prospective 12-week open-label
+>   trial…"), emitted as its own chunk because the merge into `p011-c004` would
+>   exceed the chunker's `max_chars` (1752 + 2 + 116 = 1870 > 1800).
+> - The regenerated 70-record embedding artifact reproduces **70/70** from the
+>   *working-tree* (uncommitted) parsed artifact and only **37/70** from the
+>   committed one, so at `b705d60` the committed parsed/embedded pair is
+>   inconsistent (`VectorStore.from_artifacts` raises
+>   `RetrievalError: chunk T2D-010-p011-c005 has no embedding record`) and the
+>   recorded benchmark depends on an uncommitted file.
+>
+> The measured numbers above are unaffected. Full evidence and follow-up:
+> [`docs/engineering-log/2026-09-19-stale-t2d-010-embedding-artifact.md`](../engineering-log/2026-09-19-stale-t2d-010-embedding-artifact.md).
+> Decision-level context:
+> [DECISION-008](../decisions/DECISION-008-artifact-storage-contract.md).
+
 ## Comparison with documented baseline
 
 Results match the values in `docs/pipelines/retrieval-baseline-benchmark.md`.

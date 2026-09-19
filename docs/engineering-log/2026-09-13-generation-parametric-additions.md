@@ -1,5 +1,14 @@
 # Baseline generation added claims not present in retrieved evidence
 
+> **Partly superseded (2026-09-14).** The two claims recorded below as "not
+> present in any supplied evidence item" were later shown by programmatic re-check
+> to **be present** in the supplied chunks (rank 4 `p002-c003`, rank 5
+> `p017-c003`) — see
+> [2026-09-14 — the two "parametric addition" claims were actually in the supplied evidence](./2026-09-14-grounding-claims-were-in-supplied-evidence.md).
+> The "2 of 12 unsupported" split must not be quoted as a grounding measurement;
+> the general lesson (prompt text constrains but does not prove grounding) still
+> stands.
+>
 > Log problems that taught us something or changed an implementation
 > decision. No trivial syntax mistakes.
 

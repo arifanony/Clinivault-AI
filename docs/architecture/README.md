@@ -8,8 +8,10 @@ Foundational rules live in
 layered stage packages in strict data-flow order, plain-dict
 JSON-serializable stage contracts, one fail-loud error type per stage,
 and abstraction seams only where current requirements justify
-replaceability (currently `EmbeddingProvider` is the only seam; other
-components stay concrete until a demonstrated need justifies abstraction).
+replaceability (currently the `EmbeddingProvider` and `GenerationProvider`
+seams exist; other components stay concrete until a demonstrated need justifies
+abstraction). Snapshot date: 2026-09-13 — the generation stage and its seam
+arrived after it (see [generation-baseline.md](../pipelines/generation-baseline.md)).
 
 ## Implemented now
 

@@ -180,6 +180,11 @@ artifact was written under `data/`.
 
 ## Recommendation for the NEXT bounded unit
 
+**Recorded as a decision:**
+[DECISION-010](../decisions/DECISION-010-retain-baseline-retrieval.md) — the
+production retrieval representation is retained; the T2D-010 ingestion confound is
+the gating item for any future comparison.
+
 Do NOT change production retrieval based on this evidence. Recommended
 next unit: **resolve the T2D-010 ingestion confound** (parser-level
 column handling for that document class), because (a) it is the only

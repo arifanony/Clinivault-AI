@@ -20,7 +20,12 @@ never rewritten — if it changes, mark it Replaced and write a new document.
 | [DECISION-004](./DECISION-004-corpus-strategy.md) | Corpus strategy: question-driven T2D evidence (replacing the original general-corpus plan) | Chosen | 2026-09-07 |
 | [DECISION-005](./DECISION-005-initial-clinical-scope.md) | Initial MVP clinical scope: frozen T2D boundary (five question families, explicit out-of-scope list) | Chosen | 2026-09-08 |
 | [DECISION-006](./DECISION-006-pdf-parser.md) | PDF parser: pdfplumber for ingestion text extraction (pypdf for validation only; PyMuPDF rejected on licensing) | Chosen | 2026-09-08 |
+| [DECISION-007](./DECISION-007-generation-provider.md) | Baseline generation provider: Google Gemini `gemini-2.5-flash` (controlled provider bake-off; OpenRouter 429s, Groq unreachable) | Chosen | 2026-09-13 |
 | [DECISION-001](./DECISION-001-repository-architecture.md) | Repository architecture: layered stages, plain-dict contracts, fail-loud errors, seams only where replaceability is justified | Chosen (retroactively documented) | 2026-09-13 |
+| [DECISION-008](./DECISION-008-artifact-storage-contract.md) | Artifact storage: canonical `data/<stage>/<corpus-version>/<document-id>/` paths, durability = committed, regenerate (never patch) downstream artifacts when upstream changes | Chosen (retroactively documented; refined 2026-09-19) | 2026-09-16 |
+| [DECISION-009](./DECISION-009-retrieval-baseline-representation.md) | Baseline retrieval representation and configuration: hash bag-of-words embeddings, in-memory cosine index, explicit Top-K=5, fail-loud invariants | Chosen (retroactively documented) | 2026-09-13 → 2026-09-18 |
+| [DECISION-010](./DECISION-010-retain-baseline-retrieval.md) | Retain the baseline retrieval representation: the controlled three-arm comparison showed no arm beating the baseline on Hit@1/MRR | Chosen | 2026-09-18 |
+| [DECISION-011](./DECISION-011-grounded-generation-contract.md) | Grounded generation contract: evidence-only answers, explicit `no_evidence` abstention (no provider call), fail-loud errors, inspectable prompt/evidence | Chosen (retroactively documented) | 2026-09-13 |
 
 ## Decisions in Progress
 
@@ -30,8 +35,20 @@ never rewritten — if it changes, mark it Replaced and write a new document.
 
 ## Not Decided Yet
 
-Everything else — parser, chunking, embedding, vector database, metadata,
-LLM provider, retrieval, context construction, abstention, persistence,
-deployment. Each gets its decision document when we reach the milestone
-that needs it. We deliberately keep this list short and honest rather than
-pre-writing decisions we can't make yet.
+Still undecided (each gets a decision document when the milestone that needs it
+arrives, not before):
+
+- the semantic embedding model (the provider seam and the controlled comparison
+  make this the next candidate — see DECISION-009 and DECISION-010)
+- vector storage/database at production scale
+- chunking strategy (the current chunker is explicitly a baseline)
+- metadata schema beyond the current provenance fields
+- abstention thresholds beyond "no evidence", truncation/context-limit policy,
+  retries/streaming, and any automatic grounding/citation measurement
+- persistence beyond committed artifacts, deployment/infrastructure
+
+Retrieval strategy is now recorded as DECISION-009 (baseline configuration) and
+DECISION-010 (retention after the controlled comparison); parser, embedding
+approach, generation provider, generation contract, and artifact storage are
+decided. We deliberately keep this list short and honest rather than pre-writing
+decisions we can't make yet.

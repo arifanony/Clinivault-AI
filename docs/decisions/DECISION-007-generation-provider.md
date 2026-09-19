@@ -194,3 +194,18 @@ source-code unit and is not implemented in this documentation change.
   ai.google.dev Gemini API pricing / billing / rate-limits).
 - DECISION-001 (architecture and seam principle), DECISION-003
   (no-recurring-API-cost during MVP).
+
+## Related Documents (added 2026-09-19, for cross-reference only)
+
+- [generation-baseline.md](../pipelines/generation-baseline.md) — the output
+  contract, prompt, and error behavior this decision left undecided were
+  implemented and are now recorded in
+  [DECISION-011](./DECISION-011-grounded-generation-contract.md).
+- [observability-ui.md](../pipelines/observability-ui.md) — BYOK credential
+  handling (request-scoped key, never persisted) and the debug console built on
+  this provider.
+- [DECISION-010](./DECISION-010-retain-baseline-retrieval.md) — the semantic
+  embedding arm's single-pass limitation was caused by this provider family's
+  free-tier 429 limits.
+- Engineering logs: [2026-09-13](../engineering-log/2026-09-13-generation-parametric-additions.md)
+  and [2026-09-14](../engineering-log/2026-09-14-grounding-claims-were-in-supplied-evidence.md).

@@ -133,3 +133,18 @@ remaining Stage-1 documents.
 
 - [DECISION-002: Python version](./DECISION-002-python-version.md) — the runtime contract this dependency was added under
 - [Ingestion parsing pipeline](../pipelines/ingestion-parsing.md) — the pipeline this parser powers
+
+## Related Documents (added 2026-09-19, for cross-reference only)
+
+This decision predicted reading-order problems and deferred mitigation until
+observed. That mitigation now exists inside the pipeline and is documented in the
+engineering log — the parser choice itself is unchanged:
+
+- column-aware reading order (`src/clinivault_ai/chunking/reader.py`, commits
+  `18028cf` → `ce168df` → `896c7af`), described in
+  [ingestion-parsing.md](../pipelines/ingestion-parsing.md) §"Observed behavior —
+  region-aware re-ingestion".
+- [2026-09-09 — column detection threshold rejects the real gutters](../engineering-log/2026-09-09-column-detection-threshold-rejects-real-gutters.md),
+  [2026-09-10 — rows spanning multiple regions leak cross-gutter text](../engineering-log/2026-09-10-row-merge-cross-region-leakage.md),
+  [2026-09-16 — T2D-010 multi-column extraction interleaving](../engineering-log/2026-09-16-t2d-010-column-interleaving.md),
+  [2026-09-19 — stale T2D-010 embedding artifact](../engineering-log/2026-09-19-stale-t2d-010-embedding-artifact.md).

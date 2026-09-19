@@ -22,7 +22,15 @@ validated artifacts persisted durably — see
 ranking weakness investigated — see
 [`retrieval-ranking-investigation.md`](./retrieval-ranking-investigation.md);
 controlled baseline retrieval benchmark established — see
-[`retrieval-baseline-benchmark.md`](./retrieval-baseline-benchmark.md).
+[`retrieval-baseline-benchmark.md`](./retrieval-baseline-benchmark.md); benchmark
+measured results recorded — see
+[`retrieval-baseline-benchmark-results.md`](./retrieval-baseline-benchmark-results.md);
+representative T2D-001 pipeline evaluation recorded — see
+[`representative-evaluation.md`](./representative-evaluation.md); controlled
+retrieval comparison (baseline vs term-weighted vs semantic) run — see
+[`retrieval-controlled-comparison.md`](./retrieval-controlled-comparison.md);
+T2D-010 ingestion-quality isolation investigated — see
+[`t2d-010-ingestion-quality-investigation.md`](./t2d-010-ingestion-quality-investigation.md).
 Further pipeline
 docs are created as pipelines are actually built, using
 [`docs/templates/pipeline-doc-template.md`](../templates/pipeline-doc-template.md).

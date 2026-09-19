@@ -139,3 +139,20 @@ and the rejected options describe costs that were not paid.
 - Future decisions this one deliberately leaves open: embedding model,
   vector storage, generation provider, abstention. Each is decided when
   its milestone arrives.
+
+## Related Decisions — Seam Status Update (added 2026-09-19, no change to this decision)
+
+This decision's seam principle is unchanged; its "currently one seam" statement
+was a current-state snapshot and has since been extended exactly as the principle
+describes (a stage showed a real second implementation need):
+
+- `EmbeddingProvider` — original seam
+  ([DECISION-009](./DECISION-009-retrieval-baseline-representation.md) records the
+  baseline representation; `d0dc40c` used the seam for evaluation-only providers
+  without touching production code).
+- `GenerationProvider` — added with the baseline generation stage
+  ([DECISION-007](./DECISION-007-generation-provider.md),
+  [DECISION-011](./DECISION-011-grounded-generation-contract.md), commit `7fba7c1`).
+- Still concrete: parser wrapper, chunker, vector store, context builder.
+- Pipeline artifacts and durability rules:
+  [DECISION-008](./DECISION-008-artifact-storage-contract.md).
