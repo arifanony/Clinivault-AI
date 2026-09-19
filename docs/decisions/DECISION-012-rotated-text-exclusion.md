@@ -120,3 +120,4 @@ Full suite: 210/210 pass.
   [DECISION-008](DECISION-008-artifact-storage-contract.md),
   [DECISION-010](DECISION-010-retain-baseline-retrieval.md)
 - Commit: (this unit) `fix: remediate t2d-010 parser extraction`
+- See also [DECISION-013](DECISION-013-genesis-adoption.md): adopting a repository-native control layer was justified in part by the continuity gap this remediation surfaced at session boundaries
