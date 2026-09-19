@@ -1,0 +1,100 @@
+{
+  "schema_version": 2,
+  "project": {
+    "name": "Clinivault AI",
+    "mode": "adopt",
+    "profile": "prototype",
+    "objective": "Build a production-oriented, evidence-grounded Healthcare RAG system for Type 2 Diabetes, validated through reproducible evaluation and incremental evidence-driven engineering.",
+    "constraints": [],
+    "non_goals": [],
+    "trust_boundary": "local repository",
+    "created_at": "2026-09-19T09:31:07.427Z",
+    "updated_at": "2026-09-19T09:35:14.791Z"
+  },
+  "policy": {
+    "ponytail": "full",
+    "autonomy": "human-in-the-loop",
+    "learned_rule_promotion": "human-required",
+    "cleanup": "propose-only",
+    "traces": {
+      "storage": "local",
+      "commit_raw": false,
+      "redact_secrets": true
+    }
+  },
+  "lifecycle": {
+    "phase": "operational",
+    "status": "ready",
+    "active_task": null,
+    "blocker": null,
+    "next_action": "No technical unit currently active. Last completed: T2D-010 parser extraction remediation (commit b3e1487, DECISION-012). Next bounded unit requires human authorization. Authoritative engineering knowledge: docs/decisions, docs/engineering-log, docs/pipelines; Genesis owns control state only."
+  },
+  "commands": {
+    "test": {
+      "command": "python -m unittest discover -s tests",
+      "status": "unverified",
+      "source": "manual correction: project test convention (tests/ unittest suite; documented across docs/pipelines verification sections). Discovery's 'python -m pytest' from 'pyproject.toml' was incorrect — pyproject.toml defines no test command and pytest is not a project dependency."
+    }
+  },
+  "workflow": null,
+  "artifacts": [],
+  "assumptions": [],
+  "invariants": [],
+  "decisions": [
+    {
+      "id": "DECISION-1fda3d59",
+      "title": "Genesis workflow adoption (DECISION-013)",
+      "text": "Genesis adopted as the repository-native workflow/control layer. Authoritative decision content: docs/decisions/DECISION-013-genesis-adoption.md. Genesis owns control state only; never restate decision content here.",
+      "status": "accepted",
+      "source": "docs/decisions/DECISION-013-genesis-adoption.md",
+      "recorded_at": "2026-09-19T09:35:14.778Z",
+      "paths": [],
+      "tags": []
+    }
+  ],
+  "knowledge": [],
+  "tasks": [],
+  "learning_proposals": [],
+  "cleanup_proposals": [],
+  "controls": [],
+  "attempts": [],
+  "authorizations": [],
+  "experiments": [],
+  "incidents": [],
+  "discovery": {
+    "files": 159,
+    "languages": [
+      "python"
+    ],
+    "extensions": {
+      ".env": 1,
+      ".example": 1,
+      ".gitignore": 1,
+      ".gitkeep": 3,
+      ".json": 27,
+      ".lock": 1,
+      ".md": 56,
+      ".pdf": 9,
+      ".png": 6,
+      ".py": 51,
+      ".python-version": 1,
+      ".toml": 1,
+      ".txt": 1
+    },
+    "commands": {
+      "test": {
+        "command": "python -m pytest",
+        "status": "unverified",
+        "source": "pyproject.toml"
+      }
+    },
+    "legacy_genesis": false,
+    "revision": {
+      "commit": "b3e1487803c4352f7abbda77652e7d3b685935d3",
+      "dirty": true,
+      "source_hash": "7b756819051d28fd7daa4b8f7bc5db664c06c9f38a0d7247ca887bc06dbd3e09"
+    }
+  },
+  "checkpoint": null,
+  "legacy": null
+}

@@ -1,0 +1,530 @@
+{
+  "schemaVersion": 2,
+  "project": "Clinivault AI",
+  "revision": "b3e1487803c4352f7abbda77652e7d3b685935d3",
+  "sourceHash": "6adf26b71cac98d3492ce6de6fb59d15b9f315fe604a264d664bc3a0d2f52683",
+  "provenance": {
+    "tool": "genesis-graphizer",
+    "method": "static-analysis",
+    "confidenceScale": "0..1"
+  },
+  "nodes": [
+    {
+      "id": "file:src/clinivault_ai/__init__.py",
+      "type": "file",
+      "label": "src/clinivault_ai/__init__.py",
+      "path": "src/clinivault_ai/__init__.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "2cf74908819f94a829b751a7657acc776d430297bb6916edbdcb2f109b53ee28"
+    },
+    {
+      "id": "file:src/clinivault_ai/chunking/__init__.py",
+      "type": "file",
+      "label": "src/clinivault_ai/chunking/__init__.py",
+      "path": "src/clinivault_ai/chunking/__init__.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "2edf1011de0a7e6754c27e5caf2b5f59c54a2b536203f9fcbe7bd3fb190c2299"
+    },
+    {
+      "id": "file:src/clinivault_ai/chunking/chunker.py",
+      "type": "file",
+      "label": "src/clinivault_ai/chunking/chunker.py",
+      "path": "src/clinivault_ai/chunking/chunker.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "c34dc57a1fbff7b6fcaf9b95916b956a2d30566cd58b522db93cf9afe13fdc14"
+    },
+    {
+      "id": "file:src/clinivault_ai/chunking/reader.py",
+      "type": "file",
+      "label": "src/clinivault_ai/chunking/reader.py",
+      "path": "src/clinivault_ai/chunking/reader.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "7ce56da4fad2691437121a1c7aba512f0171d175b22763603ae0df8a1505686c"
+    },
+    {
+      "id": "file:src/clinivault_ai/chunking/validate.py",
+      "type": "file",
+      "label": "src/clinivault_ai/chunking/validate.py",
+      "path": "src/clinivault_ai/chunking/validate.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "5812aead548f9cace908181333ed0e0541e07c7c93b951139feb9515dd614438"
+    },
+    {
+      "id": "file:src/clinivault_ai/context/__init__.py",
+      "type": "file",
+      "label": "src/clinivault_ai/context/__init__.py",
+      "path": "src/clinivault_ai/context/__init__.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "b7436b2ef71ca267f2e23f7b4a64294dbae7672538c3e23f5b6ba819301ffdfa"
+    },
+    {
+      "id": "file:src/clinivault_ai/context/builder.py",
+      "type": "file",
+      "label": "src/clinivault_ai/context/builder.py",
+      "path": "src/clinivault_ai/context/builder.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "96e4bf62c6d0bcd26c6b812e84fea37365357a4838aa18015b42228ef7b2c723"
+    },
+    {
+      "id": "file:src/clinivault_ai/context/errors.py",
+      "type": "file",
+      "label": "src/clinivault_ai/context/errors.py",
+      "path": "src/clinivault_ai/context/errors.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "d2e3e80059873868a8440465de3bd0457284efcb19a2b05f4baec0e06c3b214c"
+    },
+    {
+      "id": "file:src/clinivault_ai/embedding/__init__.py",
+      "type": "file",
+      "label": "src/clinivault_ai/embedding/__init__.py",
+      "path": "src/clinivault_ai/embedding/__init__.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "158ff56012aec771b1edd2bfc8ea283e60baaa3fe6a3ed5b4d51226dbb5366f5"
+    },
+    {
+      "id": "file:src/clinivault_ai/embedding/embedder.py",
+      "type": "file",
+      "label": "src/clinivault_ai/embedding/embedder.py",
+      "path": "src/clinivault_ai/embedding/embedder.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "77ea80f20a42e5f39b654fd2e9efff6f4a0fc13d7966d171164d7a1d7a1c93a9"
+    },
+    {
+      "id": "file:src/clinivault_ai/embedding/errors.py",
+      "type": "file",
+      "label": "src/clinivault_ai/embedding/errors.py",
+      "path": "src/clinivault_ai/embedding/errors.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "48ec541b1ce73f4b8120de6c82b37a0f03af24b714d4b119467a6700d0d3a35a"
+    },
+    {
+      "id": "file:src/clinivault_ai/embedding/provider.py",
+      "type": "file",
+      "label": "src/clinivault_ai/embedding/provider.py",
+      "path": "src/clinivault_ai/embedding/provider.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "842aef6420489569de609c5ec24190873b874a8ec1a90bfa411c7e8d0366503e"
+    },
+    {
+      "id": "file:src/clinivault_ai/evaluation/__init__.py",
+      "type": "file",
+      "label": "src/clinivault_ai/evaluation/__init__.py",
+      "path": "src/clinivault_ai/evaluation/__init__.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "24f88deb641161746166b4da0dc18584f5f5980d479c4e4fb31ab5163b390e53"
+    },
+    {
+      "id": "file:src/clinivault_ai/evaluation/benchmark.py",
+      "type": "file",
+      "label": "src/clinivault_ai/evaluation/benchmark.py",
+      "path": "src/clinivault_ai/evaluation/benchmark.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "86a940fe3e1d7cd0092b7d6fecdae9cfeed619b6b31a8819487bdde78c100bcb"
+    },
+    {
+      "id": "file:src/clinivault_ai/evaluation/cases.py",
+      "type": "file",
+      "label": "src/clinivault_ai/evaluation/cases.py",
+      "path": "src/clinivault_ai/evaluation/cases.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "81c8e8e1eee3c822fde4cd325d6afe252f8a723e095a2b0bd2286ffe7289ebce"
+    },
+    {
+      "id": "file:src/clinivault_ai/evaluation/comparison.py",
+      "type": "file",
+      "label": "src/clinivault_ai/evaluation/comparison.py",
+      "path": "src/clinivault_ai/evaluation/comparison.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "e5d29573de1c46bd5126ea169dcc5bf8e98332306fedcb457030e9271ddfcf47"
+    },
+    {
+      "id": "file:src/clinivault_ai/evaluation/metrics.py",
+      "type": "file",
+      "label": "src/clinivault_ai/evaluation/metrics.py",
+      "path": "src/clinivault_ai/evaluation/metrics.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "b5c78377f85947bd6fd0c2c8b1605a19426b98fcb5ff58875793711fdffc5cd5"
+    },
+    {
+      "id": "file:src/clinivault_ai/evaluation/semantic.py",
+      "type": "file",
+      "label": "src/clinivault_ai/evaluation/semantic.py",
+      "path": "src/clinivault_ai/evaluation/semantic.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "9e0817f229fa69461d2d58e81008a8c42310a14d6b3b96623dcf15d4fa877818"
+    },
+    {
+      "id": "file:src/clinivault_ai/evaluation/termweighted.py",
+      "type": "file",
+      "label": "src/clinivault_ai/evaluation/termweighted.py",
+      "path": "src/clinivault_ai/evaluation/termweighted.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "62477ad37a1c988afecf6e79a650ef83140ad90ccf8d10c79acd567783cf95ec"
+    },
+    {
+      "id": "file:src/clinivault_ai/generation/__init__.py",
+      "type": "file",
+      "label": "src/clinivault_ai/generation/__init__.py",
+      "path": "src/clinivault_ai/generation/__init__.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "840d523a4df5675aba3c7ccdc4c75eccca1cb196abd98a1c9993211f6f86c77a"
+    },
+    {
+      "id": "file:src/clinivault_ai/generation/errors.py",
+      "type": "file",
+      "label": "src/clinivault_ai/generation/errors.py",
+      "path": "src/clinivault_ai/generation/errors.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "e54eb2ce2fa3f559ea51cc9ca88927d1748b8f4bdc4b8004ed7c7ee6f4b4dfb9"
+    },
+    {
+      "id": "file:src/clinivault_ai/generation/generator.py",
+      "type": "file",
+      "label": "src/clinivault_ai/generation/generator.py",
+      "path": "src/clinivault_ai/generation/generator.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "c8b3463b935dc47c614c14d96a6175dd140409422b6959d798b134c09e5872fe"
+    },
+    {
+      "id": "file:src/clinivault_ai/generation/prompt.py",
+      "type": "file",
+      "label": "src/clinivault_ai/generation/prompt.py",
+      "path": "src/clinivault_ai/generation/prompt.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "948b83bf82299f41a456d4be69fb6210fbcf2ccdbbe3be6614c7b4e32a6022e7"
+    },
+    {
+      "id": "file:src/clinivault_ai/generation/provider.py",
+      "type": "file",
+      "label": "src/clinivault_ai/generation/provider.py",
+      "path": "src/clinivault_ai/generation/provider.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "53d19bb68cceb9f9c045e20c5f5f04c994d38ca9df46d18bca413918886545a4"
+    },
+    {
+      "id": "file:src/clinivault_ai/ingestion/__init__.py",
+      "type": "file",
+      "label": "src/clinivault_ai/ingestion/__init__.py",
+      "path": "src/clinivault_ai/ingestion/__init__.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "2df7b27fbffe90f3a811ddc1fc07e558019ea5dffccb21d7184d7e5a09468047"
+    },
+    {
+      "id": "file:src/clinivault_ai/ingestion/__main__.py",
+      "type": "file",
+      "label": "src/clinivault_ai/ingestion/__main__.py",
+      "path": "src/clinivault_ai/ingestion/__main__.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "5a270527d002a7716ee10f0ed535d66faffa29126df455c522f39894396da5c0"
+    },
+    {
+      "id": "file:src/clinivault_ai/ingestion/errors.py",
+      "type": "file",
+      "label": "src/clinivault_ai/ingestion/errors.py",
+      "path": "src/clinivault_ai/ingestion/errors.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "736bdc959327f03e8dcf64f5b76f093494a986e4f2f6e1b245cc9329e702e684"
+    },
+    {
+      "id": "file:src/clinivault_ai/ingestion/output.py",
+      "type": "file",
+      "label": "src/clinivault_ai/ingestion/output.py",
+      "path": "src/clinivault_ai/ingestion/output.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "814daeb174497fdf254e78cefd05c862b31f1e9b2ec9a913db053b37d2ffae51"
+    },
+    {
+      "id": "file:src/clinivault_ai/ingestion/parsing.py",
+      "type": "file",
+      "label": "src/clinivault_ai/ingestion/parsing.py",
+      "path": "src/clinivault_ai/ingestion/parsing.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "6c1533d813de9aeaa97285116804d3df41960a3a1ce736b5d35bdbd04c26e1a9"
+    },
+    {
+      "id": "file:src/clinivault_ai/ingestion/source.py",
+      "type": "file",
+      "label": "src/clinivault_ai/ingestion/source.py",
+      "path": "src/clinivault_ai/ingestion/source.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "0248c413d297a8c51cd56f7fa7d3652585244016230b31b6d6568dd957628d30"
+    },
+    {
+      "id": "file:src/clinivault_ai/ingestion/validation.py",
+      "type": "file",
+      "label": "src/clinivault_ai/ingestion/validation.py",
+      "path": "src/clinivault_ai/ingestion/validation.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "f51f6751b24643f16af6452e4bd9dd29088bb3c86978eddd00f765473cd7f20a"
+    },
+    {
+      "id": "file:src/clinivault_ai/pipeline/__init__.py",
+      "type": "file",
+      "label": "src/clinivault_ai/pipeline/__init__.py",
+      "path": "src/clinivault_ai/pipeline/__init__.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "aca1475c35ef67cb62d80f437e077b28b186c6cd42fd2f5fc13b286d149e3363"
+    },
+    {
+      "id": "file:src/clinivault_ai/retrieval/__init__.py",
+      "type": "file",
+      "label": "src/clinivault_ai/retrieval/__init__.py",
+      "path": "src/clinivault_ai/retrieval/__init__.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "6a993446e82eaaff32575070a15d01c026f589a9c6c80b03fb7938165a8aa4fb"
+    },
+    {
+      "id": "file:src/clinivault_ai/retrieval/errors.py",
+      "type": "file",
+      "label": "src/clinivault_ai/retrieval/errors.py",
+      "path": "src/clinivault_ai/retrieval/errors.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "f1e7aa91a6327dcd295fcc433e9697a39f69e3fa389c5648d2aba68a09e9f312"
+    },
+    {
+      "id": "file:src/clinivault_ai/retrieval/search.py",
+      "type": "file",
+      "label": "src/clinivault_ai/retrieval/search.py",
+      "path": "src/clinivault_ai/retrieval/search.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "7fba39a92871bacb692b526468f8865c0022653990cdab4cfce76c5e0260c3b4"
+    },
+    {
+      "id": "file:src/clinivault_ai/retrieval/store.py",
+      "type": "file",
+      "label": "src/clinivault_ai/retrieval/store.py",
+      "path": "src/clinivault_ai/retrieval/store.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "aba4221772081801b0bbe32a84b46b90e872e04d98f0009e8c07a7ae5214683e"
+    },
+    {
+      "id": "file:src/clinivault_ai/ui/__init__.py",
+      "type": "file",
+      "label": "src/clinivault_ai/ui/__init__.py",
+      "path": "src/clinivault_ai/ui/__init__.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "e4a37aa615c6dc6d871663e4f08b8b97310c44958157538c42d469cbac3a3e67"
+    },
+    {
+      "id": "file:src/clinivault_ai/ui/__main__.py",
+      "type": "file",
+      "label": "src/clinivault_ai/ui/__main__.py",
+      "path": "src/clinivault_ai/ui/__main__.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "0f5f9f99de5ee795e8c07c76b5b9b56bcd573b22d47623169e5a1e9f87e4e441"
+    },
+    {
+      "id": "file:src/clinivault_ai/ui/app.py",
+      "type": "file",
+      "label": "src/clinivault_ai/ui/app.py",
+      "path": "src/clinivault_ai/ui/app.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "62e634440e0526b0c8365554f707f13ad4f4bc7b7134f9e9ce2828b36377f0b4"
+    },
+    {
+      "id": "file:src/clinivault_ai/ui/page.py",
+      "type": "file",
+      "label": "src/clinivault_ai/ui/page.py",
+      "path": "src/clinivault_ai/ui/page.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "64a17078c018b42a1ad0aab0367610996e527388d9ec6564d08eb35f270c1526"
+    },
+    {
+      "id": "file:tests/test_chunking.py",
+      "type": "file",
+      "label": "tests/test_chunking.py",
+      "path": "tests/test_chunking.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "43a51adec42ace0fdf4534e92abc966a969de0927aee80447d6278c87c898faf"
+    },
+    {
+      "id": "file:tests/test_comparison.py",
+      "type": "file",
+      "label": "tests/test_comparison.py",
+      "path": "tests/test_comparison.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "83369289a3c60caab3ef59d0e4cdb5158f51780ec0f8b3a35d1ed4590f17445a"
+    },
+    {
+      "id": "file:tests/test_context.py",
+      "type": "file",
+      "label": "tests/test_context.py",
+      "path": "tests/test_context.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "69be40bcf3de972c623efb6cf47f1b265a4b7e3728564b20a395ea219a8b4320"
+    },
+    {
+      "id": "file:tests/test_embedding.py",
+      "type": "file",
+      "label": "tests/test_embedding.py",
+      "path": "tests/test_embedding.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "32da0fe11e1f207662a11399d9b5786da13347713a206f13d562ca3d46f6b3ad"
+    },
+    {
+      "id": "file:tests/test_evaluation_metrics.py",
+      "type": "file",
+      "label": "tests/test_evaluation_metrics.py",
+      "path": "tests/test_evaluation_metrics.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "c7e917d43c94df5e13292acd231a92c88e14d361f88b99548e8f00ad4626e606"
+    },
+    {
+      "id": "file:tests/test_generation.py",
+      "type": "file",
+      "label": "tests/test_generation.py",
+      "path": "tests/test_generation.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "9717bf48b422d65766b97cd534364df02b622101f5dda38f2523a1be20856609"
+    },
+    {
+      "id": "file:tests/test_ingestion.py",
+      "type": "file",
+      "label": "tests/test_ingestion.py",
+      "path": "tests/test_ingestion.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "0a6de97203b440321357b4d7a820c715095096353d3aff4528c1b24dc8c1f803"
+    },
+    {
+      "id": "file:tests/test_pipeline.py",
+      "type": "file",
+      "label": "tests/test_pipeline.py",
+      "path": "tests/test_pipeline.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "bc0bd00f1b736804ea6ee44fee9840e29334d69c401b8b836861e85b5d656677"
+    },
+    {
+      "id": "file:tests/test_reader.py",
+      "type": "file",
+      "label": "tests/test_reader.py",
+      "path": "tests/test_reader.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "021e4988ecfdd9f37f6bdc3285300f01f4f23e8cf7f68776433a434557d9eb85"
+    },
+    {
+      "id": "file:tests/test_retrieval.py",
+      "type": "file",
+      "label": "tests/test_retrieval.py",
+      "path": "tests/test_retrieval.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "21b064b87426703f5f7fee7bb495fc2e60d81d86fb38868b3e203a99319ef17f"
+    },
+    {
+      "id": "file:tests/test_ui.py",
+      "type": "file",
+      "label": "tests/test_ui.py",
+      "path": "tests/test_ui.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "9a7ce756fc79a338afc8b27a1e620c81c9dd77d693ccaae621f508197afbc299"
+    }
+  ],
+  "edges": [],
+  "warnings": [
+    "Python AST unavailable: Python was not found; run without arguments to install from the Microsoft Store, or disable this shortcut from Settings > Apps > Advanced app settings > App execution aliases."
+  ],
+  "stats": {
+    "unresolvedCalls": 0
+  }
+}
