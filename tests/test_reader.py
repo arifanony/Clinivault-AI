@@ -294,5 +294,65 @@ class TableGuardTests(unittest.TestCase):
         self.assertEqual(len(kept), 1)
 
 
+class UprightWordFilterTests(unittest.TestCase):
+    """Rotated (non-upright) text must never enter reading-order text.
+
+    Journal spine banners and rotated access watermarks are drawn at 90
+    degrees, so their glyphs share y-coordinates with body lines. Unfiltered,
+    line assembly interleaves reversed banner fragments (e.g. "TNEMEGANAM"
+    for "MANAGEMENT") into paragraphs -- the structural defect confirmed on
+    T2D-010 page 1.
+    """
+
+    def test_upright_words_are_kept(self):
+        words = [
+            {"x0": 50, "x1": 90, "top": 100, "text": "diabetes", "upright": True},
+            {"x0": 100, "x1": 140, "top": 100, "text": "care", "upright": True},
+        ]
+        self.assertEqual(reader._upright_words(words), words)
+
+    def test_rotated_words_are_dropped(self):
+        words = [
+            {"x0": 50, "x1": 90, "top": 100, "text": "body", "upright": True},
+            {"x0": 520, "x1": 560, "top": 100, "text": "TNEMEGANAM", "upright": False},
+        ]
+        kept = reader._upright_words(words)
+        self.assertEqual([w["text"] for w in kept], ["body"])
+
+    def test_missing_upright_attribute_is_preserved(self):
+        # Synthetic word dicts (these tests, other callers) carry no
+        # `upright` key and must be passed through untouched.
+        words = [word(50, 90, 100, "kept")]
+        self.assertEqual(reader._upright_words(words), words)
+
+    def test_filter_is_order_preserving_and_non_mutating(self):
+        words = [
+            {"text": "a", "upright": True},
+            {"text": "ROTATED", "upright": False},
+            {"text": "b", "upright": True},
+        ]
+        snapshot = [dict(w) for w in words]
+        kept = reader._upright_words(words)
+        self.assertEqual([w["text"] for w in kept], ["a", "b"])
+        self.assertEqual(words, snapshot)
+
+    def test_rotated_banner_fragments_do_not_reach_text(self):
+        # Body words and reversed banner fragments share the same y band
+        # (the T2D-010 page-1 condition). After filtering, the reconstructed
+        # text carries body words only -- reading order is not interleaved.
+        body = [
+            word(50 + i * 60, 100 + i * 60, 300.0, t)
+            for i, t in enumerate(["For", "prevention", "and", "management"])
+        ]
+        banner = [
+            {"x0": 520, "x1": 570, "top": 300.0, "text": "TNEMEGANAM", "upright": False},
+            {"x0": 520, "x1": 560, "top": 312.0, "text": "KSIR", "upright": False},
+        ]
+        text = reader._words_to_text(reader._upright_words(body + banner))
+        self.assertNotIn("TNEMEGANAM", text)
+        self.assertNotIn("KSIR", text)
+        self.assertIn("management", text)
+
+
 if __name__ == "__main__":
     unittest.main()

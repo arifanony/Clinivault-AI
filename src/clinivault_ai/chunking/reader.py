@@ -317,13 +317,16 @@ def extract_page_text_column_aware(
       - left_word_count, right_word_count (first/last region, compatibility)
       - column_boundaries: per-region x extents
       - lines: reconstructed lines in region reading order
-      - words: raw pdfplumber word dicts
+      - words: upright pdfplumber word dicts (rotated text excluded)
     """
     with pdfplumber.open(pdf_path) as pdf:
         page = pdf.pages[page_number - 1]
         # Extract words while the PDF is still open — page objects become
         # unusable ("seek of closed file") once the context manager exits.
         words = page.extract_words(use_text_flow=False, keep_blank_chars=False)
+        # Rotated text (spine banners, rotated access watermarks) is dropped
+        # before any layout reasoning: see _upright_words.
+        words = _upright_words(words)
         # Semantic-guard evidence: table cell geometry must also be read while
         # the page is open. Default find_tables() settings only — the guard
         # treats undetected tables as unknown, never as evidence of absence.
@@ -391,6 +394,22 @@ def extract_page_text_column_aware(
         "lines": [ln for group in region_lines for ln in group],
         "words": words,
     }
+
+def _upright_words(words: list[dict]) -> list[dict]:
+    """Drop rotated (non-upright) words from a pdfplumber word list.
+
+    Rotated text is not body text: journal spine banners and access watermarks
+    are drawn at 90 degrees, so their glyphs share y-coordinates with body
+    lines. Left in, line assembly interleaves reversed banner fragments
+    (e.g. "TNEMEGANAM" for "MANAGEMENT") into paragraphs and the page-wide
+    extent of the banner also pollutes the gutter-coverage histogram.
+
+    This is a structural rule about text orientation, not a document-specific
+    exception. Words that do not report pdfplumber's ``upright`` attribute are
+    kept, so synthetic word dicts (tests, other callers) are unaffected.
+    """
+    return [word for word in words if word.get("upright", True)]
+
 
 def _words_to_lines(words: list[dict]) -> list[dict]:
     """Group words into lines by top position (within 3pt tolerance).

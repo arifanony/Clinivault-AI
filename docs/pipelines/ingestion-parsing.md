@@ -151,6 +151,21 @@ reader (pipeline version 0.1.0 → 0.2.0) and T2D-001 was re-ingested:
 
 - [DECISION-006: PDF parser](../decisions/DECISION-006-pdf-parser.md)
 - [DECISION-002: Python version](../decisions/DECISION-002-python-version.md)
+- [DECISION-012: Rotated-text exclusion](../decisions/DECISION-012-rotated-text-exclusion.md)
+
+## Observed behavior — rotated-text remediation (T2D-010, 2026-09-19)
+
+The word stream feeding the reader is now filtered to **upright text only**
+before any layout reasoning (DECISION-012). Rotated 90° spine banners and
+access watermarks had been interleaving (reversed) into body lines on every
+T2D-010 page; after the filter, 2,111 banner/watermark characters are
+removed across its 15 pages and body text is verbatim-preserved. Chunk
+texts, chunk IDs, and hash-embedding vectors are byte-identical for T2D-010
+(70/70 consistent), and the frozen benchmark reproduces exactly. Full-corpus
+re-parse check: T2D-001/002/003 identical; T2D-005–009 differ only by
+rotated-banner/watermark removal (their committed artifacts are internally
+consistent as-parsed; regeneration on re-ingestion per DECISION-008).
+Details: `../engineering-log/2026-09-19-t2d-010-rotated-banner-interleaving.md`.
 
 ## Known limitations
 

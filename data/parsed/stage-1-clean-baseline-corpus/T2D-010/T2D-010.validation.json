@@ -1,6 +1,6 @@
 {
   "document_id": "T2D-010",
-  "validated_at_utc": "2026-09-15T13:20:27+00:00",
+  "validated_at_utc": "2026-09-18T04:13:41+00:00",
   "checks": [
     {
       "name": "source_sha256_matches_manifest",
@@ -15,7 +15,7 @@
     {
       "name": "document_text_present",
       "status": "pass",
-      "detail": "total extracted characters: 106583"
+      "detail": "total extracted characters: 104472"
     },
     {
       "name": "page_provenance_complete",
@@ -50,24 +50,24 @@
   ],
   "statistics": {
     "page_count": 15,
-    "total_chars": 106583,
-    "total_words": 15901,
+    "total_chars": 104472,
+    "total_words": 15752,
     "chars_per_page": {
-      "mean": 7105.5,
-      "median": 6965,
-      "min": 4412,
-      "max": 9758
+      "mean": 6964.8,
+      "median": 6831,
+      "min": 4231,
+      "max": 9624
     },
     "words_per_page": {
-      "mean": 1060.1,
-      "median": 1103,
-      "min": 632,
-      "max": 1413
+      "mean": 1050.1,
+      "median": 1094,
+      "min": 616,
+      "max": 1404
     },
     "empty_pages": [],
     "failed_pages": [],
     "low_text_pages_reported_only": {
-      "rule": "char_count < 10% of median (6965)",
+      "rule": "char_count < 10% of median (6831)",
       "pages": []
     },
     "control_char_anomaly_pages": []

@@ -53,6 +53,17 @@ The stored text of the expected chunks and their same-page neighbors was read in
 2. **q1's weakness is mostly ranking,** not ingestion: the expected chunk exists and ranks 28 primarily because of hash-embedding behavior (collision + function-word mass + citation boilerplate), even though interleaving further dilutes the passage.
 3. T2D-010 is the only corpus document where an extraction/coverage gap of this kind was demonstrated; the other weakness cases (T2D-006 q2, T2D-009 q2) are ranking-driven.
 
+> **Correction (2026-09-19, remediation unit):** point 2 above is
+> **superseded by direct raw-PDF evidence** — the label "11.4a" does not
+> exist anywhere in the raw T2D-010 PDF (label series is 11.1a–11.12b), and
+> the finerenone/nsMRA recommendation is **11.8**, whose text **is present**
+> in the parsed artifact (pages 7 and 10). The "11.4a not locatable" finding
+> was a mislabeled expectation, not an extraction gap. The genuine T2D-010
+> extraction defect was rotated-banner/watermark interleaving, since
+> remediated (see `../engineering-log/2026-09-19-t2d-010-rotated-banner-interleaving.md`
+> and [DECISION-012](../decisions/DECISION-012-rotated-text-exclusion.md)).
+> T2D-010's remaining retrieval weakness is a ranking-mechanism issue.
+
 ## 7. Classification
 
 - **OBSERVED:** artifact existence; stored chunk contents; absence of the 11.4-series recommendation text in the parsed corpus; interleaving on the affected pages vs raw extraction; the recorded ranks and scores.
