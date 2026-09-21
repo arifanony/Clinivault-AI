@@ -33,19 +33,20 @@ changes, query rewriting, generation, UI.
 
 ## B. Dataset / cases
 
-21 cases across 9 documents (T2D-004 excluded — blocked).
+46 cases across 9 documents (T2D-004 excluded — blocked). Expanded under TASK EVAL-EXPAND-001 (DECISION-014).
 
-| Document | Cases |
-|---|---|
-| T2D-001 | 4 (`diagnosis`, `classification`, `gdm`, `hba1c`) |
-| T2D-002 | 1 (`screening`) |
-| T2D-003 | 2 (`hba1c-accuracy`, `quadas`) |
-| T2D-005 | 2 (`a1c-goal`, `hypoglycemia`) |
-| T2D-006 | 2 (`glp1-sglt2`, `second-line`) |
-| T2D-007 | 2 (`first-line`, `add-on`) |
-| T2D-008 | 3 (`weight`, `harms`, `harms-variant`) |
-| T2D-009 | 3 (`bp`, `statins`, `statin-variant`) |
-| T2D-010 | 2 (`ckd-screening`, `kidney-protection`) |
+| Document | Baseline 21-Case Count | Expanded 46-Case Count | Cases |
+|---|---|---|---|
+| T2D-001 | 4 | 7 | `diagnosis`, `classification`, `gdm`, `hba1c`, `type1-autoantibody`, `diagnosis-criteria-table`, `prediabetes-screening` |
+| T2D-002 | 1 | 3 | `screening`, `lifestyle-outcomes`, `metformin-prediabetes` |
+| T2D-003 | 2 | 4 | `hba1c-accuracy`, `quadas`, `fpg-optimal-cutoff`, `hba1c-optimal-threshold` |
+| T2D-005 | 2 | 5 | `a1c-goal`, `hypoglycemia`, `cgm-targets`, `glycemic-deintensification`, `dka-prevention` |
+| T2D-006 | 2 | 5 | `glp1-sglt2`, `second-line`, `insulin-initiation`, `metformin-first-line`, `initial-combination` |
+| T2D-007 | 2 | 5 | `first-line`, `add-on`, `dpp4-against`, `sglt2-cv-ckd-outcomes`, `hypoglycemia-risk` |
+| T2D-008 | 3 | 6 | `weight`, `harms`, `harms-variant`, `tirzepatide-weight`, `finerenone-mortality`, `sglt2-kidney-nma` |
+| T2D-009 | 3 | 6 | `bp`, `statins`, `statin-variant`, `aspirin-primary`, `sglt2-heart-failure`, `icosapent-ethyl` |
+| T2D-010 | 2 | 5 | `ckd-screening`, `kidney-protection`, `albuminuria-classification`, `finerenone-ckd`, `protein-restriction` |
+| **TOTAL** | **21** | **46** | **21 original + 25 expanded cases** |
 
 Queries are taken from prior validated runs; none were invented for this
 benchmark. Provenance was checked programmatically: **20 of 21 queries appear

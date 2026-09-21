@@ -28,6 +28,7 @@ never rewritten — if it changes, mark it Replaced and write a new document.
 | [DECISION-011](./DECISION-011-grounded-generation-contract.md) | Grounded generation contract: evidence-only answers, explicit `no_evidence` abstention (no provider call), fail-loud errors, inspectable prompt/evidence | Chosen (retroactively documented) | 2026-09-13 |
 | [DECISION-012](./DECISION-012-rotated-text-exclusion.md) | Exclude rotated (non-upright) text from reading-order extraction: rotated spine banners/watermarks interleaved into body lines; word-level orientation filter before layout reasoning | Chosen | 2026-09-19 |
 | [DECISION-013](./DECISION-013-genesis-adoption.md) | Adopt Genesis as the repository-native workflow/control layer (control state, gates, receipts, approvals, recovery); `docs/` remains the sole authoritative engineering knowledge layer | Chosen | 2026-09-19 |
+| [DECISION-014](./DECISION-014-benchmark-expansion.md) | Expand retrieval evaluation benchmark from 21 to 46 evidence-backed cases across all 9 corpus documents | Chosen | 2026-09-21 |
 
 
 
