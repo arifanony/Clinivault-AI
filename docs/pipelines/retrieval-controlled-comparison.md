@@ -213,3 +213,20 @@ Upon resolving parsing/ingestion issues and expanding the benchmark to **46 case
 The expanded 46-case set highlights semantic mapping's superiority over lexical matching. When subjected to dense numerical queries and overlapping multi-drug comparative clinical assertions, the Semantic provider successfully pushed the expected relevant chunks into the Top-5 for **42 out of 46 (91.30%)** queries, nearly doubling the Baseline Hash (56.52%). Hit@1 is almost double the baseline, drastically pushing the MRR to 0.6109.
 
 This establishes substantial proof that **upgrading to a dense semantic retrieval representation** is heavily justified by objective metrics for expanding to broader clinical contexts over Type 2 Diabetes evidence.
+
+---
+
+## Phase 3: Local Semantic Models (2026-09-21)
+
+To circumvent operational friction with cloud semantic models (e.g., Gemini's HTTP 429 delays), 3 tiers of `sentence-transformers` based local embedding models were uniformly evaluated over the exact same 46-case dataset under TASK `EVAL-HF-001`.
+
+| Model | Dim | Encode Time (~700 Chunks, CPU) | Q-Lat | Hit@1 | Hit@5 | MRR |
+|---|---|---|---|---|---|---|
+| _Baseline Hash_ | _256_ | _< 1.0s_ | _<0.01_ | _12 (26.1%)_ | _26 (56.5%)_ | _0.3601_ |
+| `all-MiniLM-L6-v2` | 384 | 27.4s | 0.02s | 12 (26.1%) | 31 (67.4%) | 0.4105 |
+| `BAAI/bge-small-en-v1.5` | 384 | 140.1s | 0.04s | 19 (41.3%) | 36 (78.3%) | **0.5428** |
+| `BAAI/bge-base-en-v1.5` | 768 | 380.2s | 0.09s | 16 (34.8%) | 35 (76.1%) | 0.5105 |
+
+**Inferences**:
+- **Semantic Domination Holds Local**: Even entirely CPU-bound and locally quantized models map representations better than the existing `Term-Weighted/Hash` counterparts, proving that external cloud calls are arbitrarily optional for this pipeline's evolution.
+- **Dimensionality Plateaus Early**: Extracting `bge-small` -> `bge-base` doubles the embedding volume (384-d to 768-d), almost triples CPU encode latency (140s -> 380s), but actually yields slightly worse tracking indices within this highly domain-specific set. Consequently, `BAAI/bge-small-en-v1.5` validates perfectly structurally optimized requirements for moving to Semantic models.
