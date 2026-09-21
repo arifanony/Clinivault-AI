@@ -192,3 +192,24 @@ failure class that is not purely a ranking matter, and (b) any future
 retrieval comparison would otherwise remain polluted by it. A semantic
 re-ranking/representation decision should only be revisited after the
 corpus extraction is trustworthy and with a larger labeled case set.
+
+---
+
+## Phase 2: Expanded 46-Case Evaluation (2026-09-21)
+
+Upon resolving parsing/ingestion issues and expanding the benchmark to **46 cases** covering all 9 documents (TASK `EVAL-COMPARE-001`), the same three representations were re-evaluated.
+
+| Approach | Hit@1 | Hit@5 | MRR |
+|---|---|---|---|
+| A. Baseline Hash | 12/46 (26.09%) | 26/46 (56.52%) | 0.3601 |
+| B. Term-weighted (IDF) | 8/46 (17.39%) | 20/46 (43.48%) | 0.2815 |
+| C. Semantic (Gemini) | **21/46 (45.65%)** | **42/46 (91.30%)** | **0.6109** |
+
+### Per-Query Changes (Relative to Baseline - 46 Cases)
+- **IDF-weighted Hash**: 5 cases improved rank; 15 regressed; 26 unchanged. IDF term-weighting fundamentally decreases capability on the expanded diverse dataset, continuing the trend seen in the 21-case trial.
+- **Semantic (Gemini)**: **27 cases improved rank**; 12 regressed; 7 unchanged.
+
+### Interpretation Update
+The expanded 46-case set highlights semantic mapping's superiority over lexical matching. When subjected to dense numerical queries and overlapping multi-drug comparative clinical assertions, the Semantic provider successfully pushed the expected relevant chunks into the Top-5 for **42 out of 46 (91.30%)** queries, nearly doubling the Baseline Hash (56.52%). Hit@1 is almost double the baseline, drastically pushing the MRR to 0.6109.
+
+This establishes substantial proof that **upgrading to a dense semantic retrieval representation** is heavily justified by objective metrics for expanding to broader clinical contexts over Type 2 Diabetes evidence.
