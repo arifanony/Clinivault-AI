@@ -27,7 +27,7 @@ class HFEmbeddingProvider:
 
         # Initialize model
         t0 = time.time()
-        self.model = SentenceTransformer(self.name, device=self.device)
+        self.model = SentenceTransformer(self.name, device=self.device, trust_remote_code=True, local_files_only=True)
         self.load_latency = time.time() - t0
         self.dimension = self.model.get_sentence_embedding_dimension()
 

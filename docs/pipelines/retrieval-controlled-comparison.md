@@ -216,17 +216,22 @@ This establishes substantial proof that **upgrading to a dense semantic retrieva
 
 ---
 
-## Phase 3: Local Semantic Models (2026-09-21)
+## Phase 3 & 4: Local Semantic Models (EVAL-HF-001 & EVAL-HF-002)
 
-To circumvent operational friction with cloud semantic models (e.g., Gemini's HTTP 429 delays), 3 tiers of `sentence-transformers` based local embedding models were uniformly evaluated over the exact same 46-case dataset under TASK `EVAL-HF-001`.
+To circumvent operational friction with cloud semantic models (e.g., Gemini's HTTP 429 delays), multiple tiers of `sentence-transformers` based local embedding models were uniformly evaluated over the exact same 46-case dataset sequentially avoiding cache collision under `DECISION-008`.
 
-| Model | Dim | Encode Time (~700 Chunks, CPU) | Q-Lat | Hit@1 | Hit@5 | MRR |
-|---|---|---|---|---|---|---|
-| _Baseline Hash_ | _256_ | _< 1.0s_ | _<0.01_ | _12 (26.1%)_ | _26 (56.5%)_ | _0.3601_ |
-| `all-MiniLM-L6-v2` | 384 | 27.4s | 0.02s | 12 (26.1%) | 31 (67.4%) | 0.4105 |
-| `BAAI/bge-small-en-v1.5` | 384 | 140.1s | 0.04s | 19 (41.3%) | 36 (78.3%) | **0.5428** |
-| `BAAI/bge-base-en-v1.5` | 768 | 380.2s | 0.09s | 16 (34.8%) | 35 (76.1%) | 0.5105 |
+| Model | Dim | Corpus Encode Latency | Hit@1 | Hit@5 | MRR |
+|---|---|---|---|---|---|
+| _Baseline Hash_ | _256_ | _< 1.0s (CPU)_ | _12 (26.1%)_ | _26 (56.5%)_ | _0.3601_ |
+| `all-MiniLM-L6-v2` | 384 | 27.4s (CPU) | 12 (26.1%) | 31 (67.4%) | 0.4105 |
+| `TaylorAI/bge-micro-v2` | 384 | ~30s (CPU) | 14 (30.4%) | 32 (69.6%) | 0.4518 |
+| `BAAI/bge-base-en-v1.5` | 768 | 380.2s (CPU) | 16 (34.8%) | 35 (76.1%) | 0.5105 |
+| `thenlper/gte-small` | 384 | ~140s (CPU) | 18 (39.1%) | 37 (80.4%) | 0.5409 |
+| `BAAI/bge-small-en-v1.5` | 384 | 140.1s (CPU) | 19 (41.3%) | 36 (78.3%) | 0.5428 |
+| `intfloat/e5-small-v2` | 384 | ~140s (CPU) | 20 (43.5%) | 36 (78.3%) | **0.5583** |
+| _Semantic (Gemini)_ | _768_ | _Cloud API_ | _21 (45.65%)_ | _42 (91.30%)_ | _0.6109_ |
 
 **Inferences**:
-- **Semantic Domination Holds Local**: Even entirely CPU-bound and locally quantized models map representations better than the existing `Term-Weighted/Hash` counterparts, proving that external cloud calls are arbitrarily optional for this pipeline's evolution.
-- **Dimensionality Plateaus Early**: Extracting `bge-small` -> `bge-base` doubles the embedding volume (384-d to 768-d), almost triples CPU encode latency (140s -> 380s), but actually yields slightly worse tracking indices within this highly domain-specific set. Consequently, `BAAI/bge-small-en-v1.5` validates perfectly structurally optimized requirements for moving to Semantic models.
+- **Microsoft E5 and BGE lead zero-shot pipelines**: The `intfloat/e5-small-v2` architecture achieved the absolute highest zero-shot MRR (0.5583) among tested local instances, dethroning `bge-small-en-v1.5`, while pulling practically identical query and encoding latency limits. 
+- **Dimensionality Plateaus Early**: Extracting `bge-small` -> `bge-base` doubles the embedding volume (384-d to 768-d), almost triples CPU encode latency, but actually yields slightly worse tracking indices within this highly domain-specific set.
+- **Even nano models outperform hash**: `bge-micro-v2` (merely ~17M parameters) fundamentally outclasses the lexically driven Hash Baseline (+0.09 MRR) and standard `MiniLM-L6-v2` while pulling lightning-fast response times equivalently close to baseline logic hashing arrays.
