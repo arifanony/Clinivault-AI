@@ -14,11 +14,21 @@ from clinivault_ai.embedding.errors import EmbeddingError
 class HFEmbeddingProvider:
     """Semantic embeddings via Hugging Face sentence-transformers (evaluation-only)."""
 
-    def __init__(self, model_name: str, device: str = "cpu"):
+    def __init__(self, model_name: str, device: str = "cpu",
+                 query_prefix: str = "", passage_prefix: str = ""):
         if not model_name:
             raise ValueError("model_name must be provided")
         self.name = model_name
         self.device = device
+        # E5-style input prefixes (evaluation-only normalization).
+        # Defaults preserve the historical raw-input behavior exactly.
+        if not isinstance(query_prefix, str) or not isinstance(passage_prefix, str):
+            raise ValueError("query_prefix and passage_prefix must be strings")
+        self.query_prefix = query_prefix
+        self.passage_prefix = passage_prefix
+        self.input_formatting = (
+            "e5-query-passage" if (query_prefix or passage_prefix) else "raw"
+        )
         
         try:
             from sentence_transformers import SentenceTransformer
@@ -38,13 +48,16 @@ class HFEmbeddingProvider:
             "device": self.device,
             "dimension": self.dimension,
             "external": False,
+            "input_formatting": self.input_formatting,
+            "query_prefix": self.query_prefix,
+            "passage_prefix": self.passage_prefix,
         }
 
     def embed_texts(self, texts: list[str]) -> list[list[float]]:
-        return self._embed(texts)
+        return self._embed([f"{self.passage_prefix}{t}" for t in texts])
 
     def embed_query(self, query: str) -> list[float]:
-        return self._embed([query])[0]
+        return self._embed([f"{self.query_prefix}{query}"])[0]
 
     def _embed(self, texts: list[str]) -> list[list[float]]:
         for text in texts:

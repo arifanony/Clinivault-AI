@@ -88,6 +88,98 @@ class TermWeightedProviderTests(unittest.TestCase):
         self.assertGreater(p._weight("glucose"), p._weight("the"))
 
 
+class HFInputFormattingTests(unittest.TestCase):
+    """EVAL-HF-003: optional E5 query/passage prefixes, offline only.
+
+    No model is loaded here (constructor requires sentence-transformers);
+    these tests cover the pure prefix/formatting surface.
+    """
+
+    def test_defaults_preserve_raw_behavior(self):
+        import inspect
+
+        from clinivault_ai.evaluation import hf_semantic
+
+        sig = inspect.signature(hf_semantic.HFEmbeddingProvider.__init__)
+        self.assertEqual(sig.parameters["query_prefix"].default, "")
+        self.assertEqual(sig.parameters["passage_prefix"].default, "")
+
+    def test_prefix_attributes_recorded_in_params(self):
+        from clinivault_ai.evaluation import hf_semantic
+
+        provider = hf_semantic.HFEmbeddingProvider.__new__(
+            hf_semantic.HFEmbeddingProvider
+        )
+        provider.name = "intfloat/e5-small-v2"
+        provider.device = "cpu"
+        provider.dimension = 384
+        provider.query_prefix = "query: "
+        provider.passage_prefix = "passage: "
+        provider.input_formatting = "e5-query-passage"
+        params = hf_semantic.HFEmbeddingProvider.provider_params(provider)
+        self.assertEqual(params["input_formatting"], "e5-query-passage")
+        self.assertEqual(params["query_prefix"], "query: ")
+        self.assertEqual(params["passage_prefix"], "passage: ")
+        self.assertEqual(params["model"], "intfloat/e5-small-v2")
+
+    @staticmethod
+    def _bare_provider(query_prefix="", passage_prefix=""):
+        """Provider instance without loading a model (fully offline)."""
+        from clinivault_ai.evaluation import hf_semantic
+
+        provider = hf_semantic.HFEmbeddingProvider.__new__(
+            hf_semantic.HFEmbeddingProvider
+        )
+        provider.name = "intfloat/e5-small-v2"
+        provider.device = "cpu"
+        provider.dimension = 384
+        provider.query_prefix = query_prefix
+        provider.passage_prefix = passage_prefix
+        provider.input_formatting = (
+            "e5-query-passage" if (query_prefix or passage_prefix) else "raw"
+        )
+        provider.seen = []
+
+        def _capture(texts):
+            provider.seen.append(list(texts))
+            return [[0.0] * 384 for _ in texts]
+
+        provider._embed = _capture
+        return provider
+
+    def test_real_constructor_rejects_non_string_prefixes(self):
+        from clinivault_ai.evaluation import hf_semantic
+
+        # Prefix validation runs before sentence-transformers is imported,
+        # so no model is loaded and no network access can occur.
+        with self.assertRaises(ValueError):
+            hf_semantic.HFEmbeddingProvider(
+                "intfloat/e5-small-v2", query_prefix=123
+            )
+        with self.assertRaises(ValueError):
+            hf_semantic.HFEmbeddingProvider(
+                "intfloat/e5-small-v2", passage_prefix=None
+            )
+
+    def test_raw_formatting_leaves_inputs_unprefixed(self):
+        provider = self._bare_provider()
+        provider.embed_texts(["chunk text"])
+        provider.embed_query("a query")
+        self.assertEqual(provider.seen[0], ["chunk text"])
+        self.assertEqual(provider.seen[1], ["a query"])
+        self.assertEqual(provider.provider_params()["input_formatting"], "raw")
+
+    def test_e5_prefixes_applied_to_passages_and_query(self):
+        provider = self._bare_provider("query: ", "passage: ")
+        provider.embed_texts(["chunk text"])
+        provider.embed_query("a query")
+        self.assertEqual(provider.seen[0], ["passage: chunk text"])
+        self.assertEqual(provider.seen[1], ["query: a query"])
+        self.assertEqual(
+            provider.provider_params()["input_formatting"], "e5-query-passage"
+        )
+
+
 class ComparisonRunnerTests(unittest.TestCase):
     """Runner behavior with a fake provider over the frozen cases."""
 
