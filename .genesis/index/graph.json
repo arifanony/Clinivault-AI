@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
   "project": "Clinivault AI",
-  "revision": "cc434a87144917206f7cbc56d6514c42794b5cdb",
-  "sourceHash": "6adf26b71cac98d3492ce6de6fb59d15b9f315fe604a264d664bc3a0d2f52683",
+  "revision": "ac5d6e8d9ee6e99af718ccbf1ab8ff27f4a32946",
+  "sourceHash": "b9eb3e53ed3719e0d3ef4200d85e674fe81bebaaf7e432a50176a508bd3519ca",
   "provenance": {
     "tool": "genesis-graphizer",
     "method": "static-analysis",
@@ -157,7 +157,7 @@
       "language": "python",
       "confidence": 1,
       "extractor": "filesystem",
-      "contentHash": "81c8e8e1eee3c822fde4cd325d6afe252f8a723e095a2b0bd2286ffe7289ebce"
+      "contentHash": "8b97f1242e78b8c48875908a21314c378e25e0d381485daaae56ef22251cbf59"
     },
     {
       "id": "file:src/clinivault_ai/evaluation/comparison.py",
@@ -168,6 +168,16 @@
       "confidence": 1,
       "extractor": "filesystem",
       "contentHash": "e5d29573de1c46bd5126ea169dcc5bf8e98332306fedcb457030e9271ddfcf47"
+    },
+    {
+      "id": "file:src/clinivault_ai/evaluation/hf_semantic.py",
+      "type": "file",
+      "label": "src/clinivault_ai/evaluation/hf_semantic.py",
+      "path": "src/clinivault_ai/evaluation/hf_semantic.py",
+      "language": "python",
+      "confidence": 1,
+      "extractor": "filesystem",
+      "contentHash": "dac1c86e87413d4ca2f32d4d3c8770447da5b2aaf9b9dc48d0d55a12f31d4dd8"
     },
     {
       "id": "file:src/clinivault_ai/evaluation/metrics.py",

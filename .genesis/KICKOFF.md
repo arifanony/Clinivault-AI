@@ -4,12 +4,10 @@
 
 - objective: Build a production-oriented, evidence-grounded Healthcare RAG system for Type 2 Diabetes, validated through reproducible evaluation and incremental evidence-driven engineering.
 - phase/status: build/active
-- active task: EVAL-EXPAND-001 — Expand the labeled retrieval benchmark with a materially broader, evidence-backed evaluation set and rerun the frozen baseline without changing the retrieval system.
+- active task: none
 - blocker: none
-- next action: Run the task pre-flight.
+- next action: Requires human authorization for next technical unit
 - phase instruction: Work only on the active bounded task. Check `genesis query . impact PATH` before editing shared code.
-- gates: tests:pending, benchmark:pending
-- recent failures: none
 
 ## Resume
 
@@ -17,7 +15,7 @@ Load Genesis and official Ponytail full, then run `genesis brief .` for the curr
 Fetch full records with `genesis context . --id ID` only when needed. Do not load project.json or historical proof wholesale.
 Ask the index before reading code: `genesis query . search|scope|callers|callees|impact|path` (`--json` for parsing). Run `genesis query . impact PATH` before editing shared code. Answers are advisory static analysis; `ambiguous` means candidates were not ruled out, so confirm in source.
 Run `genesis serve .` for a live map of the repository when structure is unclear; it reindexes on save and is read-only. Run `genesis index .` if the index is stale and nothing is watching.
-Context fingerprint: 277347f5f66eaf585376a49bf22cb51e879aa0e95e03d0bfc509b79fb1562f78. Use --since only after receiving that full packet; kickoff is not the packet.
+Context fingerprint: b8e15ef0ce0cb2494a8ee7c33b065c64a1c5dec9d890b9c3009dab0c0ed44991. Use --since only after receiving that full packet; kickoff is not the packet.
 - DECISION-1fda3d59: Genesis workflow adoption (DECISION-013)
 Applicable invariants, active rules, authorization and proof references are in the packet. Truncated summaries are retrieval pointers, not the full evidence.
 Reuse fresh gates with --reuse. Reconcile interrupted attempts before replaying commands. Report state → evidence → blocker → next action; checkpoint before stopping.
