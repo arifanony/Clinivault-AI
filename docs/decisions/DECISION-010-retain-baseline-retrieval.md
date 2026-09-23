@@ -2,7 +2,10 @@
 
 ## Status
 
-Chosen
+Replaced by [DECISION-016](./DECISION-016-retrieval-representation.md) on
+2026-09-23 after the frozen benchmark expanded to 46 cases and the local
+semantic-model evaluation completed. This record remains the historical
+decision for the earlier 21-case comparison.
 
 ## Date
 
