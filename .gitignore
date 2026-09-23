@@ -10,3 +10,8 @@ wheels/
 .venv
 .agents/
 .clinerules/
+
+# Local secrets (never commit)
+.env
+.env.*
+!.env.example
