@@ -1,0 +1,30 @@
+{
+  "task": "ARTIFACT-DURABILITY-001",
+  "gate": "tests",
+  "kind": "command",
+  "attempt": "c2bfe68d-64fe-4005-a9d3-ea637357d105",
+  "command": "python -m unittest discover -s tests",
+  "started_at": "2026-09-23T16:21:40.108Z",
+  "observed_at": "2026-09-23T16:21:44.772Z",
+  "exit_code": 0,
+  "signal": null,
+  "stdout": "",
+  "stderr": "..................................................................................................................................................................................................................\r\n----------------------------------------------------------------------\r\nRan 210 tests in 0.825s\r\n\r\nOK\r\n",
+  "failure": null,
+  "receipt": null,
+  "revision": {
+    "commit": "f3ccd1b4c28685b408a651cc81d0e543595702b9",
+    "dirty": true
+  },
+  "source_hash": "d0858b2469ad5919eb6aa8fd0222d0389ca9722fbeaa82662a1f479d53ce449f",
+  "before_hash": "d0858b2469ad5919eb6aa8fd0222d0389ca9722fbeaa82662a1f479d53ce449f",
+  "config_hash": "0547be6c1709b0b7060e281638cda5278eb3e1e3b535a81daf8d0a2d94785c7e",
+  "environment": {
+    "node": "v24.19.0",
+    "platform": "win32",
+    "arch": "x64",
+    "verifier": "358371454f03eb4fdfd3eda3cb1d18cb1dd8fe9445404bb3d3047267b3977eb9",
+    "variables": {}
+  },
+  "hash": "10b62fe75a22f68a0f87d09e3889dc97fb01787f8de10ffa12e10da782679f9d"
+}
