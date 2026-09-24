@@ -313,6 +313,16 @@ real in-browser case inspection of all five representative queries
 user to run manually via `python -m clinivault_ai.ui`. The deterministic
 data-level evidence (retrieval ranks/scores/text, selected flags, context
 membership) is verified above and by the automated tests.
+
+**Later manual run (user-captured).** The user subsequently ran the UI in a
+real browser for the query "criteria for the diagnosis of diabetes" (Top-K 5,
+user-supplied Gemini key) and captured six screenshots, stored at
+[`evidence-observability-ui-manual-run/`](./evidence-observability-ui-manual-run/)
+(`Testcase11.png` … `Testcase16.png`; moved from the repository-root `TESTIMG/`
+folder on 2026-09-24). They show the run completing and a generated answer whose
+inline citations use the `(EVIDENCE_ITEM_RANK: n, <document_id>, p<page>, c<chunk>)`
+form. These are human-captured evidence of one case, not an automated check.
+
 ## Limitations
 
 - Debug console only: no authentication, no persistence, no run history.

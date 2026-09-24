@@ -1,7 +1,7 @@
 # DECISION-014: Expand Retrieval Evaluation Benchmark from 21 to 46 Evidence-Backed Cases
 
 - **Date:** 2026-09-21
-- **Status:** Accepted
+- **Status:** Chosen
 - **Decided by:** TASK EVAL-EXPAND-001 authorized under Genesis control state and local agent operating contract.
 
 ## Decision

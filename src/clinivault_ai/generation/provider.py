@@ -82,8 +82,13 @@ def _coerce_usage(value: Any) -> dict[str, Any]:
     return {"raw": value}
 
 
-def _post_json(url: str, payload: dict[str, Any], timeout: float) -> dict[str, Any]:
+def _post_json(
+    url: str, payload: dict[str, Any], timeout: float, *, api_key: str
+) -> dict[str, Any]:
     """POST JSON to *url* and return the parsed JSON body.
+
+    The API key travels only in the ``x-goog-api-key`` request header so it
+    never appears in URLs, proxy logs, or error messages.
 
     Raises:
         GenerationError (via _raise_generation_error) on HTTP errors.
@@ -96,6 +101,7 @@ def _post_json(url: str, payload: dict[str, Any], timeout: float) -> dict[str, A
         headers={
             "Content-Type": "application/json",
             "User-Agent": "ClinivaultAI/0.1 (baseline-generation)",
+            "x-goog-api-key": api_key,
         },
         method="POST",
     )
@@ -211,7 +217,6 @@ class GeminiProvider:
         api_key = self._api_key or _env_api_key()
         url = (
             f"{API_ROOT}{GENERATE_CONTENT_PATH.format(model=urllib.parse.quote(self.model, safe=''))}"
-            f"?key={urllib.parse.quote(api_key, safe='')}"
         )
 
         payload = {
@@ -224,5 +229,5 @@ class GeminiProvider:
             ],
         }
 
-        response = _post_json(url, payload, t)
+        response = _post_json(url, payload, t, api_key=api_key)
         return _parse_generate_content_response(response, self.model)

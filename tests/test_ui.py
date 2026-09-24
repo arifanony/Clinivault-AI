@@ -211,8 +211,9 @@ class ByokRequestTests(unittest.TestCase):
 
         captured = {}
 
-        def fake_post(url, payload, timeout):
+        def fake_post(url, payload, timeout, *, api_key):
             captured["url"] = url
+            captured["api_key"] = api_key
             return {"text": "hello", "usage": {}}
 
         os.environ["GOOGLE_API_KEY"] = "ENV-KEY"
@@ -220,7 +221,8 @@ class ByokRequestTests(unittest.TestCase):
             with patch("clinivault_ai.generation.provider._post_json", side_effect=fake_post):
                 out = GeminiProvider(api_key="REQ-KEY").generate("hi")
             self.assertEqual(out["text"], "hello")
-            self.assertIn("REQ-KEY", captured["url"])
+            self.assertEqual(captured["api_key"], "REQ-KEY")
+            self.assertNotIn("REQ-KEY", captured["url"])
             self.assertNotIn("ENV-KEY", captured["url"])
         finally:
             del os.environ["GOOGLE_API_KEY"]
@@ -233,8 +235,9 @@ class ByokRequestTests(unittest.TestCase):
 
         captured = {}
 
-        def fake_post(url, payload, timeout):
+        def fake_post(url, payload, timeout, *, api_key):
             captured["url"] = url
+            captured["api_key"] = api_key
             return {"text": "hello", "usage": {}}
 
         os.environ["GOOGLE_API_KEY"] = "ENV-KEY"
@@ -242,7 +245,8 @@ class ByokRequestTests(unittest.TestCase):
             with patch("clinivault_ai.generation.provider._post_json", side_effect=fake_post):
                 out = GeminiProvider().generate("hi")
             self.assertEqual(out["text"], "hello")
-            self.assertIn("ENV-KEY", captured["url"])
+            self.assertEqual(captured["api_key"], "ENV-KEY")
+            self.assertNotIn("ENV-KEY", captured["url"])
         finally:
             del os.environ["GOOGLE_API_KEY"]
 

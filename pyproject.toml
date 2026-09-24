@@ -1,7 +1,7 @@
 [project]
 name = "clinivault-ai"
 version = "0.1.0"
-description = "Add your description here"
+description = "Evidence-grounded clinical knowledge system (Type 2 Diabetes RAG) with traceable provenance"
 readme = "README.md"
 authors = [
     { name = "arifanony", email = "arifhuss33@gmail.com" }
@@ -14,6 +14,14 @@ dependencies = [
 
 [project.scripts]
 clinivault-ai = "clinivault_ai:main"
+
+[project.optional-dependencies]
+semantic = [
+    "sentence-transformers>=5",
+]
+eval = [
+    "sentence-transformers>=5",
+]
 
 [build-system]
 requires = ["uv_build>=0.12.9,<0.13.0"]

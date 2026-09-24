@@ -1,7 +1,9 @@
 # Pipelines
 
-Status: ingestion parsing implemented for the first document (T2D-001) —
-see [`ingestion-parsing.md`](./ingestion-parsing.md); baseline structural
+Status: ingestion parsing implemented and applied to all nine obtained
+Stage-1 documents — see [`ingestion-parsing.md`](./ingestion-parsing.md);
+baseline grounded generation implemented — see
+[`generation-baseline.md`](./generation-baseline.md); baseline structural
 chunking and baseline embedding generation implemented — see
 [`embedding-baseline.md`](./embedding-baseline.md); baseline vector
 storage and similarity retrieval implemented — see
@@ -37,12 +39,8 @@ docs are created as pipelines are actually built, using
 
 Planned documents (each written when that pipeline exists, not before):
 
-- ingestion (this one gets extra detail — every block explained: why it
-  exists, input, output, alternatives, failure modes, validation, evidence)
-- parsing
 - cleaning and normalization
 - metadata creation
-- generation
 - citations
 - execution recording
 

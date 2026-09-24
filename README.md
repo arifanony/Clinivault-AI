@@ -24,22 +24,55 @@ The reasoning is documented in
 
 ## Current Status
 
-Early-stage MVP development:
+Early-stage MVP development (status as of 2026-09-24):
 
-- **Done:** the Stage 1 clean baseline corpus (nine documents) is acquired and
-  validated; the full baseline pipeline is implemented, tested, and verified
-  end-to-end on the first corpus document (T2D-001): ingestion with
-  column-aware reading order, structural chunking (107 validated chunks),
-  baseline embedding generation, in-memory vector storage with cosine
-  top-k retrieval, and context construction into inspectable evidence
-  bundles. Foundational architecture recorded in DECISION-001.
-- **In progress:** next milestone steps (generation/evaluation) are not yet
-  started; the semantic embedding model remains an open, undecided decision.
-- **Not yet built:** generation (LLM/provider, prompts, answers), abstention,
-  retrieval evaluation, multi-document corpus ingestion (pipeline contracts
-  support it; only T2D-001 is ingested), and deployment infrastructure.
+- **Done:** the Stage 1 clean baseline corpus (nine obtained documents;
+  T2D-004 is blocked-access) is acquired, validated, parsed, chunked, and
+  embedded, with durable artifacts under `data/` (DECISION-008). The full
+  baseline pipeline runs end to end: ingestion with column-aware reading
+  order, structural chunking, embedding through a provider seam, in-memory
+  cosine top-k retrieval, context construction into inspectable evidence
+  bundles, grounded generation with Gemini `gemini-2.5-flash`
+  (DECISION-007, DECISION-011), end-to-end traces, and a local
+  observability UI. A frozen 46-case retrieval benchmark (DECISION-014)
+  and a local embedding-model screen (DECISION-015) led to
+  DECISION-016: local semantic retrieval with raw `intfloat/e5-small-v2`.
+- **In progress:** integrating DECISION-016 into production retrieval,
+  then corpus-wide retrieval, richer metadata, persisted execution
+  records, and answer-reliability checks (see the roadmap in
+  [docs/architecture/README.md](./docs/architecture/README.md)).
+- **Not yet built:** citation validation, abstention beyond "no evidence",
+  a production API, containerization, CI, and deployment infrastructure.
 - Architecture documentation is written as components actually take shape,
   not before — see [docs/architecture/](./docs/architecture/README.md).
+
+## Local setup
+
+Requires Python 3.14 and [uv](https://docs.astral.sh/uv/).
+
+```text
+uv sync
+copy .env.example .env
+```
+
+Then put a Gemini Developer API key in `.env` as `GOOGLE_API_KEY`. The
+file is git-ignored. The observability UI can also take a per-request key;
+the provider sends it in the `x-goog-api-key` header, never in the URL.
+
+Optional local-model extra (evaluation today; production integration is
+the next unit):
+
+```text
+uv sync --extra semantic
+```
+
+`--extra eval` is an alias for the same dependency.
+
+The test gate is `python -m unittest discover -s tests` (from the
+uv-managed environment). Genesis (`genesis brief .`) is the workflow
+control layer. It is not a Python dependency: install Node.js >= 18, then
+the official [genesis-kit](https://github.com/ayush488-glitch/genesis-kit)
+CLI. Do not edit `.genesis/project.json` by hand.
 
 ## Documentation
 

@@ -360,5 +360,39 @@ class GenerationTraceTests(unittest.TestCase):
         self.assertNotIn("provider_called", result)
 
 
+class GeminiRequestShapeTests(unittest.TestCase):
+    """The API key must travel in a header, never in the request URL."""
+
+    def test_api_key_sent_in_header_not_url(self):
+        import io
+        import json
+        from unittest.mock import patch
+
+        from clinivault_ai.generation.provider import GeminiProvider
+
+        captured = {}
+
+        class FakeResponse(io.BytesIO):
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                return False
+
+        def fake_urlopen(req, timeout):
+            captured["url"] = req.full_url
+            captured["headers"] = {k.lower(): v for k, v in req.header_items()}
+            body = {"candidates": [{"content": {"parts": [{"text": "ok"}]}}]}
+            return FakeResponse(json.dumps(body).encode("utf-8"))
+
+        with patch("urllib.request.urlopen", side_effect=fake_urlopen):
+            out = GeminiProvider(api_key="SECRET-KEY").generate("hi")
+
+        self.assertEqual(out["text"], "ok")
+        self.assertNotIn("SECRET-KEY", captured["url"])
+        self.assertNotIn("key=", captured["url"])
+        self.assertEqual(captured["headers"]["x-goog-api-key"], "SECRET-KEY")
+
+
 if __name__ == "__main__":
     unittest.main()

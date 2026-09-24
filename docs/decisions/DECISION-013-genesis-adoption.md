@@ -1,7 +1,7 @@
 # DECISION-013: Adopt Genesis as the Repository-Native Workflow/Control Layer
 
 - **Date:** 2026-09-19
-- **Status:** Accepted
+- **Status:** Chosen
 - **Decided by:** Human approval in the active engineering conversation (this unit's approval is the human's explicit approval of the read-only discovery report; no earlier approval exists).
 
 ## Decision
@@ -64,7 +64,7 @@ Genesis is the smallest existing mechanism that mechanically closes the control-
 - `docs/decisions/DECISION-008-artifact-storage-contract.md` (security/artifact rules Genesis must honor)
 - `docs/decisions/DECISION-012-rotated-text-exclusion.md` (the last completed technical remediation unit was a parser fix — parser remediation is the precise prerequisite of this adoption: the active-control-state gap is exactly what made that audit/freeze coordination expensive)
 - `docs/templates/decision-template.md`
-- Genesis official skills: `skills/genesis/SKILL.md`, `skills/ponytail/SKILL.md` (genesis-kit v2.4.0)
+- Genesis official skills: `skills/genesis/SKILL.md`, `skills/ponytail/SKILL.md` (paths inside the genesis-kit v2.4.0 repository; they are not vendored into this repository)
 
 ## Related commits
 

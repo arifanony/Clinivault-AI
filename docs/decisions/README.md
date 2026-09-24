@@ -15,13 +15,13 @@ never rewritten — if it changes, mark it Replaced and write a new document.
 
 | # | Decision | Status | Date |
 |---|---|---|---|
+| [DECISION-001](./DECISION-001-repository-architecture.md) | Repository architecture: layered stages, plain-dict contracts, fail-loud errors, seams only where replaceability is justified | Chosen (retroactively documented) | 2026-09-13 |
 | [DECISION-002](./DECISION-002-python-version.md) | Python version: 3.14 (project runtime contract) | Chosen | 2026-09-08 |
 | [DECISION-003](./DECISION-003-product-direction.md) | Product direction: Type 2 Diabetes as the initial domain | Chosen | 2026-09-07 |
 | [DECISION-004](./DECISION-004-corpus-strategy.md) | Corpus strategy: question-driven T2D evidence (replacing the original general-corpus plan) | Chosen | 2026-09-07 |
 | [DECISION-005](./DECISION-005-initial-clinical-scope.md) | Initial MVP clinical scope: frozen T2D boundary (five question families, explicit out-of-scope list) | Chosen | 2026-09-08 |
 | [DECISION-006](./DECISION-006-pdf-parser.md) | PDF parser: pdfplumber for ingestion text extraction (pypdf for validation only; PyMuPDF rejected on licensing) | Chosen | 2026-09-08 |
 | [DECISION-007](./DECISION-007-generation-provider.md) | Baseline generation provider: Google Gemini `gemini-2.5-flash` (controlled provider bake-off; OpenRouter 429s, Groq unreachable) | Chosen | 2026-09-13 |
-| [DECISION-001](./DECISION-001-repository-architecture.md) | Repository architecture: layered stages, plain-dict contracts, fail-loud errors, seams only where replaceability is justified | Chosen (retroactively documented) | 2026-09-13 |
 | [DECISION-008](./DECISION-008-artifact-storage-contract.md) | Artifact storage: canonical `data/<stage>/<corpus-version>/<document-id>/` paths, durability = committed, regenerate (never patch) downstream artifacts when upstream changes | Chosen (retroactively documented; refined 2026-09-19) | 2026-09-16 |
 | [DECISION-009](./DECISION-009-retrieval-baseline-representation.md) | Baseline retrieval representation and configuration: hash bag-of-words embeddings, in-memory cosine index, explicit Top-K=5, fail-loud invariants | Chosen (retroactively documented) | 2026-09-13 → 2026-09-18 |
 | [DECISION-010](./DECISION-010-retain-baseline-retrieval.md) | Historical retention of the baseline retrieval representation after the 21-case controlled comparison | Replaced by DECISION-016 | 2026-09-18 |

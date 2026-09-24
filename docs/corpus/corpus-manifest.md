@@ -69,7 +69,7 @@ re-verification of structure and page count happens at ingestion time.
 | Version | 2021 final recommendation statement |
 | Date added | 2026-09-08 |
 | Acquisition date | 2026-09-08 |
-| Ingestion date | — (pending) |
+| Ingestion date | 2026-09-16 (current parsed artifact `extraction_timestamp_utc`; ingestion pipeline v0.1.0) |
 | License / reuse | U.S. government work — public domain (verify statement text on document at ingestion) |
 | Filename | `data/raw/stage-1-clean-baseline-corpus/T2D-002-uspstf-2021-prediabetes-t2d-screening.pdf` |
 | Pages | 8 |
@@ -102,7 +102,7 @@ re-verification of structure and page count happens at ingestion time.
 | Version | — |
 | Date added | 2026-09-08 |
 | Acquisition date | 2026-09-08 |
-| Ingestion date | — (pending) |
+| Ingestion date | 2026-09-15 (current parsed artifact `extraction_timestamp_utc`; ingestion pipeline v0.1.0) |
 | License / reuse | PLOS ONE — open access, CC BY (verify exact license statement on document at ingestion) |
 | Filename | `data/raw/stage-1-clean-baseline-corpus/T2D-003-kaur-2020-diagnostic-accuracy-sr-meta.pdf` |
 | Pages | 19 |
@@ -135,7 +135,7 @@ re-verification of structure and page count happens at ingestion time.
 | Version | — |
 | Date added | 2026-09-08 |
 | Acquisition date | 2026-09-08 |
-| Ingestion date | — (pending) |
+| Ingestion date | 2026-09-15 (current parsed artifact `extraction_timestamp_utc`; ingestion pipeline v0.1.0) |
 | License / reuse | Open-access full text via PMC (exact license terms to verify on document at ingestion) |
 | Filename | `data/raw/stage-1-clean-baseline-corpus/T2D-007-acp-2024-newer-pharmacologic-t2d.pdf` |
 | Pages | 19 |
@@ -168,7 +168,7 @@ re-verification of structure and page count happens at ingestion time.
 | Version | 2026 Standards of Care |
 | Date added | 2026-09-08 |
 | Acquisition date | 2026-09-08 |
-| Ingestion date | — (pending) |
+| Ingestion date | 2026-09-15 (current parsed artifact `extraction_timestamp_utc`; ingestion pipeline v0.1.0) |
 | License / reuse | © American Diabetes Association; free-to-read on the official site; reuse/processing terms to be confirmed at ingestion |
 | Filename | `data/raw/stage-1-clean-baseline-corpus/T2D-005-ada-2026-soc-06-glycemic-goals.pdf` (corrected from a `…goals.pdf.pdf` double extension during validation) |
 | Pages | 18 |
@@ -201,7 +201,7 @@ re-verification of structure and page count happens at ingestion time.
 | Version | 2026 Standards of Care |
 | Date added | 2026-09-08 |
 | Acquisition date | 2026-09-08 |
-| Ingestion date | — (pending) |
+| Ingestion date | 2026-09-15 (current parsed artifact `extraction_timestamp_utc`; ingestion pipeline v0.1.0) |
 | License / reuse | © American Diabetes Association; free-to-read on the official site; reuse/processing terms to be confirmed at ingestion |
 | Filename | `data/raw/stage-1-clean-baseline-corpus/T2D-006-ada-2026-soc-09-pharmacologic.pdf` |
 | Pages | 33 |
@@ -234,7 +234,7 @@ re-verification of structure and page count happens at ingestion time.
 | Version | 2026 Standards of Care |
 | Date added | 2026-09-08 |
 | Acquisition date | 2026-09-08 |
-| Ingestion date | — (pending) |
+| Ingestion date | 2026-09-15 (current parsed artifact `extraction_timestamp_utc`; ingestion pipeline v0.1.0) |
 | License / reuse | © American Diabetes Association; free-to-read on the official site; reuse/processing terms to be confirmed at ingestion |
 | Filename | `data/raw/stage-1-clean-baseline-corpus/T2D-009-ada-2026-soc-10-cardiovascular.pdf` |
 | Pages | 30 |
@@ -267,7 +267,7 @@ re-verification of structure and page count happens at ingestion time.
 | Version | 2026 Standards of Care |
 | Date added | 2026-09-08 |
 | Acquisition date | 2026-09-08 |
-| Ingestion date | — (pending) |
+| Ingestion date | 2026-09-18 (current parsed artifact `extraction_timestamp_utc`, after the T2D-010 parser remediation; ingestion pipeline v0.1.0) |
 | License / reuse | © American Diabetes Association; free-to-read on the official site; reuse/processing terms to be confirmed at ingestion |
 | Filename | `data/raw/stage-1-clean-baseline-corpus/T2D-010-ada-2026-soc-11-ckd.pdf` |
 | Pages | 15 |
@@ -300,7 +300,7 @@ re-verification of structure and page count happens at ingestion time.
 | Version | 2026 Standards of Care |
 | Date added | 2026-09-08 |
 | Acquisition date | 2026-09-08 (re-acquisition) |
-| Ingestion date | 2026-09-08 (parsed; ingestion pipeline v0.1.0) |
+| Ingestion date | 2026-09-08 (first parse); current parsed artifact `extraction_timestamp_utc` is 2026-09-10 (ingestion pipeline v0.1.0) |
 | License / reuse | © American Diabetes Association; free-to-read on the official site; reuse/processing terms to be confirmed at ingestion |
 | Filename | `data/raw/stage-1-clean-baseline-corpus/T2D-001-ada-2026-soc-02-diagnosis-classification.pdf` |
 | Pages | 23 |
@@ -310,7 +310,7 @@ re-verification of structure and page count happens at ingestion time.
 | Reason for inclusion | Primary guideline source for diagnosis/classification questions (curated input, family 1: diagnosis and classification) |
 | SHA-256 | 97D8CC13CD7356BE84B148A9FFF47C6E115131B9657DD0A746A834F2C70017B8 |
 | Acquisition status | obtained (re-acquired canonical copy) |
-| Provenance note | The first validated copy of this document was lost in a file-handling incident during the 2026-09-08 correction (duplicate-content mix-up followed by an accidental deletion; see engineering log [`2026-09-08-duplicate-file-content-mismatch.md`](../../engineering-log/2026-09-08-duplicate-file-content-mismatch.md)). This record describes the re-acquired canonical copy, manually downloaded from the official ADA route and verified (real PDF, opens, 37 pages, SHA-256 above) before acceptance. Its byte stream differs from the lost copy despite identical document content and length — the earlier hash is retained only as historical incident information in the engineering log. |
+| Provenance note | The first validated copy of this document was lost in a file-handling incident during the 2026-09-08 correction (duplicate-content mix-up followed by an accidental deletion; see engineering log [`2026-09-08-duplicate-file-content-mismatch.md`](../engineering-log/2026-09-08-duplicate-file-content-mismatch.md)). This record describes the re-acquired canonical copy, manually downloaded from the official ADA route and verified (real PDF, opens, SHA-256 above) before acceptance. An earlier revision of this note said "37 pages"; a pypdf re-check on 2026-09-24 confirmed the file has 23 pages, matching the Pages field and the parsed artifact. Its byte stream differs from the lost copy despite identical document content and length — the earlier hash is retained only as historical incident information in the engineering log. |
 
 
 
@@ -351,7 +351,7 @@ re-verification of structure and page count happens at ingestion time.
 | Version | — |
 | Date added | 2026-09-08 |
 | Acquisition date | 2026-09-08 |
-| Ingestion date | — (pending) |
+| Ingestion date | 2026-09-15 (current parsed artifact `extraction_timestamp_utc`; ingestion pipeline v0.1.0) |
 | License / reuse | Likely open access (BMJ research); exact license terms to verify on document at ingestion |
 | Filename | `data/raw/stage-1-clean-baseline-corpus/T2D-008-nong-2025-t2d-medications-living-nma.pdf` |
 | Pages | 16 |

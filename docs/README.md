@@ -119,4 +119,8 @@ Documentation evolves alongside the code, not after it.
 
 Errata is a separate product — an external evaluation harness. This repository
 produces structured evidence (execution records, ingestion records) that Errata
-can consume later. No evaluation logic lives here.
+can consume later. No Errata logic lives here. The in-repo
+`clinivault_ai.evaluation` package is Clinivault's own engineering measurement
+(the frozen retrieval benchmark and controlled comparisons that gate decisions
+such as DECISION-016); it is not an evaluation product and is not a substitute
+for Errata.

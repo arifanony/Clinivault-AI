@@ -1,6 +1,6 @@
 # DECISION-012: Exclude Rotated (Non-Upright) Text from Reading-Order Extraction
 
-- **Status:** Accepted (2026-09-19)
+- **Status:** Chosen (2026-09-19)
 - **Scope:** `src/clinivault_ai/chunking/reader.py` (layout/reading-order layer only)
 - **Supersedes:** nothing; refines [DECISION-006](DECISION-006-pdf-parser.md)
 

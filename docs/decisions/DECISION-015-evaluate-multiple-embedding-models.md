@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Chosen
 
 ## Date
 
