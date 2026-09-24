@@ -1,0 +1,30 @@
+{
+  "task": "DOCS-HANDOFF-002",
+  "gate": "tests",
+  "kind": "command",
+  "attempt": "40dcf85d-2adc-448c-a0ee-d0adf3901a0d",
+  "command": "python -m unittest discover -s tests",
+  "started_at": "2026-09-24T18:25:49.606Z",
+  "observed_at": "2026-09-24T18:25:55.095Z",
+  "exit_code": 0,
+  "signal": null,
+  "stdout": "",
+  "stderr": ".......................................................................................................................................................................................................................\r\n----------------------------------------------------------------------\r\nRan 215 tests in 0.732s\r\n\r\nOK\r\n",
+  "failure": null,
+  "receipt": null,
+  "revision": {
+    "commit": "f955e23e66a01b2cbb6ff420a94879bded30186b",
+    "dirty": true
+  },
+  "source_hash": "8d2af0e1221c563d08ba2b47433813aaf0b15461414d96057fa22884d110ee5a",
+  "before_hash": "8d2af0e1221c563d08ba2b47433813aaf0b15461414d96057fa22884d110ee5a",
+  "config_hash": "8ca86ddb181abc6b4b88b90d86de363cfdc2b37f31d32c15dc22f785021e079e",
+  "environment": {
+    "node": "v24.19.0",
+    "platform": "win32",
+    "arch": "x64",
+    "verifier": "358371454f03eb4fdfd3eda3cb1d18cb1dd8fe9445404bb3d3047267b3977eb9",
+    "variables": {}
+  },
+  "hash": "3be8bbce076ee8cfb1038e1245f03f4baebf680e5064da00278f8f425b423c69"
+}
