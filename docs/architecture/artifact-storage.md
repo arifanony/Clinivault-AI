@@ -166,6 +166,17 @@ T2D-009, T2D-010:
 - `data/parsed/stage-1-clean-baseline-corpus/<DOC>/<DOC>.validation.json`
 - `data/embedded/stage-1-clean-baseline-corpus/<DOC>/<DOC>.embeddings.json`
 
+**Production E5 embeddings (DECISION-017, EVAL-HF durable tree).** Hash
+JSON under `data/embedded/` is unchanged. Production UI (T2D-001) and
+`benchmark --provider e5` read:
+
+- `data/embedded-intfloat--e5-small-v2/stage-1-clean-baseline-corpus/<DOC>/<DOC>.embeddings.json`
+
+These are 384-d vectors, `model.name` = `intfloat/e5-small-v2`,
+`input_formatting` = `raw`. Pair them only with `E5EmbeddingProvider`
+(query encoding uses `embed_texts`, no prefixes). Other EVAL-HF trees
+(`data/embedded-<org>--<model>/`) remain evaluation-only.
+
 **Known deviation (raw stage).** The canonical rule (§B) requires a
 per-document directory at every stage, but the raw PDFs above are stored flat as
 `<DOC>-<slug>.pdf` inside the corpus-version directory. This is recorded as a

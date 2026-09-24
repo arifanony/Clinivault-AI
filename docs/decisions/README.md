@@ -31,6 +31,7 @@ never rewritten — if it changes, mark it Replaced and write a new document.
 | [DECISION-014](./DECISION-014-benchmark-expansion.md) | Expand retrieval evaluation benchmark from 21 to 46 evidence-backed cases across all 9 corpus documents | Chosen | 2026-09-21 |
 | [DECISION-015](./DECISION-015-evaluate-multiple-embedding-models.md) | Evaluate Multiple Local Embedding Models before representation switch | Chosen | 2026-09-21 |
 | [DECISION-016](./DECISION-016-retrieval-representation.md) | Retrieval representation for the next integration phase: select local semantic retrieval, with raw `intfloat/e5-small-v2` as the leading candidate; no production change in this decision | Chosen | 2026-09-23 |
+| [DECISION-017](./DECISION-017-production-e5-retrieval.md) | Production retrieval representation: raw `intfloat/e5-small-v2`; hash retained as comparison baseline | Chosen | 2026-09-25 |
 
 
 
@@ -52,9 +53,8 @@ arrives, not before):
   retries/streaming, and any automatic grounding/citation measurement
 - persistence beyond committed artifacts, deployment/infrastructure
 
-Retrieval strategy is recorded as DECISION-009 (baseline configuration),
-DECISION-010 (historical 21-case retention outcome), and DECISION-016 (the
-46-case-supported local semantic direction for a future integration unit).
-Parser, embedding approach, generation provider, generation contract, and
-artifact storage are decided. We deliberately keep this list short and honest
-rather than pre-writing decisions we can't make yet.
+Retrieval strategy is recorded as DECISION-009 (baseline configuration:
+Top-K, cosine, fail-loud), DECISION-010 (historical 21-case retention),
+DECISION-016 (46-case local semantic *direction*), and DECISION-017
+(production implementation: raw `intfloat/e5-small-v2`). Hash remains the
+comparison baseline and the default of `generate_embeddings()`.

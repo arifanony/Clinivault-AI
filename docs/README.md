@@ -66,6 +66,7 @@ Two rules drive everything else:
 | `docs/corpus/` | Why each document is in the corpus, and how we choose documents |
 | `docs/engineering-log/` | Problems we hit that taught us something |
 | `docs/templates/` | The three templates used above |
+| `docs/handoff/` | Resume artifacts. Start at [CURRENT_HANDOFF.md](./handoff/CURRENT_HANDOFF.md) (M1 done; next = M2). Procedure: [M1–M7 implementation guide](./handoff/M1-M7-IMPLEMENTATION-GUIDE.md) |
 
 ## What Counts as a "Meaningful Decision"
 

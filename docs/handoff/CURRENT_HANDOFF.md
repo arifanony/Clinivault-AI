@@ -2,154 +2,112 @@
 
 > **Safe transition artifact.** This document contains no `.env` content, API
 > keys, tokens, passwords, credentials, or machine-specific secrets. Treat live
-> Git and Genesis commands as canonical when resuming; this handoff records the
-> verified state immediately before the handoff-document completion commit.
+> Git as canonical when resuming. Prefer this file plus
+> [M1-M7-IMPLEMENTATION-GUIDE.md](./M1-M7-IMPLEMENTATION-GUIDE.md) and
+> `git log -1`.
 
 ## Repository State
 
 - **Current project:** Clinivault AI
 - **Branch:** `master`
-- **Verified pre-handoff commit:**
-  `f955e23e66a01b2cbb6ff420a94879bded30186b`
-  (`docs: decide retrieval representation direction`)
-- **Verified pre-handoff remote synchronization:** `HEAD` equaled
-  `origin/master` at `f955e23e66a01b2cbb6ff420a94879bded30186b`.
-- **Working-tree state before this handoff task:** clean except for the
-  pre-existing untracked `.env.example` protected local file. Genesis task
-  activation generated the canonical `.genesis/` control-state changes for this
-  bounded documentation task.
-- **Intentionally ignored/protected local files:** `.env` is ignored; `.env.example`
-  is protected local state, untracked, and must not be staged, committed,
-  printed, copied, or deleted without explicit safe authorization. `.clinerules/`
-  is local-only and ignored.
-
-## Genesis State
-
-- **Pre-handoff `genesis status .`:** `verify/ready`, no active task, no
-  blocker.
-- **Pre-handoff `genesis brief .` summary:** the project objective is to build
-  a production-oriented, evidence-grounded Type 2 Diabetes healthcare RAG
-  system through reproducible, evidence-driven engineering. Genesis includes
-  the accepted DECISION-016 retrieval-representation record.
-- **DOCS-HANDOFF-001:** completed/terminal through the official Genesis CLI.
-  It created the handoff artifact and recorded a passing required test gate.
-- **Active task after this handoff's completion lifecycle:** none.
-- **Current phase/objective after completion:** `verify/ready`; the repository
-  is waiting for explicit human authorization of the next bounded technical
-  unit.
-- **Blocker:** none.
-- **Last completed bounded unit:** `DECISION-016-RETRIEVAL-REPRESENTATION`,
-  committed and pushed as `f955e23`.
-- **Ready for a new authorization:** yes, after this handoff correction is
-  committed and pushed. No new technical unit is authorized by this handoff.
+- **Last completed milestone:** **M1** — production raw `intfloat/e5-small-v2`
+  retrieval (DECISION-017).
+- **Verified commit:** the tip of `master` after the M1 handoff commit
+  (`feat: use raw e5-small-v2 as production retrieval embeddings`). After
+  `git pull`, confirm with `git log -1 --oneline`.
+- **Working-tree expectation after pull:** clean (no uncommitted M1 leftovers).
+- **Intentionally ignored/protected local files:** `.env` is ignored and must
+  never be staged or committed. Copy `.env.example` locally and set
+  `GOOGLE_API_KEY` only on the machine. Never print or paste keys.
 
 ## Last Completed Unit
 
-- **Unit/task:** `DECISION-016-RETRIEVAL-REPRESENTATION`
-- **What was completed:** an evidence-based retrieval-representation decision
-  after the frozen 46-case evaluations. DECISION-010 was marked Replaced as the
-  historical 21-case outcome. DECISION-016 selected local dense semantic
-  retrieval as the next separately authorized integration direction, with raw
-  `intfloat/e5-small-v2` as the leading local candidate. No production retrieval
-  implementation changed.
-- **Important files changed:**
-  - `docs/decisions/DECISION-016-retrieval-representation.md`
-  - `docs/decisions/DECISION-010-retain-baseline-retrieval.md`
-  - `docs/decisions/README.md`
-  - `docs/engineering-log/2026-09-23-retrieval-representation-decision.md`
-  - `docs/engineering-log/README.md`
-  - `docs/pipelines/retrieval-controlled-comparison.md`
-  - canonical Genesis control state and gate receipt under `.genesis/`
-- **Tests/gates run:** `python -m unittest discover -s tests`; 215 tests ran
-  and passed. Genesis recorded the task gate as passed. Markdown relative-link
-  validation and `git diff --check` also passed.
-- **Important measured results:**
-  - Baseline hash: Hit@1 12/46, Hit@5 26/46, MRR 0.3601.
-  - Raw E5-small: Hit@1 20/46, Hit@5 36/46, MRR 0.5583.
-  - E5 `query:`/`passage:` format: Hit@1 19/46, Hit@5 35/46, MRR 0.5486.
-  - Gemini semantic: Hit@1 21/46, Hit@5 42/46, MRR 0.6109.
-- **Relevant Decision Record:**
-  `docs/decisions/DECISION-016-retrieval-representation.md`
-- **Relevant Engineering Log:**
-  `docs/engineering-log/2026-09-23-retrieval-representation-decision.md`
-- **Relevant evaluation/report:**
-  `docs/pipelines/retrieval-controlled-comparison.md`,
-  `docs/engineering-log/2026-09-21-multi-model-embedding-eval.md`,
-  `docs/engineering-log/2026-09-22-eval-hf-002.md`, and
-  `docs/engineering-log/2026-09-23-eval-hf-003.md`.
+- **Unit/task:** M1 / `DECISION-017-PRODUCTION-E5-RETRIEVAL`
+- **What was completed:** production retrieval switched to raw
+  `intfloat/e5-small-v2` via `E5EmbeddingProvider`. UI T2D-001 defaults read
+  E5 artifacts. `benchmark --provider e5` reproduces the frozen scores. Hash
+  baseline remains available (`data/embedded/`, default benchmark = hash).
+- **Important files:**
+  - `docs/decisions/DECISION-017-production-e5-retrieval.md`
+  - `docs/engineering-log/2026-09-25-e5-production-integration.md`
+  - `docs/pipelines/embedding-e5.md`
+  - `docs/handoff/M1-M7-IMPLEMENTATION-GUIDE.md`
+  - `src/clinivault_ai/embedding/provider.py`
+  - `src/clinivault_ai/evaluation/benchmark.py`
+  - `src/clinivault_ai/ui/app.py`
+  - `tests/test_e5_provider.py`
+- **Tests/gates:**
+  - `.venv/Scripts/python -m unittest discover -s tests` — 224 tests OK
+    (skips allowed when semantic extra or HF cache missing)
+  - `.venv/Scripts/python -m clinivault_ai.evaluation.benchmark --provider e5`
+    — Hit@1 **20/46**, Hit@5 **36/46**, MRR **0.5583**
+- **Relevant Decision / Log / Pipeline:**
+  - `docs/decisions/DECISION-017-production-e5-retrieval.md`
+  - `docs/engineering-log/2026-09-25-e5-production-integration.md`
+  - `docs/pipelines/embedding-e5.md`
 
 ## Current Technical Understanding
 
 ### OBSERVED
 
-- On the frozen 46-case benchmark, the measured raw E5-small result exceeds the
-  baseline hash result on Hit@1, Hit@5, and MRR.
-- Gemini has the highest measured aggregate results listed above, but it is a
-  cloud/API-dependent provider.
-- E5 intended input prefixes did not improve the frozen benchmark relative to
-  the reproduced raw protocol; raw E5 vectors for T2D-001 matched the persisted
-  EVAL-HF-002 artifact byte-for-byte.
-- Current production retrieval remains the baseline hash representation. No
-  semantic integration was implemented by DECISION-016.
+- Production query embedding uses `embed_texts` with **no** `query:` /
+  `passage:` prefixes (same path as frozen EVAL-HF-003 raw winner).
+- E5 artifacts live under `data/embedded-intfloat--e5-small-v2/` (384-d).
+  Hash artifacts under `data/embedded/` (256-d) are untouched.
+- `E5EmbeddingProvider` uses `local_files_only=True`. Empty HF cache fails
+  loud; no silent hash fallback in the UI.
+- UI still indexes **T2D-001 only** and rebuilds the store per request.
 
 ### INFERENCE
 
-- Under the current MVP offline/cost constraint, local dense semantic retrieval
-  with raw E5-small is the most evidence-supported direction for a future,
-  separately authorized integration unit.
+- M2 (nine-doc index, load once at startup) is the next measured product gap.
 
 ### NOT YET VALIDATED
 
-- Statistical significance or universal superiority of raw E5-small over other
-  local models or E5 prefix formatting.
-- Production integration behavior, packaging/runtime cost, memory profile, and
-  retrieval behavior outside the frozen 46-case benchmark.
-- Any change to corpus, labels, Top-K, chunking, hybrid retrieval, reranking, or
-  vector storage.
+- End-to-end Gemini answers on the UI with E5 evidence (retrieval-only gate for M1).
+- Corpus-wide search across all nine Stage-1 docs.
+- Hybrid / rerank (M6) — defer unless a measured weakness appears after M1–M5.
 
 ## Next Authorized Action
 
-After the handoff completion lifecycle recorded by this document:
+**M2 only** — nine-document Stage-1 corpus index, load once at UI startup,
+`--provider e5|hash` (default e5). See
+[M1-M7-IMPLEMENTATION-GUIDE.md](./M1-M7-IMPLEMENTATION-GUIDE.md) §M2.
 
-**WAITING FOR EXPLICIT HUMAN AUTHORIZATION. DO NOT START A NEW TECHNICAL UNIT.**
+**Do not start M3–M7 in the same session.** One milestone, tests, docs,
+commit, stop.
 
-## Resume Procedure
-
-Before doing any work, run:
+## Resume Procedure (other device)
 
 ```text
+git pull
 git status --short
 git log -5 --oneline
-git rev-parse HEAD
-git rev-parse origin/master
-genesis status .
-genesis brief .
+uv sync
+uv sync --extra semantic
+copy .env.example .env
+# set GOOGLE_API_KEY in .env locally; never commit .env
+.venv\Scripts\python -m unittest discover -s tests
+# optional gate:
+.venv\Scripts\python -m clinivault_ai.evaluation.benchmark --provider e5
 ```
 
-Treat those command results as canonical. Confirm whether the handoff task has
-completed and whether `HEAD == origin/master`. Then read only the project
-documentation relevant to the active, explicitly authorized task before doing
-work; do not reconstruct unrelated repository history.
+If E5 load fails with missing model files, download once outside production
+code (explicit `SentenceTransformer('intfloat/e5-small-v2')` into the HF
+cache), then retry. Do not change `local_files_only=True`.
+
+Genesis CLI is optional; skip if Node/`genesis` is missing. **Never
+hand-edit** `.genesis/project.json`.
+
+Then open the M1–M7 guide and implement **M2 only**.
 
 ## Important Rules
 
-The next agent must:
-
-- obey Genesis and its active task, scope, gates, and blockers;
-- work on one bounded task at a time;
-- require explicit human authorization and an active Genesis task before a new
-  technical unit;
-- not silently expand scope or begin the next unit automatically;
-- use official Genesis CLI commands for task completion and checkpointing;
-- create Engineering Logs for meaningful failures, discoveries, investigations,
-  or changed understanding;
-- create Decision Records for actual engineering decisions;
-- never manually edit `.genesis/project.json`;
-- protect `.env` and `.env.example`, and never expose or commit secrets;
-- verify evidence before claiming success and distinguish OBSERVED, INFERENCE,
-  and NOT YET VALIDATED;
-- stop after the bounded task is complete; and
-- finish the Git/Genesis lifecycle: required gates, Genesis task completion,
-  Genesis checkpoint, Genesis status/brief verification, Git diff/status review,
-  staged-diff review and `git diff --check`, commit, push when intended for
-  sharing, and verification that `HEAD == origin/master`.
+- One milestone per session; stop after commit.
+- Do not expand into M3+ without a new authorization.
+- Protect `.env`; never commit secrets or put Gemini keys in URLs (`?key=`).
+  Use `x-goog-api-key` header only.
+- Distinguish OBSERVED / INFERENCE / NOT YET VALIDATED in engineering logs.
+- Test gate is **unittest**, not pytest. Default Python via `uv` (3.14+).
+- Never overwrite hash embedding JSON when touching E5 paths.
+- T2D-004 is blocked-access — do not invent a substitute PDF.

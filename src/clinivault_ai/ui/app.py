@@ -56,9 +56,18 @@ def create_trace_response(run_fn, query, top_k, api_key=None):
 
 
 def _load_t2d001_store(parsed_path, embeddings_path):
-    """Build the single-document store from existing baseline artifacts."""
+    """Build the single-document store from committed artifacts.
+
+    The query embedder must match the artifact model (DECISION-017). A
+    hash store with an E5 query (or the reverse) fails loud on dimension.
+    """
     from clinivault_ai.chunking import chunk_pages, default_config
-    from clinivault_ai.embedding import BaselineHashEmbeddingProvider
+    from clinivault_ai.embedding import (
+        BaselineHashEmbeddingProvider,
+        E5EmbeddingProvider,
+        E5_MODEL_NAME,
+        EmbeddingError,
+    )
     from clinivault_ai.retrieval.store import VectorStore
 
     with open(parsed_path, encoding="utf-8") as f:
@@ -66,7 +75,16 @@ def _load_t2d001_store(parsed_path, embeddings_path):
     with open(embeddings_path, encoding="utf-8") as f:
         artifact = json.load(f)
     chunk_output = chunk_pages(parsed, default_config())
-    embedder = BaselineHashEmbeddingProvider()
+    model_name = (artifact.get("model") or {}).get("name")
+    if model_name == E5_MODEL_NAME:
+        embedder = E5EmbeddingProvider()
+    elif model_name == BaselineHashEmbeddingProvider.name:
+        embedder = BaselineHashEmbeddingProvider()
+    else:
+        raise EmbeddingError(
+            f"unsupported embedding artifact model {model_name!r}; "
+            f"expected {E5_MODEL_NAME!r} or {BaselineHashEmbeddingProvider.name!r}"
+        )
     store = VectorStore.from_artifacts(artifact, chunk_output)
     return store, embedder
 
@@ -89,12 +107,13 @@ def make_run_fn(parsed_path, embeddings_path):
 
 
 def default_paths():
-    """Repository-relative baseline artifact paths (T2D-001)."""
+    """Repository-relative production (E5) artifact paths for T2D-001."""
     root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
     return (
         os.path.join(root, "data", "parsed", "stage-1-clean-baseline-corpus",
                      "T2D-001", "T2D-001.parsed.json"),
-        os.path.join(root, "data", "embedded", "stage-1-clean-baseline-corpus",
+        os.path.join(root, "data", "embedded-intfloat--e5-small-v2",
+                     "stage-1-clean-baseline-corpus",
                      "T2D-001", "T2D-001.embeddings.json"),
     )
 

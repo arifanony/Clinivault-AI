@@ -57,10 +57,10 @@ the current per-document artifact state.
 
 ## Deliberately replaceable
 
-- Embedding model (via the `EmbeddingProvider` seam; the current
-  `clinivault-baseline-hash-v1` is a deterministic contract baseline, NOT
-  a semantic model; DECISION-016 selects local raw `intfloat/e5-small-v2`
-  as the next integration target).
+- Embedding model (via the `EmbeddingProvider` seam; production retrieval
+  is raw `intfloat/e5-small-v2` per DECISION-017; `clinivault-baseline-hash-v1`
+  remains the deterministic contract baseline and comparison path, NOT a
+  semantic model).
 - Generation provider (via the `GenerationProvider` seam; baseline is
   Gemini `gemini-2.5-flash` per DECISION-007, behind the grounded
   generation contract of DECISION-011).

@@ -32,7 +32,9 @@ representative T2D-001 pipeline evaluation recorded — see
 retrieval comparison (baseline vs term-weighted vs semantic) run — see
 [`retrieval-controlled-comparison.md`](./retrieval-controlled-comparison.md);
 T2D-010 ingestion-quality isolation investigated — see
-[`t2d-010-ingestion-quality-investigation.md`](./t2d-010-ingestion-quality-investigation.md).
+[`t2d-010-ingestion-quality-investigation.md`](./t2d-010-ingestion-quality-investigation.md);
+production raw E5 retrieval (T2D-001 UI + selectable benchmark) — see
+[`embedding-e5.md`](./embedding-e5.md).
 Further pipeline
 docs are created as pipelines are actually built, using
 [`docs/templates/pipeline-doc-template.md`](../templates/pipeline-doc-template.md).

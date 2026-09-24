@@ -24,7 +24,7 @@ The reasoning is documented in
 
 ## Current Status
 
-Early-stage MVP development (status as of 2026-09-24):
+Early-stage MVP development (status as of 2026-09-25):
 
 - **Done:** the Stage 1 clean baseline corpus (nine obtained documents;
   T2D-004 is blocked-access) is acquired, validated, parsed, chunked, and
@@ -34,13 +34,14 @@ Early-stage MVP development (status as of 2026-09-24):
   cosine top-k retrieval, context construction into inspectable evidence
   bundles, grounded generation with Gemini `gemini-2.5-flash`
   (DECISION-007, DECISION-011), end-to-end traces, and a local
-  observability UI. A frozen 46-case retrieval benchmark (DECISION-014)
-  and a local embedding-model screen (DECISION-015) led to
-  DECISION-016: local semantic retrieval with raw `intfloat/e5-small-v2`.
-- **In progress:** integrating DECISION-016 into production retrieval,
-  then corpus-wide retrieval, richer metadata, persisted execution
-  records, and answer-reliability checks (see the roadmap in
-  [docs/architecture/README.md](./docs/architecture/README.md)).
+  observability UI. Production retrieval uses raw `intfloat/e5-small-v2`
+  (DECISION-017); the hash provider remains the `generate_embeddings()`
+  default and the `--provider hash` comparison baseline. The frozen
+  46-case benchmark reproduces E5 Hit@1 20/46, Hit@5 36/46, MRR 0.5583.
+- **In progress:** corpus-wide retrieval in the live UI, richer metadata,
+  persisted execution records, and answer-reliability checks (see the
+  roadmap in [docs/architecture/README.md](./docs/architecture/README.md)
+  and [docs/handoff/M1-M7-IMPLEMENTATION-GUIDE.md](./docs/handoff/M1-M7-IMPLEMENTATION-GUIDE.md)).
 - **Not yet built:** citation validation, abstention beyond "no evidence",
   a production API, containerization, CI, and deployment infrastructure.
 - Architecture documentation is written as components actually take shape,
@@ -59,14 +60,16 @@ Then put a Gemini Developer API key in `.env` as `GOOGLE_API_KEY`. The
 file is git-ignored. The observability UI can also take a per-request key;
 the provider sends it in the `x-goog-api-key` header, never in the URL.
 
-Optional local-model extra (evaluation today; production integration is
-the next unit):
+Optional local-model extra for production E5 retrieval and evaluation
+(requires Hugging Face cache for `intfloat/e5-small-v2`):
 
 ```text
 uv sync --extra semantic
 ```
 
-`--extra eval` is an alias for the same dependency.
+`--extra eval` is an alias for the same dependency. Also see
+[docs/handoff/CURRENT_HANDOFF.md](./docs/handoff/CURRENT_HANDOFF.md) for
+cross-device resume.
 
 The test gate is `python -m unittest discover -s tests` (from the
 uv-managed environment). Genesis (`genesis brief .`) is the workflow
@@ -86,3 +89,5 @@ The project's documentation starts here:
 | [Pipelines](./docs/pipelines/README.md) | How each pipeline works, block by block |
 | [Engineering log](./docs/engineering-log/README.md) | Problems we hit that taught us something |
 | [Architecture](./docs/architecture/README.md) | How the system fits together (written as it takes shape) |
+| [M1–M7 implementation guide](./docs/handoff/M1-M7-IMPLEMENTATION-GUIDE.md) | M1 done (raw E5 production retrieval); M2–M7 still one-milestone-at-a-time |
+| [Current handoff](./docs/handoff/CURRENT_HANDOFF.md) | Cross-device resume: M1 done, next = M2 only |

@@ -12,11 +12,11 @@ deterministic, dependency-free baseline provider:
   ``hashlib.blake2b`` (stable across runs and processes, unlike builtin
   ``hash()``), L2-normalized. NOT semantic: it exists to establish and
   test the contract end-to-end with zero dependencies, zero network, and
-  zero cost. Choosing a semantic model is a future decision (not this
-  unit).
+  zero cost. DECISION-017 selects raw ``intfloat/e5-small-v2`` as the
+  production retrieval representation; this hash provider remains the
+  default of ``generate_embeddings()`` and the comparison baseline.
 
-No embedding model/provider has been decided in the repository; the seam
-is what makes that future decision cheap.
+DECISION-017 implements that production choice behind this seam.
 """
 
 from __future__ import annotations
@@ -29,6 +29,9 @@ from typing import Protocol
 from clinivault_ai.embedding.errors import EmbeddingError
 
 DEFAULT_BASELINE_DIMENSION = 256
+E5_MODEL_NAME = "intfloat/e5-small-v2"
+E5_EXPECTED_DIMENSION = 384
+E5_INPUT_FORMATTING = "raw"
 
 _TOKEN_SPLIT = re.compile(r"\s+")
 
@@ -88,3 +91,67 @@ class BaselineHashEmbeddingProvider:
                 counts = [c / norm for c in counts]
             vectors.append(counts)
         return vectors
+
+
+class E5EmbeddingProvider:
+    """Production local dense provider: raw ``intfloat/e5-small-v2``.
+
+    Retrieval embeds queries with ``embed_texts([query])[0]`` (search.py),
+    so corpus and query paths must stay unprefixed (DECISION-016/017).
+    """
+
+    name = E5_MODEL_NAME
+
+    def __init__(self, *, device: str = "cpu", local_files_only: bool = True):
+        try:
+            from sentence_transformers import SentenceTransformer
+        except ImportError as exc:
+            raise EmbeddingError(
+                "sentence-transformers is not installed; "
+                "run `uv sync --extra semantic`"
+            ) from exc
+        try:
+            self.model = SentenceTransformer(
+                E5_MODEL_NAME,
+                device=device,
+                trust_remote_code=True,
+                local_files_only=local_files_only,
+            )
+        except Exception as exc:
+            raise EmbeddingError(
+                f"could not load local model {E5_MODEL_NAME!r} "
+                f"(local_files_only={local_files_only}): {exc}"
+            ) from exc
+        self.device = device
+        dim_fn = getattr(
+            self.model, "get_embedding_dimension",
+            self.model.get_sentence_embedding_dimension,
+        )
+        self.dimension = int(dim_fn())
+        if self.dimension != E5_EXPECTED_DIMENSION:
+            raise EmbeddingError(
+                f"{E5_MODEL_NAME} dimension {self.dimension} != "
+                f"{E5_EXPECTED_DIMENSION}"
+            )
+
+    def provider_params(self) -> dict:
+        return {
+            "method": "hf-sentence-transformers",
+            "model": E5_MODEL_NAME,
+            "device": self.device,
+            "dimension": self.dimension,
+            "external": False,
+            "input_formatting": E5_INPUT_FORMATTING,
+            "query_prefix": "",
+            "passage_prefix": "",
+        }
+
+    def embed_texts(self, texts: list[str]) -> list[list[float]]:
+        for text in texts:
+            if not isinstance(text, str) or not text.strip():
+                raise EmbeddingError("cannot embed empty or whitespace-only text")
+        import torch
+
+        with torch.no_grad():
+            embeddings = self.model.encode(texts, convert_to_numpy=True)
+        return [[float(v) for v in row] for row in embeddings]
