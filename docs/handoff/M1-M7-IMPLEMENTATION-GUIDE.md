@@ -27,8 +27,10 @@ and implement **M2 only** next.
 
 ### M1 (done — production raw E5)
 
-Start the next session from the commit that landed M1 (message begins
-`feat: use raw e5-small-v2…`). Confirm with `git log -1`.
+Start the next session from
+`5548cd833256d737aa5eb488441c4dd2a250c181`
+(`feat: use raw e5-small-v2 as production retrieval embeddings`).
+Confirm with `git log -1`.
 
 M1 includes:
 

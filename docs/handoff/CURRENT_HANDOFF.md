@@ -12,9 +12,10 @@
 - **Branch:** `master`
 - **Last completed milestone:** **M1** — production raw `intfloat/e5-small-v2`
   retrieval (DECISION-017).
-- **Verified commit:** the tip of `master` after the M1 handoff commit
-  (`feat: use raw e5-small-v2 as production retrieval embeddings`). After
-  `git pull`, confirm with `git log -1 --oneline`.
+- **Verified commit:**
+  `5548cd833256d737aa5eb488441c4dd2a250c181`
+  (`feat: use raw e5-small-v2 as production retrieval embeddings`).
+  After `git pull`, confirm with `git rev-parse HEAD` / `git log -1 --oneline`.
 - **Working-tree expectation after pull:** clean (no uncommitted M1 leftovers).
 - **Intentionally ignored/protected local files:** `.env` is ignored and must
   never be staged or committed. Copy `.env.example` locally and set
