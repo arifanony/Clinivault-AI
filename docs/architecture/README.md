@@ -1,6 +1,6 @@
 # Architecture
 
-Status: living snapshot (last reconciled 2026-09-24) — written as
+Status: living snapshot (last reconciled 2026-10-06) — written as
 components actually exist. Clinivault is still evolving; this is not a
 final architecture.
 
@@ -26,12 +26,12 @@ Clinical PDF
   -> chunking/validate.py     mechanical chunk-contract checks
   -> embedding/embedder.py    provider seam -> validated embedding records
   -> data/embedded/...json    {document_id, model, statistics, embeddings}
-  -> retrieval/store.py       in-memory cosine index (joined by chunk_id)
+  -> retrieval/store.py       in-memory cosine index, one doc or merged corpus (M2)
   -> retrieval/search.py      query embedding + deterministic top-k
   -> context/builder.py       inspectable evidence bundle
   -> generation/generator.py  grounded prompt + provider seam -> answer
   -> pipeline/__init__.py     run_query: retrieval -> context -> generation traces
-  -> ui/app.py                local observability console
+  -> ui/app.py                observability console; nine-doc index loaded once (M2)
 ```
 
 Stage contracts (all plain dicts, JSON-serializable):
@@ -83,8 +83,7 @@ and no Errata logic lives here.
 ## Not yet built
 
 Citation validation, abstention beyond the "no evidence" path, persisted
-per-query execution records, corpus-wide retrieval in the live UI,
-brief-level metadata (section, publication date, version), a production
-API, containerization, CI, and deployment/infrastructure. The ordered
-roadmap for these lives in the audit plan milestones M1–M7 and is tracked
-as Genesis tasks.
+per-query execution records, brief-level metadata (section, publication
+date, version), a production API, containerization, CI, and
+deployment/infrastructure. The ordered roadmap for these lives in the
+audit plan milestones M1–M7 and is tracked as Genesis tasks.

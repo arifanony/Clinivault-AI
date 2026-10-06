@@ -323,6 +323,45 @@ folder on 2026-09-24). They show the run completing and a generated answer whose
 inline citations use the `(EVIDENCE_ITEM_RANK: n, <document_id>, p<page>, c<chunk>)`
 form. These are human-captured evidence of one case, not an automated check.
 
+## M2 — Nine-document index, load once
+
+The UI previously rebuilt a T2D-001-only store on every request. It now
+builds one merged nine-document corpus index **once at startup** and
+reuses it for every request; only the generation provider is still
+created per-request (for request-scoped BYOK keys).
+
+```
+python -m clinivault_ai.ui                               # corpus + E5 (default)
+python -m clinivault_ai.ui --provider hash               # corpus + hash baseline
+python -m clinivault_ai.ui --single-doc                  # legacy T2D-001-only E5 index
+python -m clinivault_ai.ui --provider hash --single-doc  # legacy T2D-001-only hash index
+```
+
+Behavior:
+
+- `load_store(provider, single_doc=...)` (`src/clinivault_ai/ui/app.py`)
+  reads the committed parsed + embedding artifacts, chunks each document,
+  and merges them with `VectorStore.from_corpus()`. All corpus artifacts
+  must share one embedding model or loading fails loud (no silent
+  mixed-model index, no silent hash fallback for E5).
+- Indexed documents: T2D-001, 002, 003, 005, 006, 007, 008, 009, 010.
+  T2D-004 is blocked-access and is never loaded.
+- Corpus size (observed 2026-10-06, identical chunking under both
+  providers): **727 chunks** — 001: 107, 002: 34, 003: 44, 005: 84,
+  006: 142, 007: 38, 008: 66, 009: 142, 010: 70.
+- Retrieval results carry per-record `document_id`, so top-k lists mix
+  documents (e.g. E5 query "finerenone chronic kidney disease" returned
+  T2D-009 + T2D-010 chunks; "continuous glucose monitoring targets"
+  returned T2D-005 + T2D-006 chunks).
+- Single-document behavior is unchanged: the frozen benchmark still
+  reproduces hash 12/46 · 26/46 · 0.3601 and E5 20/46 · 36/46 · 0.5583.
+
+Tests: `tests/test_ui.py` (`CorpusPathsTests`, `BuildParserTests`,
+`MakeRunFnLoadOnceTests`, `CorpusLoadTests`) plus `FromCorpusTests` in
+`tests/test_retrieval.py` — 18 new tests. Full gate:
+`.venv\Scripts\python -m unittest discover -s tests` →
+**Ran 242 tests — OK** (1 expected conditional skip).
+
 ## Limitations
 
 - Debug console only: no authentication, no persistence, no run history.

@@ -24,7 +24,7 @@ The reasoning is documented in
 
 ## Current Status
 
-Early-stage MVP development (status as of 2026-09-25):
+Early-stage MVP development (status as of 2026-10-06):
 
 - **Done:** the Stage 1 clean baseline corpus (nine obtained documents;
   T2D-004 is blocked-access) is acquired, validated, parsed, chunked, and
@@ -38,9 +38,12 @@ Early-stage MVP development (status as of 2026-09-25):
   (DECISION-017); the hash provider remains the `generate_embeddings()`
   default and the `--provider hash` comparison baseline. The frozen
   46-case benchmark reproduces E5 Hit@1 20/46, Hit@5 36/46, MRR 0.5583.
-- **In progress:** corpus-wide retrieval in the live UI, richer metadata,
-  persisted execution records, and answer-reliability checks (see the
-  roadmap in [docs/architecture/README.md](./docs/architecture/README.md)
+  The live UI searches the merged nine-document corpus (727 chunks),
+  loaded once at startup with `--provider e5|hash` (default e5) and an
+  optional `--single-doc` legacy path (M2).
+- **In progress:** richer metadata, persisted execution records, and
+  answer-reliability checks (see the roadmap in
+  [docs/architecture/README.md](./docs/architecture/README.md)
   and [docs/handoff/M1-M7-IMPLEMENTATION-GUIDE.md](./docs/handoff/M1-M7-IMPLEMENTATION-GUIDE.md)).
 - **Not yet built:** citation validation, abstention beyond "no evidence",
   a production API, containerization, CI, and deployment infrastructure.
@@ -89,5 +92,5 @@ The project's documentation starts here:
 | [Pipelines](./docs/pipelines/README.md) | How each pipeline works, block by block |
 | [Engineering log](./docs/engineering-log/README.md) | Problems we hit that taught us something |
 | [Architecture](./docs/architecture/README.md) | How the system fits together (written as it takes shape) |
-| [M1–M7 implementation guide](./docs/handoff/M1-M7-IMPLEMENTATION-GUIDE.md) | M1 done (raw E5 production retrieval); M2–M7 still one-milestone-at-a-time |
-| [Current handoff](./docs/handoff/CURRENT_HANDOFF.md) | Cross-device resume: M1 done, next = M2 only |
+| [M1–M7 implementation guide](./docs/handoff/M1-M7-IMPLEMENTATION-GUIDE.md) | M1–M2 done; M3–M7 still one-milestone-at-a-time |
+| [Current handoff](./docs/handoff/CURRENT_HANDOFF.md) | Cross-device resume: M2 done (uncommitted), next = M3 only |

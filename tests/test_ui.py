@@ -10,7 +10,16 @@ from __future__ import annotations
 import json
 import unittest
 
-from clinivault_ai.ui.app import ObservabilityUI, create_trace_response
+from clinivault_ai.ui.app import (
+    CORPUS_DOCUMENT_IDS,
+    ObservabilityUI,
+    build_parser,
+    create_trace_response,
+    default_corpus_paths,
+    default_paths,
+    load_store,
+    make_run_fn,
+)
 from clinivault_ai.ui.page import PAGE_HTML
 
 
@@ -337,6 +346,141 @@ class HandlerRequestTests(unittest.TestCase):
         finally:
             server.shutdown()
             server.server_close()
+
+
+class CorpusPathsTests(unittest.TestCase):
+    """Nine-document path resolution (offline, no artifact reads)."""
+
+    EXPECTED_IDS = (
+        "T2D-001", "T2D-002", "T2D-003", "T2D-005", "T2D-006",
+        "T2D-007", "T2D-008", "T2D-009", "T2D-010",
+    )
+
+    def test_corpus_document_ids_skip_blocked_t2d004(self):
+        self.assertEqual(CORPUS_DOCUMENT_IDS, self.EXPECTED_IDS)
+        self.assertNotIn("T2D-004", CORPUS_DOCUMENT_IDS)
+
+    def test_default_corpus_paths_cover_nine_docs(self):
+        from pathlib import Path
+
+        pairs = default_corpus_paths()
+        self.assertEqual(len(pairs), 9)
+        for doc_id, (parsed_path, emb_path) in zip(self.EXPECTED_IDS, pairs):
+            self.assertIn(doc_id, parsed_path)
+            self.assertIn(doc_id, emb_path)
+            self.assertIn("embedded-intfloat--e5-small-v2", emb_path)
+            self.assertNotIn("T2D-004", parsed_path + emb_path)
+        # Every pair points at real committed artifacts.
+        for parsed_path, emb_path in pairs:
+            self.assertTrue(Path(parsed_path).is_file(), parsed_path)
+            self.assertTrue(Path(emb_path).is_file(), emb_path)
+
+    def test_default_corpus_paths_hash_provider(self):
+        from pathlib import Path
+
+        pairs = default_corpus_paths("hash")
+        self.assertEqual(len(pairs), 9)
+        for _, emb_path in pairs:
+            parts = Path(emb_path).parts
+            self.assertIn("embedded", parts)
+            self.assertNotIn("embedded-intfloat--e5-small-v2", parts)
+
+    def test_default_paths_single_doc_backward_compatible(self):
+        parsed_path, emb_path = default_paths()
+        self.assertIn("T2D-001", parsed_path)
+        self.assertIn("embedded-intfloat--e5-small-v2", emb_path)
+        _, hash_emb = default_paths("hash")
+        self.assertIn("T2D-001", hash_emb)
+        self.assertNotIn("e5-small-v2", hash_emb)
+
+    def test_unknown_provider_rejected(self):
+        with self.assertRaises(ValueError):
+            default_paths("bogus")
+        with self.assertRaises(ValueError):
+            default_corpus_paths("bogus")
+        with self.assertRaises(ValueError):
+            load_store("bogus")
+
+
+class BuildParserTests(unittest.TestCase):
+    def test_defaults_index_corpus_with_e5(self):
+        args = build_parser().parse_args([])
+        self.assertEqual(args.provider, "e5")
+        self.assertFalse(args.single_doc)
+        self.assertEqual(args.host, "127.0.0.1")
+        self.assertEqual(args.port, 8765)
+
+    def test_provider_and_single_doc_flags(self):
+        args = build_parser().parse_args(["--provider", "hash", "--single-doc"])
+        self.assertEqual(args.provider, "hash")
+        self.assertTrue(args.single_doc)
+
+
+class MakeRunFnLoadOnceTests(unittest.TestCase):
+    """The bound store is reused for every request (no rebuild per query)."""
+
+    def test_same_store_and_embedder_across_requests(self):
+        from unittest.mock import patch
+
+        from clinivault_ai.generation.provider import GeminiProvider
+
+        store, embedder = object(), object()
+        seen = []
+
+        def fake_run_query(store_arg, query, embedder_arg, provider, *, top_k):
+            seen.append((store_arg, query, embedder_arg, provider, top_k))
+            return {"ok": True}
+
+        run_fn = make_run_fn(store, embedder)
+        with patch("clinivault_ai.ui.app.run_query", side_effect=fake_run_query):
+            first = run_fn("q one", 5)
+            second = run_fn("q two", 3, api_key="REQ-KEY")
+
+        self.assertEqual(first, {"ok": True})
+        self.assertEqual(second, {"ok": True})
+        self.assertEqual(len(seen), 2)
+        for store_arg, _, embedder_arg, provider, _ in seen:
+            self.assertIs(store_arg, store)
+            self.assertIs(embedder_arg, embedder)
+            self.assertIsInstance(provider, GeminiProvider)
+        self.assertEqual(
+            [(query, top_k) for _, query, _, _, top_k in seen],
+            [("q one", 5), ("q two", 3)],
+        )
+
+
+class CorpusLoadTests(unittest.TestCase):
+    """Real hash corpus loads into one merged index (offline, no model)."""
+
+    def test_hash_corpus_loads_nine_docs(self):
+        from clinivault_ai.embedding import BaselineHashEmbeddingProvider
+        from clinivault_ai.retrieval import search
+
+        store, embedder = load_store("hash")
+        self.assertIsNone(store.document_id)
+        self.assertEqual(store.dimension, 256)
+        self.assertIsInstance(embedder, BaselineHashEmbeddingProvider)
+        self.assertEqual(
+            {r["document_id"] for r in store.records},
+            set(CORPUS_DOCUMENT_IDS),
+        )
+        self.assertGreater(len(store), 107)
+
+        results = search(
+            store,
+            "criteria for the diagnosis of diabetes",
+            BaselineHashEmbeddingProvider(),
+            5,
+        )
+        self.assertEqual(len(results), 5)
+        for result in results:
+            self.assertIn(result["document_id"], set(CORPUS_DOCUMENT_IDS))
+
+    def test_hash_single_doc_matches_legacy_t2d001(self):
+        store, _ = load_store("hash", single_doc=True)
+        self.assertEqual(store.document_id, "T2D-001")
+        self.assertEqual(store.dimension, 256)
+        self.assertEqual(len(store), 107)
 
 
 if __name__ == "__main__":

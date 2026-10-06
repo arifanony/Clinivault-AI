@@ -356,3 +356,111 @@ class RetrievalTraceTests(unittest.TestCase):
         self.assertEqual(by_id["T-200-p001-c001"]["text"], "alpha")
         self.assertEqual(by_id["T-200-p001-c002"]["text"], "beta")
         self.assertEqual(by_id["T-200-p002-c001"]["text"], "gamma")
+
+
+def make_doc_artifacts(doc_id, dimension=8):
+    """Synthetic (chunk_output, embedding_artifact) pair for one document."""
+    pages = [
+        {
+            "page_number": 1,
+            "extraction_status": "ok",
+            "text": f"{doc_id} alpha diagnostic criteria.\n\n{doc_id} beta glucose rules.",
+        },
+        {
+            "page_number": 2,
+            "extraction_status": "ok",
+            "text": f"{doc_id} gamma screening guidance.",
+        },
+    ]
+    chunk_output = chunk_pages(
+        {"provenance": {"document_id": doc_id}, "pages": pages}, default_config()
+    )
+    artifact = generate_embeddings(
+        chunk_output, BaselineHashEmbeddingProvider(dimension=dimension)
+    )
+    return chunk_output, artifact
+
+
+class FromCorpusTests(unittest.TestCase):
+    """Multi-document corpus index: merge, validation, per-record provenance."""
+
+    def test_corpus_builds_merged_index(self):
+        chunks_a, art_a = make_doc_artifacts("T-310")
+        chunks_b, art_b = make_doc_artifacts("T-311")
+        store = VectorStore.from_corpus([(art_a, chunks_a), (art_b, chunks_b)])
+        self.assertEqual(
+            len(store), len(chunks_a["chunks"]) + len(chunks_b["chunks"])
+        )
+        self.assertIsNone(store.document_id)
+        self.assertEqual(store.dimension, 8)
+        by_chunk = {r["chunk_id"]: r["document_id"] for r in store.records}
+        for chunk in chunks_a["chunks"]:
+            self.assertEqual(by_chunk[chunk["chunk_id"]], "T-310")
+        for chunk in chunks_b["chunks"]:
+            self.assertEqual(by_chunk[chunk["chunk_id"]], "T-311")
+
+    def test_single_doc_records_carry_document_id(self):
+        chunk_output, artifact = make_artifacts()
+        store = VectorStore.from_artifacts(artifact, chunk_output)
+        for record in store.records:
+            self.assertEqual(record["document_id"], "T-200")
+
+    def test_empty_corpus_rejected(self):
+        with self.assertRaises(RetrievalError):
+            VectorStore.from_corpus([])
+
+    def test_malformed_pair_rejected(self):
+        chunks, art = make_doc_artifacts("T-310")
+        with self.assertRaises(RetrievalError):
+            VectorStore.from_corpus([{"not": "a pair"}])
+        with self.assertRaises(RetrievalError):
+            VectorStore.from_corpus([(art, chunks, "extra")])
+
+    def test_duplicate_chunk_ids_across_docs_rejected(self):
+        chunks, art = make_doc_artifacts("T-310")
+        with self.assertRaises(RetrievalError):
+            VectorStore.from_corpus([(art, chunks), (art, chunks)])
+
+    def test_dimension_mismatch_across_docs_rejected(self):
+        chunks_a, art_a = make_doc_artifacts("T-310", dimension=8)
+        chunks_b, art_b = make_doc_artifacts("T-311", dimension=16)
+        with self.assertRaises(RetrievalError):
+            VectorStore.from_corpus([(art_a, chunks_a), (art_b, chunks_b)])
+
+    def test_search_returns_per_record_document_ids(self):
+        chunks_a, art_a = make_doc_artifacts("T-310")
+        chunks_b, art_b = make_doc_artifacts("T-311")
+        store = VectorStore.from_corpus([(art_a, chunks_a), (art_b, chunks_b)])
+        owner = {c["chunk_id"]: "T-310" for c in chunks_a["chunks"]}
+        owner.update({c["chunk_id"]: "T-311" for c in chunks_b["chunks"]})
+
+        # A query matching a T-311 record ranks it first with T-311 provenance.
+        target = next(
+            r for r in store.records if r["document_id"] == "T-311"
+        )
+        top = search(store, "q", ControlledQueryProvider(target["vector"]), 1)
+        self.assertEqual(top[0]["chunk_id"], target["chunk_id"])
+        self.assertEqual(top[0]["document_id"], "T-311")
+
+        # A full-depth search mixes both documents with exact per-hit provenance.
+        full = search(store, "q", ControlledQueryProvider(target["vector"]), len(store))
+        self.assertEqual({r["document_id"] for r in full}, {"T-310", "T-311"})
+        for result in full:
+            self.assertEqual(
+                set(result.keys()),
+                {"chunk_id", "document_id", "page_number", "score", "text"},
+            )
+            self.assertEqual(result["document_id"], owner[result["chunk_id"]])
+
+    def test_corpus_trace_candidates_carry_per_record_document_ids(self):
+        chunks_a, art_a = make_doc_artifacts("T-310")
+        chunks_b, art_b = make_doc_artifacts("T-311")
+        store = VectorStore.from_corpus([(art_a, chunks_a), (art_b, chunks_b)])
+        target = store.records[0]
+        trace = {}
+        search(store, "q", ControlledQueryProvider(target["vector"]), 1, trace=trace)
+        self.assertEqual(
+            {c["document_id"] for c in trace["candidates"]}, {"T-310", "T-311"}
+        )
+        self.assertIsNone(trace["store"]["document_id"])
+        self.assertEqual(trace["store"]["records"], len(store))

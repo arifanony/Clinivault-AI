@@ -37,6 +37,24 @@ Per result: `{chunk_id, document_id, page_number, score, text}` — best
 first. `text` is the exact chunk text joined via `chunk_id`; the score
 is cosine similarity.
 
+## Corpus index (M2)
+
+`VectorStore.from_corpus()` merges several `(embedding_artifact,
+chunk_output)` pairs into one in-memory index. Each pair is validated
+exactly as a single-document build; the merge additionally requires one
+shared embedding dimension and globally unique `chunk_id` values, and
+fails loud (`RetrievalError`) on an empty corpus, a malformed pair, a
+dimension mismatch, or a duplicate ID.
+
+Every record carries its own `document_id`, and `search()` takes each
+hit's `document_id` from its record — a corpus store itself carries
+`document_id=None` because no single document owns it. Records built
+without a `document_id` (hand-constructed single-document stores in
+older tests) fall back to `store.document_id`, so single-document
+behavior is unchanged. The live UI loads the nine-document Stage-1
+corpus (727 chunks; T2D-004 excluded) once at startup; see
+[observability-ui.md](observability-ui.md).
+
 ## Similarity metric
 
 **Cosine.** The baseline provider emits L2-normalized vectors, where

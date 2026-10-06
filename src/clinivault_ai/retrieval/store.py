@@ -14,6 +14,11 @@ artifact it did not create): document identity, vector dimensions,
 numeric/finite/non-zero values, duplicate chunk IDs, and exact
 chunk<->embedding ID agreement in BOTH directions. Any mismatch raises
 RetrievalError -- records are never silently dropped.
+
+A store holds one document (``from_artifacts``) or one merged corpus
+index (``from_corpus``). Every record carries its own ``document_id``;
+a corpus store carries ``document_id=None`` itself because no single
+document owns the index.
 """
 
 from __future__ import annotations
@@ -44,10 +49,12 @@ def _validate_vector(vector, dimension: int, label: str) -> list[float]:
 class VectorStore:
     """In-memory cosine index over validated chunk embeddings + chunk text."""
 
-    def __init__(self, document_id: str, dimension: int, records: list[dict]):
+    def __init__(
+        self, document_id: str | None, dimension: int, records: list[dict]
+    ):
         self.document_id = document_id
         self.dimension = dimension
-        # records: chunk_id, page_number, text, vector (floats), norm
+        # records: chunk_id, document_id, page_number, text, vector (floats), norm
         self.records = records
 
     @classmethod
@@ -114,6 +121,7 @@ class VectorStore:
             records.append(
                 {
                     "chunk_id": chunk_id,
+                    "document_id": emb_doc,
                     "page_number": chunk["page_number"],
                     "text": chunk.get("text") or "",
                     "vector": vector,
@@ -128,6 +136,51 @@ class VectorStore:
             )
 
         return cls(document_id=emb_doc, dimension=dimension, records=records)
+
+    @classmethod
+    def from_corpus(
+        cls, pairs: list[tuple[dict, dict]]
+    ) -> "VectorStore":
+        """Build one merged index from (embedding_artifact, chunk_output) pairs.
+
+        Each pair is validated exactly as in ``from_artifacts``; the merged
+        index additionally requires one shared embedding dimension and
+        globally unique ``chunk_id`` values. The store itself carries
+        ``document_id=None``; per-result provenance comes from each record's
+        own ``document_id`` (see ``search()``).
+        """
+        if not pairs:
+            raise RetrievalError(
+                "corpus contains no (embedding_artifact, chunk_output) pairs"
+            )
+        for index, pair in enumerate(pairs):
+            if not isinstance(pair, (tuple, list)) or len(pair) != 2:
+                raise RetrievalError(
+                    f"corpus pair #{index} must be "
+                    "(embedding_artifact, chunk_output)"
+                )
+        singles = [cls.from_artifacts(emb, chk) for emb, chk in pairs]
+
+        dimension = singles[0].dimension
+        for single in singles[1:]:
+            if single.dimension != dimension:
+                raise RetrievalError(
+                    f"corpus dimension mismatch: {single.document_id!r} has "
+                    f"dimension {single.dimension} != index dimension {dimension}"
+                )
+
+        seen: set[str] = set()
+        records: list[dict] = []
+        for single in singles:
+            for record in single.records:
+                if record["chunk_id"] in seen:
+                    raise RetrievalError(
+                        f"duplicate chunk_id across corpus: {record['chunk_id']}"
+                    )
+                seen.add(record["chunk_id"])
+                records.append(record)
+
+        return cls(document_id=None, dimension=dimension, records=records)
 
     def __len__(self) -> int:
         return len(self.records)

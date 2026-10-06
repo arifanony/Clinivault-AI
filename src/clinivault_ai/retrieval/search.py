@@ -77,10 +77,13 @@ def search(
     # Deterministic ranking: descending score, ties broken by chunk_id.
     scored.sort(key=lambda item: (-item[0], item[1]))
 
+    # Provenance comes from the record itself so corpus stores return the
+    # owning document per hit; the store fallback keeps hand-built
+    # single-document stores (whose records carry no document_id) working.
     results = [
         {
             "chunk_id": chunk_id,
-            "document_id": store.document_id,
+            "document_id": record.get("document_id") or store.document_id,
             "page_number": record["page_number"],
             "score": score,
             "text": record["text"],
@@ -107,7 +110,7 @@ def search(
             {
                 "rank": rank + 1,
                 "chunk_id": chunk_id,
-                "document_id": store.document_id,
+                "document_id": record.get("document_id") or store.document_id,
                 "page_number": record["page_number"],
                 "score": score,
                 "text": record["text"],
