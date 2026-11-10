@@ -35,6 +35,7 @@ never rewritten — if it changes, mark it Replaced and write a new document.
 | [DECISION-018](./DECISION-018-document-metadata-and-ingestion-reports.md) | Document metadata passthrough and ingestion reports: catalog Titles joined at index time, brief-shaped per-document reports | Chosen | 2026-11-10 |
 | [DECISION-019](./DECISION-019-query-execution-records.md) | Persisted structured query execution records: run_id/timestamp/execution_record on run_query plus opt-in JSONL under gitignored runs/, never persisting keys | Chosen | 2026-11-10 |
 | [DECISION-020](./DECISION-020-answer-reliability.md) | Answer reliability: citation-ref checks, ABSTAIN sentinel refusal, max_chars context budget, 429/5xx Gemini retry, tiny labeled set; no AI judges, no score threshold (successor to the DECISION-011 prompt/status contract) | Chosen | 2026-11-10 |
+| [DECISION-021](./DECISION-021-production-api-container-ci.md) | Production deploy slice: FastAPI query API over the unchanged pipeline, secret-free JSON access logs, in-memory index (no Qdrant), Dockerfile, GitHub Actions CI | Chosen | 2026-11-10 |
 
 
 
@@ -56,7 +57,7 @@ arrives, not before):
   streaming, and any automatic claim-level grounding measurement (M5 settled
   deterministic citation checks, the ABSTAIN sentinel, whole-item budgeting,
   and 429/5xx retry in DECISION-020)
-- persistence beyond committed artifacts, deployment/infrastructure
+- persistence beyond committed artifacts, deployment/infrastructure beyond the M7 MVP slice (API, container, CI done in DECISION-021)
 
 Retrieval strategy is recorded as DECISION-009 (baseline configuration:
 Top-K, cosine, fail-loud), DECISION-010 (historical 21-case retention),

@@ -10,17 +10,17 @@
 
 - **Current project:** Clinivault AI
 - **Branch:** `master`
-- **Last completed milestone:** **M5** — deterministic answer
-  reliability (DECISION-020), committed and pushed as `51d89c2`.
-- **Last pushed commit:** `51d89c2` (`feat: check citations,
-  abstention sentinel, and context budget`).
-  `master` matches `origin/master`.
+- **Last completed milestone:** **M7** — production deploy slice
+  (DECISION-021), implemented and tested in the working tree (commit
+  with the M7 message below, then push).
+- **Last pushed commit:** `c320d04` (`docs: defer M6 retrieval
+  changes, no measured weakness`). M5 (`51d89c2`) and M6 are pushed.
 - **M6-scope check:** complete — deferred with no code change (see
   `docs/engineering-log/2026-11-10-m6-deferred.md`); no specific
   measured retrieval weakness after M1–M5.
-- **Working-tree expectation:** this handoff plus the M1–M7 guide
-  refreshed for the M6 deferral; `runs/` stays gitignored and
-  unwritten by default.
+- **Working-tree expectation:** M7 files (see below); `runs/`
+  stays gitignored and unwritten by default; untracked scratch removed
+  before commit.
 - **Intentionally ignored/protected local files:** `.env` is ignored and must
   never be staged or committed. Copy `.env.example` locally and set
   `GOOGLE_API_KEY` only on the machine. Never print or paste keys.
@@ -42,42 +42,41 @@
   (Committed and pushed as `51d89c2`; detail preserved in that commit,
   DECISION-020, and the M5 pipeline/engineering-log docs.)
 
-- **Unit/task:** M6-scope check (no code change — deferred per §M6)
+- **Unit/task:** M6-scope check (no code change — deferred per §M6;
+  committed and pushed as `c320d04`)
 - **What was decided:** no specific measured retrieval weakness after
-  M1–M5, so no hybrid/rerank/BM25/Top-K experiment was run. Past
-  weaknesses on record (T2D-006 near miss, T2D-009 statins lexical gap)
-  were hash-era and already answered by M1's production move to raw E5
-  (frozen 20/46 · 36/46 · 0.5583); M2–M5 changed no retrieval math
-  (hash benchmark re-verified exactly in this unit: 12/46 · 26/46 ·
-  0.3601). The missing prerequisite for any future M6 experiment is a
-  failure-class breakdown of E5's residual misses.
+  M1–M5, so no hybrid/rerank/BM25/Top-K experiment was run (see
+  `docs/engineering-log/2026-11-10-m6-deferred.md`).
+- **Unit/task:** M7 / production deploy slice (DECISION-021)
+- **What was completed:** FastAPI query API over the unchanged
+  pipeline (`POST /query` with `query`/`top_k`/`max_chars`/`api_key`,
+  `GET /health`), per-request `GeminiProvider` (body key or env,
+  never persisted), secret-free JSON access logs (method/path/status/
+  duration/`run_id` only), `Dockerfile`, GitHub Actions CI gate.
+  No stage semantics changed; UI untouched; no Qdrant; no T2D-004.
 - **Important files:**
-  - `src/clinivault_ai/generation/citations.py` (new)
-  - `src/clinivault_ai/generation/generator.py`
-  - `src/clinivault_ai/generation/prompt.py`
-  - `src/clinivault_ai/generation/provider.py`
-  - `src/clinivault_ai/generation/__init__.py`
-  - `src/clinivault_ai/context/builder.py`
-  - `src/clinivault_ai/context/__init__.py`
-  - `src/clinivault_ai/pipeline/__init__.py`
-  - `src/clinivault_ai/pipeline/records.py`
-  - `tests/test_answer_reliability.py` (new, 31 tests)
-  - `docs/decisions/DECISION-020-answer-reliability.md` (new)
-  - `docs/pipelines/answer-reliability.md` (new)
-  - `docs/engineering-log/2026-11-10-m5-answer-reliability.md` (new)
-  - `docs/decisions/README.md`, `docs/architecture/README.md`, `README.md`
-  - `docs/engineering-log/2026-11-10-m6-deferred.md` (new, M6 deferral)
+  - `src/clinivault_ai/api/app.py` (new), `__init__.py` (new),
+    `__main__.py` (new)
+  - `tests/test_api.py` (new, 13 tests)
+  - `Dockerfile` (new), `.github/workflows/ci.yml` (new)
+  - `pyproject.toml`, `uv.lock` (fastapi/uvicorn/httpx)
+  - `docs/decisions/DECISION-021-production-api-container-ci.md` (new)
+  - `docs/pipelines/production-api.md` (new)
+  - `docs/decisions/README.md`, `docs/architecture/README.md`,
+    `README.md`, `docs/pipelines/README.md`
+  - `docs/handoff/CURRENT_HANDOFF.md`,
+    `docs/handoff/M1-M7-IMPLEMENTATION-GUIDE.md`
 - **Tests/gates:**
-  - `python -m unittest tests.test_answer_reliability` — 31 tests OK
-    (written first; failed honestly before the source change)
+  - `python -m unittest tests.test_api` — 13 tests OK (run in the
+    project `.venv` via `uv run`; 3 failed honestly first for store
+    top_k bounds and log capture, then fixed)
   - `python -m unittest discover -s tests` — full gate per the loop
     below (E5 tests skip without the HF cache; the sandbox-proxy
     `test_ui` note from M4 still applies)
-  - `benchmark --provider e5` numbers unchanged by M5 (no retrieval-math
-    change): Hit@1 **20/46**, Hit@5 **36/46**, MRR **0.5583**
+  - No retrieval-math change (API wraps `run_query` unchanged)
 - **Relevant Decision / Pipeline:**
-  - `docs/decisions/DECISION-020-answer-reliability.md`
-  - `docs/pipelines/answer-reliability.md`
+  - `docs/decisions/DECISION-021-production-api-container-ci.md`
+  - `docs/pipelines/production-api.md`
 
 ## Current Technical Understanding
 
@@ -109,28 +108,32 @@
   always kept; `None` is exact pre-M5 behavior.
 - `GeminiProvider` retries 429/5xx up to `max_attempts` (default 3)
   with doubling backoff; 401/403 raise at once (M5, DECISION-020).
+- Query API (`src/clinivault_ai/api`, M7, DECISION-021) serves the same
+  startup-loaded index over `POST /query` / `GET /health`, with a
+  per-request `GeminiProvider` and secret-free JSON access logs; the
+  UI is untouched. Tests run in the project `.venv` (`uv run`).
 
 ### INFERENCE
 
-- M5 is done; retrieval math is unchanged by M5, so M6 stays a
-  measurement question (deferred unless a concrete retrieval weakness
-  appears after M1–M5).
+- M1–M7 are done (M6 deferred, docs-only). The API wraps `run_query`
+  unchanged, so pipeline semantics are inherited from M1–M5, not
+  re-proven by M7.
 
 ### NOT YET VALIDATED
 
-- End-to-end Gemini answers on the UI with E5 evidence over the corpus.
+- End-to-end Gemini answers over the API or UI with E5 evidence over
+  the corpus (needs key + model cache; never run from this machine).
 - `section` detection — deliberately absent until a deterministic detector
   is measured (DECISION-018).
-- Hybrid / rerank (M6) — defer unless a measured weakness appears after M1–M5.
+- A failure-class breakdown of E5's residual benchmark misses — the
+  prerequisite that would reopen M6.
 
 ## Next Authorized Action
 
-**M7 only with a fresh authorization — do not start it unasked.** The
-M6-scope check is complete (deferred, docs-only; see
-`docs/engineering-log/2026-11-10-m6-deferred.md`). M7 is the
-productionization slice (query API, container, CI) per
-[M1-M7-IMPLEMENTATION-GUIDE.md](./M1-M7-IMPLEMENTATION-GUIDE.md) and is
-not approved in this session.
+**Nothing is queued — the M1–M7 MVP is complete** (M6 deferred,
+docs-only). Any further work (Stage-2 corpus, workers/Qdrant,
+auth/rate-limits, claim-level verification) needs its own decision
+and an explicit fresh authorization. Do not start anything unasked.
 
 ## Resume Procedure (other device)
 
@@ -154,8 +157,8 @@ cache), then retry. Do not change `local_files_only=True`.
 Genesis CLI is optional; skip if Node/`genesis` is missing. **Never
 hand-edit** `.genesis/project.json`.
 
-Then open the M1–M7 guide; the M6-scope check is done (deferred),
-so the only next step is **M7 with a fresh authorization**.
+Then open the M1–M7 guide; M1–M7 are complete, so there is no
+next step until new work is authorized.
 
 ## Important Rules
 

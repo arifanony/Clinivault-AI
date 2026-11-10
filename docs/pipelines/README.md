@@ -34,7 +34,8 @@ retrieval comparison (baseline vs term-weighted vs semantic) run — see
 T2D-010 ingestion-quality isolation investigated — see
 [`t2d-010-ingestion-quality-investigation.md`](./t2d-010-ingestion-quality-investigation.md);
 production raw E5 retrieval (T2D-001 UI + selectable benchmark) — see
-[`embedding-e5.md`](./embedding-e5.md).
+[`embedding-e5.md`](./embedding-e5.md); production query API over the
+unchanged pipeline — see [`production-api.md`](./production-api.md).
 Further pipeline
 docs are created as pipelines are actually built, using
 [`docs/templates/pipeline-doc-template.md`](../templates/pipeline-doc-template.md).

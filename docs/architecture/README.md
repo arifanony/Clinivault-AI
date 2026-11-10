@@ -33,6 +33,7 @@ Clinical PDF
   -> pipeline/__init__.py     run_query: retrieval -> context -> generation traces + execution record (M4, M5)
   -> pipeline/records.py      execution record builder + opt-in JSONL log (M4, M5)
   -> ui/app.py                observability console; nine-doc index loaded once (M2)
+  -> api/app.py               FastAPI query API over run_query; index loaded once at startup (M7)
 ```
 
 Stage contracts (all plain dicts, JSON-serializable):
@@ -86,11 +87,11 @@ and no Errata logic lives here.
 
 ## Not yet built
 
-Claim-level grounding verification, `section` detection (deferred in
-M3 until a deterministic detector is measured), a production API,
-containerization, CI, and deployment/infrastructure. Catalog titles and
+Claim-level grounding verification and `section` detection (deferred
+in M3 until a deterministic detector is measured). Catalog titles and
 ingestion reports are done (M3, DECISION-018); per-query execution
 records are done (M4, DECISION-019); deterministic answer-reliability
-checks are done (M5, DECISION-020). The ordered roadmap for the rest
+checks are done (M5, DECISION-020); the production query API,
+container, and CI are done (M7, DECISION-021). The ordered roadmap for the rest
 lives in the audit plan milestones M1–M7 and is tracked as Genesis
 tasks.

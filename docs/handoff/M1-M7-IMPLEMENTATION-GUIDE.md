@@ -1,11 +1,11 @@
 # Clinivault M1–M7 implementation guide
 
-This is the **authoritative next-work guide** for a later session or a
-smaller model. **M1–M5 are done; the M6-scope check is complete
-(deferred — no measured weakness, see
-`docs/engineering-log/2026-11-10-m6-deferred.md`).** Resume at the tip
-(`git log -1`). **M7 needs a fresh authorization — do not start it
-unasked.**
+This is the **authoritative record** for a later session or a
+smaller model. **M1–M7 are done** (M6 deferred docs-only — no measured
+weakness, see
+`docs/engineering-log/2026-11-10-m6-deferred.md`). Resume at the tip
+(`git log -1`). **Nothing further is authorized — new work needs its
+own decision and an explicit fresh authorization.**
 
 - **Do not implement M5–M7 in one session.** One milestone, then tests,
   docs, commit, stop.
@@ -364,20 +364,24 @@ decision.
 
 ---
 
-## M7 — Productionization
+## M7 — Productionization (**DONE** — do not redo)
 
-- FastAPI wrapping `run_query`; keep stdlib UI as inspector
-- Decision: in-memory index is enough until corpus/concurrency require
-  Qdrant (do not add Qdrant “for completeness”)
+Keep this section as the historical record. Implementation landed the
+guide scope exactly:
+
+- FastAPI wrapping `run_query`; stdlib UI kept as inspector
+- Decision DECISION-021: in-memory index is enough until
+  corpus/concurrency require Qdrant (no Qdrant added)
 - Dockerfile, stdlib JSON logging (no keys), GitHub Actions: `uv sync` +
   unittest (E5 tests skip without cache)
-- Stage 2 corpus: T2D-004 only via legitimate access; never bypass 403
+- Stage 2 corpus untouched: T2D-004 only via legitimate access; never
+  bypass 403 (no new corpus in this unit)
 
 ### Commit
 
 `feat: add query API, container, and CI for the unittest gate`
 
-**Stop. That is the MVP deploy slice, not a rewrite.**
+**Stop. That was the MVP deploy slice, not a rewrite.**
 
 ---
 
@@ -385,12 +389,11 @@ decision.
 
 ```text
 git status --short
-git log -1 --oneline          # expect dbcea0c or a later *complete* milestone commit
+git log -1 --oneline          # all milestones complete; no work is queued
 git rev-parse HEAD
 uv sync
-.venv/Scripts/python -m unittest discover -s tests
-# then implement ONE milestone from this file
-# then tests + docs + commit + stop
+uv run python -m unittest discover -s tests
+# no milestones remain: new work needs its own decision + authorization
 ```
 
 If `sentence-transformers` or local E5 files are missing during M1:

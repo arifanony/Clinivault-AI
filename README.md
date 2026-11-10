@@ -54,8 +54,15 @@ Early-stage MVP development (status as of 2026-10-06):
   `max_chars` context budget with `truncated_chunk_ids`, Gemini retry on
   429/5xx with recorded `attempts`, and a tiny labeled reliability set
   (DECISION-020). No AI judges, no retrieval-score threshold.
-- **Not yet built:** a production API, containerization, CI, and
-  deployment infrastructure (see the roadmap in
+- **Done (M7):** production deploy slice — FastAPI query API over
+  the unchanged pipeline (`POST /query`, `GET /health`), secret-free
+  JSON access logs, `Dockerfile`, and a GitHub Actions CI gate running
+  the unittest suite (DECISION-021). The stdlib UI stays the
+  inspector. No vector database: the in-memory index stands until
+  measured load says otherwise.
+- **Not yet built:** Stage-2 corpus work (T2D-004 only via legitimate
+  access) and anything beyond the M1–M7 MVP — each needs its own
+  decision and authorization (see the roadmap in
   [docs/architecture/README.md](./docs/architecture/README.md)
   and [docs/handoff/M1-M7-IMPLEMENTATION-GUIDE.md](./docs/handoff/M1-M7-IMPLEMENTATION-GUIDE.md)).
 - Architecture documentation is written as components actually take shape,
@@ -103,5 +110,5 @@ The project's documentation starts here:
 | [Pipelines](./docs/pipelines/README.md) | How each pipeline works, block by block |
 | [Engineering log](./docs/engineering-log/README.md) | Problems we hit that taught us something |
 | [Architecture](./docs/architecture/README.md) | How the system fits together (written as it takes shape) |
-| [M1–M7 implementation guide](./docs/handoff/M1-M7-IMPLEMENTATION-GUIDE.md) | M1–M4 done; M5–M7 still one-milestone-at-a-time |
+| [M1–M7 implementation guide](./docs/handoff/M1-M7-IMPLEMENTATION-GUIDE.md) | M1–M7 done (M6 deferred, docs-only) |
 | [Current handoff](./docs/handoff/CURRENT_HANDOFF.md) | Cross-device resume: M4 done (uncommitted), next = M5 only |
