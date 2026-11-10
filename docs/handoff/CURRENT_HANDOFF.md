@@ -11,17 +11,16 @@
 - **Current project:** Clinivault AI
 - **Branch:** `master`
 - **Last completed milestone:** **M5** — deterministic answer
-  reliability (DECISION-020).
-- **Last pushed commit:** `6e46024` (`feat: persist structured query
-  execution records`). M3 (`d803d3a`) and M4 (`6e46024`) are pushed;
-  `master` matches `origin/master`. M5 is implemented, tested, and
-  documented in the working tree but **not yet committed** — review,
-  commit as `feat: check citations, abstention sentinel, and context
-  budget`, then push. After that, confirm with `git rev-parse HEAD` /
-  `git log -1 --oneline`.
-- **Working-tree expectation:** M5 files modified (see below); `runs/`
-  stays gitignored and unwritten by default; untracked scratch removed
-  before commit.
+  reliability (DECISION-020), committed and pushed as `51d89c2`.
+- **Last pushed commit:** `51d89c2` (`feat: check citations,
+  abstention sentinel, and context budget`).
+  `master` matches `origin/master`.
+- **M6-scope check:** complete — deferred with no code change (see
+  `docs/engineering-log/2026-11-10-m6-deferred.md`); no specific
+  measured retrieval weakness after M1–M5.
+- **Working-tree expectation:** this handoff plus the M1–M7 guide
+  refreshed for the M6 deferral; `runs/` stays gitignored and
+  unwritten by default.
 - **Intentionally ignored/protected local files:** `.env` is ignored and must
   never be staged or committed. Copy `.env.example` locally and set
   `GOOGLE_API_KEY` only on the machine. Never print or paste keys.
@@ -40,6 +39,18 @@
   3-case labeled set (in-scope supported, DECISION-005 out-of-scope
   refusal, empty evidence) with citation-validity and
   abstention-correctness metrics. No AI judges, no score threshold.
+  (Committed and pushed as `51d89c2`; detail preserved in that commit,
+  DECISION-020, and the M5 pipeline/engineering-log docs.)
+
+- **Unit/task:** M6-scope check (no code change — deferred per §M6)
+- **What was decided:** no specific measured retrieval weakness after
+  M1–M5, so no hybrid/rerank/BM25/Top-K experiment was run. Past
+  weaknesses on record (T2D-006 near miss, T2D-009 statins lexical gap)
+  were hash-era and already answered by M1's production move to raw E5
+  (frozen 20/46 · 36/46 · 0.5583); M2–M5 changed no retrieval math
+  (hash benchmark re-verified exactly in this unit: 12/46 · 26/46 ·
+  0.3601). The missing prerequisite for any future M6 experiment is a
+  failure-class breakdown of E5's residual misses.
 - **Important files:**
   - `src/clinivault_ai/generation/citations.py` (new)
   - `src/clinivault_ai/generation/generator.py`
@@ -55,6 +66,7 @@
   - `docs/pipelines/answer-reliability.md` (new)
   - `docs/engineering-log/2026-11-10-m5-answer-reliability.md` (new)
   - `docs/decisions/README.md`, `docs/architecture/README.md`, `README.md`
+  - `docs/engineering-log/2026-11-10-m6-deferred.md` (new, M6 deferral)
 - **Tests/gates:**
   - `python -m unittest tests.test_answer_reliability` — 31 tests OK
     (written first; failed honestly before the source change)
@@ -113,11 +125,12 @@
 
 ## Next Authorized Action
 
-**M6-scope check only** — per [M1-M7-IMPLEMENTATION-GUIDE.md](./M1-M7-IMPLEMENTATION-GUIDE.md)
-§M6: if M1–M5 show no specific retrieval weakness, write the M6-deferred
-log and skip hybrid/rerank/BM25/Top-K changes; a one-variable experiment
-needs its own decision. **Do not start M7 in the same session.** One
-milestone, tests, docs, commit, stop.
+**M7 only with a fresh authorization — do not start it unasked.** The
+M6-scope check is complete (deferred, docs-only; see
+`docs/engineering-log/2026-11-10-m6-deferred.md`). M7 is the
+productionization slice (query API, container, CI) per
+[M1-M7-IMPLEMENTATION-GUIDE.md](./M1-M7-IMPLEMENTATION-GUIDE.md) and is
+not approved in this session.
 
 ## Resume Procedure (other device)
 
@@ -141,7 +154,8 @@ cache), then retry. Do not change `local_files_only=True`.
 Genesis CLI is optional; skip if Node/`genesis` is missing. **Never
 hand-edit** `.genesis/project.json`.
 
-Then open the M1–M7 guide and run the **M6-scope check only**.
+Then open the M1–M7 guide; the M6-scope check is done (deferred),
+so the only next step is **M7 with a fresh authorization**.
 
 ## Important Rules
 

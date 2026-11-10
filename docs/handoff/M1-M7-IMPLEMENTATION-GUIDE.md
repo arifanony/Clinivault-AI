@@ -1,9 +1,11 @@
 # Clinivault M1–M7 implementation guide
 
 This is the **authoritative next-work guide** for a later session or a
-smaller model. **M1–M5 are done.** Resume at the M5 commit tip (`git log -1`)
-and run the **M6-scope check only** next (defer unless a measured
-weakness appears; see §M6).
+smaller model. **M1–M5 are done; the M6-scope check is complete
+(deferred — no measured weakness, see
+`docs/engineering-log/2026-11-10-m6-deferred.md`).** Resume at the tip
+(`git log -1`). **M7 needs a fresh authorization — do not start it
+unasked.**
 
 - **Do not implement M5–M7 in one session.** One milestone, then tests,
   docs, commit, stop.
