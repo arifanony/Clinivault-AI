@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import math
 
+from clinivault_ai.corpus.catalog import get_document_name
 from clinivault_ai.retrieval.errors import RetrievalError
 
 
@@ -118,16 +119,18 @@ class VectorStore:
                 )
             vector = emb_by_id[chunk_id]
             norm = math.sqrt(sum(v * v for v in vector))
-            records.append(
-                {
-                    "chunk_id": chunk_id,
-                    "document_id": emb_doc,
-                    "page_number": chunk["page_number"],
-                    "text": chunk.get("text") or "",
-                    "vector": vector,
-                    "norm": norm,
-                }
-            )
+            record: dict = {
+                "chunk_id": chunk_id,
+                "document_id": emb_doc,
+                "page_number": chunk["page_number"],
+                "text": chunk.get("text") or "",
+                "vector": vector,
+                "norm": norm,
+            }
+            document_name = get_document_name(emb_doc)
+            if document_name:
+                record["document_name"] = document_name
+            records.append(record)
 
         missing = sorted(seen - seen_chunks)
         if missing:

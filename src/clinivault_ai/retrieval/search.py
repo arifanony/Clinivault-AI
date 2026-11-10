@@ -80,16 +80,20 @@ def search(
     # Provenance comes from the record itself so corpus stores return the
     # owning document per hit; the store fallback keeps hand-built
     # single-document stores (whose records carry no document_id) working.
-    results = [
-        {
+    # document_name is optional and only present for catalogued documents,
+    # so synthetic/legacy records keep their exact historical contract.
+    results = []
+    for score, chunk_id, record in scored[:top_k]:
+        item: dict = {
             "chunk_id": chunk_id,
             "document_id": record.get("document_id") or store.document_id,
             "page_number": record["page_number"],
             "score": score,
             "text": record["text"],
         }
-        for score, chunk_id, record in scored[:top_k]
-    ]
+        if isinstance(record.get("document_name"), str) and record["document_name"]:
+            item["document_name"] = record["document_name"]
+        results.append(item)
 
     if trace is not None:
         embedding_ms = (t_embed_end - t_embed_start) * 1000.0
@@ -106,8 +110,9 @@ def search(
             "dimension": store.dimension,
             "records": len(store.records),
         }
-        trace["candidates"] = [
-            {
+        candidates = []
+        for rank, (score, chunk_id, record) in enumerate(scored):
+            candidate: dict = {
                 "rank": rank + 1,
                 "chunk_id": chunk_id,
                 "document_id": record.get("document_id") or store.document_id,
@@ -116,7 +121,9 @@ def search(
                 "text": record["text"],
                 "selected": rank < top_k,
             }
-            for rank, (score, chunk_id, record) in enumerate(scored)
-        ]
+            if isinstance(record.get("document_name"), str) and record["document_name"]:
+                candidate["document_name"] = record["document_name"]
+            candidates.append(candidate)
+        trace["candidates"] = candidates
 
     return results

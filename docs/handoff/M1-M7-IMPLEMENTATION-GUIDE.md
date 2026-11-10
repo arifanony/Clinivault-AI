@@ -1,10 +1,10 @@
 # Clinivault M1–M7 implementation guide
 
 This is the **authoritative next-work guide** for a later session or a
-smaller model. **M1 is done.** Resume at the M1 commit tip (`git log -1`)
-and implement **M2 only** next.
+smaller model. **M1–M3 are done.** Resume at the M3 commit tip (`git log -1`)
+and implement **M4 only** next.
 
-- **Do not implement M2–M7 in one session.** One milestone, then tests,
+- **Do not implement M4–M7 in one session.** One milestone, then tests,
   docs, commit, stop.
 - **Do not treat uncommitted working-tree code as done.** If the tree is
   dirty with *partial* M2–M7 edits and no matching tests/docs/decision

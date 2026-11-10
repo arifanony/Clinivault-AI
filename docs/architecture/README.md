@@ -41,8 +41,9 @@ Stage contracts (all plain dicts, JSON-serializable):
 | ingestion | verified PDF | `{provenance, pages:[{document_id, filename, page_number, text, text_sha256, char_count, word_count, page_width, page_height, extraction_status, extraction_error}]}` |
 | chunking | parsed document | `{document_id, config, statistics, chunks:[{chunk_id, document_id, page_number, chunk_index, text}]}` |
 | embedding | chunk output | `{document_id, model, statistics, embeddings:[{chunk_id, document_id, page_number, vector}]}` |
-| retrieval | chunk output + embedding artifact | `[{chunk_id, document_id, page_number, score, text}]` (best first) |
-| context | retrieval results (+ optional query) | `{query, evidence_count, documents, evidence:[{rank, chunk_id, document_id, page_number, score, text}]}` |
+| retrieval | chunk output + embedding artifact | `[{chunk_id, document_id, page_number, score, text}]` (best first; plus optional `document_name` for catalogued documents) |
+| context | retrieval results (+ optional query) | `{query, evidence_count, documents, evidence:[{rank, chunk_id, document_id, page_number, score, text}]}` (each level carries optional `document_name` when the result had it) |
+| ingestion report | parsed document + chunk output + embedding artifact | `{document_id, total_pages, parsed_pages, failed_pages, total_chunks, embedded_chunks, indexed_chunks, ingestion_status}` under `data/ingestion-report/<corpus-version>/<DOC-ID>/` |
 
 Provenance survives every boundary: document -> page -> chunk ->
 embedding -> retrieval result -> evidence bundle. Each stage re-validates
@@ -83,7 +84,9 @@ and no Errata logic lives here.
 ## Not yet built
 
 Citation validation, abstention beyond the "no evidence" path, persisted
-per-query execution records, brief-level metadata (section, publication
-date, version), a production API, containerization, CI, and
-deployment/infrastructure. The ordered roadmap for these lives in the
-audit plan milestones M1–M7 and is tracked as Genesis tasks.
+per-query execution records (M4), answer reliability (M5), `section`
+detection (deferred in M3 until a deterministic detector is measured), a
+production API, containerization, CI, and deployment/infrastructure.
+Catalog titles and ingestion reports are done (M3, DECISION-018). The
+ordered roadmap for the rest lives in the audit plan milestones M1–M7 and
+is tracked as Genesis tasks.

@@ -1,0 +1,10 @@
+{
+  "document_id": "T2D-001",
+  "total_pages": 23,
+  "parsed_pages": 23,
+  "failed_pages": [],
+  "total_chunks": 107,
+  "embedded_chunks": 107,
+  "indexed_chunks": 107,
+  "ingestion_status": "success"
+}

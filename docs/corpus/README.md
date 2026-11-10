@@ -95,3 +95,10 @@ Raw PDFs live in `data/raw/`, in per-stage folders:
 `stage-1-clean-baseline-corpus/`, `stage-2-domain-evidence-corpus/`,
 `stage-3-stress-evaluation-corpus/`.
 
+Brief-level metadata for the nine Stage-1 documents lives in code at
+`src/clinivault_ai/corpus/catalog.py` (transcribed from
+[`corpus-manifest.md`](./corpus-manifest.md); T2D-004 excluded by design),
+joined onto retrieval records at index time. Per-document ingestion reports
+live under `data/ingestion-report/stage-1-clean-baseline-corpus/<DOC-ID>/`
+(see `docs/pipelines/ingestion-report.md`).
+

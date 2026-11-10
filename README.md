@@ -41,8 +41,12 @@ Early-stage MVP development (status as of 2026-10-06):
   The live UI searches the merged nine-document corpus (727 chunks),
   loaded once at startup with `--provider e5|hash` (default e5) and an
   optional `--single-doc` legacy path (M2).
-- **In progress:** richer metadata, persisted execution records, and
-  answer-reliability checks (see the roadmap in
+- **Done (M3):** brief-level metadata passthrough (`document_name` from
+  a manifest-transcribed catalog, joined at index time) and per-document
+  ingestion reports under `data/ingestion-report/` (DECISION-018); `section`
+  stays absent until a deterministic detector is measured.
+- **In progress:** persisted execution records and answer-reliability checks
+  (see the roadmap in
   [docs/architecture/README.md](./docs/architecture/README.md)
   and [docs/handoff/M1-M7-IMPLEMENTATION-GUIDE.md](./docs/handoff/M1-M7-IMPLEMENTATION-GUIDE.md)).
 - **Not yet built:** citation validation, abstention beyond "no evidence",

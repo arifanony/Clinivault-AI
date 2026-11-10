@@ -64,6 +64,12 @@ def _validate_result(item, index: int) -> dict:
         )
     if not isinstance(item["text"], str):
         raise ContextError(f"result {index} ({item['chunk_id']}) has non-string text")
+    if "document_name" in item:
+        name = item["document_name"]
+        if not isinstance(name, str) or not name:
+            raise ContextError(
+                f"result {index} ({item['chunk_id']}) has an invalid document_name"
+            )
     return item
 
 
@@ -102,25 +108,31 @@ def build_context(results, query: str | None = None, trace: dict | None = None) 
         )
         summary["chunk_count"] += 1
         summary["pages"].add(validated["page_number"])
-        evidence.append(
-            {
-                "rank": index + 1,
-                "chunk_id": chunk_id,
-                "document_id": document_id,
-                "page_number": validated["page_number"],
-                "score": validated["score"],
-                "text": validated["text"],
-            }
-        )
+        document_name = validated.get("document_name")
+        if isinstance(document_name, str) and document_name:
+            summary.setdefault("document_name", document_name)
+        entry: dict = {
+            "rank": index + 1,
+            "chunk_id": chunk_id,
+            "document_id": document_id,
+            "page_number": validated["page_number"],
+            "score": validated["score"],
+            "text": validated["text"],
+        }
+        if isinstance(document_name, str) and document_name:
+            entry["document_name"] = document_name
+        evidence.append(entry)
 
-    documents_summary = [
-        {
+    documents_summary = []
+    for doc in documents.values():
+        summary_item: dict = {
             "document_id": doc["document_id"],
             "chunk_count": doc["chunk_count"],
             "pages": sorted(doc["pages"]),
         }
-        for doc in documents.values()
-    ]
+        if isinstance(doc.get("document_name"), str) and doc["document_name"]:
+            summary_item["document_name"] = doc["document_name"]
+        documents_summary.append(summary_item)
 
     bundle = {
         "query": query,
