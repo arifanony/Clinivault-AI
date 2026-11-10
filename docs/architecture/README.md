@@ -28,10 +28,10 @@ Clinical PDF
   -> data/embedded/...json    {document_id, model, statistics, embeddings}
   -> retrieval/store.py       in-memory cosine index, one doc or merged corpus (M2)
   -> retrieval/search.py      query embedding + deterministic top-k
-  -> context/builder.py       inspectable evidence bundle
-  -> generation/generator.py  grounded prompt + provider seam -> answer
-  -> pipeline/__init__.py     run_query: retrieval -> context -> generation traces + execution record (M4)
-  -> pipeline/records.py      execution record builder + opt-in JSONL log (M4)
+  -> context/builder.py       inspectable evidence bundle (+ M5 max_chars budget)
+  -> generation/generator.py  grounded prompt + provider seam -> answer (+ M5 citation/sentinel/attempts checks)
+  -> pipeline/__init__.py     run_query: retrieval -> context -> generation traces + execution record (M4, M5)
+  -> pipeline/records.py      execution record builder + opt-in JSONL log (M4, M5)
   -> ui/app.py                observability console; nine-doc index loaded once (M2)
 ```
 
@@ -43,9 +43,10 @@ Stage contracts (all plain dicts, JSON-serializable):
 | chunking | parsed document | `{document_id, config, statistics, chunks:[{chunk_id, document_id, page_number, chunk_index, text}]}` |
 | embedding | chunk output | `{document_id, model, statistics, embeddings:[{chunk_id, document_id, page_number, vector}]}` |
 | retrieval | chunk output + embedding artifact | `[{chunk_id, document_id, page_number, score, text}]` (best first; plus optional `document_name` for catalogued documents) |
-| context | retrieval results (+ optional query) | `{query, evidence_count, documents, evidence:[{rank, chunk_id, document_id, page_number, score, text}]}` (each level carries optional `document_name` when the result had it) |
+| context | retrieval results (+ optional query, optional max_chars) | `{query, evidence_count, documents, evidence:[{rank, chunk_id, document_id, page_number, score, text}], truncated_chunk_ids}` (each level carries optional `document_name` when the result had it; M5 budget drops the lowest-rank tail whole items at a time, rank 1 always kept) |
+| generation | evidence bundle + provider | `{query, answer, status ∈ ok/no_evidence/abstained, provider, model, evidence, prompt_text, timings, usage, attempts, invalid_citations}` (M5: ABSTAIN: sentinel refusal, citation-ref checks, 429/5xx provider retry) |
 | ingestion report | parsed document + chunk output + embedding artifact | `{document_id, total_pages, parsed_pages, failed_pages, total_chunks, embedded_chunks, indexed_chunks, ingestion_status}` under `data/ingestion-report/<corpus-version>/<DOC-ID>/` |
-| execution record | run_query outputs (results + bundle + result) | `{run_id, timestamp, query, retrieval:{top_k, chunks}, context:{chunk_ids_used}, generation:{model, answer, abstained, status}, sources}` appended as JSONL only when `run_log_path` or `CLINIVAULT_RUN_LOG` is set (default: no write; `runs/` gitignored) |
+| execution record | run_query outputs (results + bundle + result) | `{run_id, timestamp, query, retrieval:{top_k, chunks}, context:{chunk_ids_used, truncated_chunk_ids}, generation:{model, answer, abstained, status}, sources}` appended as JSONL only when `run_log_path` or `CLINIVAULT_RUN_LOG` is set (default: no write; `runs/` gitignored) |
 
 Provenance survives every boundary: document -> page -> chunk ->
 embedding -> retrieval result -> evidence bundle. Each stage re-validates
@@ -85,10 +86,11 @@ and no Errata logic lives here.
 
 ## Not yet built
 
-Citation validation, abstention beyond the "no evidence" path, answer
-reliability (M5), `section` detection (deferred in M3 until a
-deterministic detector is measured), a production API, containerization,
-CI, and deployment/infrastructure. Catalog titles and ingestion reports
-are done (M3, DECISION-018); per-query execution records are done (M4,
-DECISION-019). The ordered roadmap for the rest lives in the audit plan
-milestones M1–M7 and is tracked as Genesis tasks.
+Claim-level grounding verification, `section` detection (deferred in
+M3 until a deterministic detector is measured), a production API,
+containerization, CI, and deployment/infrastructure. Catalog titles and
+ingestion reports are done (M3, DECISION-018); per-query execution
+records are done (M4, DECISION-019); deterministic answer-reliability
+checks are done (M5, DECISION-020). The ordered roadmap for the rest
+lives in the audit plan milestones M1–M7 and is tracked as Genesis
+tasks.

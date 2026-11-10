@@ -34,6 +34,7 @@ never rewritten — if it changes, mark it Replaced and write a new document.
 | [DECISION-017](./DECISION-017-production-e5-retrieval.md) | Production retrieval representation: raw `intfloat/e5-small-v2`; hash retained as comparison baseline | Chosen | 2026-09-25 |
 | [DECISION-018](./DECISION-018-document-metadata-and-ingestion-reports.md) | Document metadata passthrough and ingestion reports: catalog Titles joined at index time, brief-shaped per-document reports | Chosen | 2026-11-10 |
 | [DECISION-019](./DECISION-019-query-execution-records.md) | Persisted structured query execution records: run_id/timestamp/execution_record on run_query plus opt-in JSONL under gitignored runs/, never persisting keys | Chosen | 2026-11-10 |
+| [DECISION-020](./DECISION-020-answer-reliability.md) | Answer reliability: citation-ref checks, ABSTAIN sentinel refusal, max_chars context budget, 429/5xx Gemini retry, tiny labeled set; no AI judges, no score threshold (successor to the DECISION-011 prompt/status contract) | Chosen | 2026-11-10 |
 
 
 
@@ -51,8 +52,10 @@ arrives, not before):
 - vector storage/database at production scale
 - chunking strategy (the current chunker is explicitly a baseline)
 - metadata schema beyond the current provenance fields
-- abstention thresholds beyond "no evidence", truncation/context-limit policy,
-  retries/streaming, and any automatic grounding/citation measurement
+- retrieval-score abstention thresholds, mid-text truncation/summarization,
+  streaming, and any automatic claim-level grounding measurement (M5 settled
+  deterministic citation checks, the ABSTAIN sentinel, whole-item budgeting,
+  and 429/5xx retry in DECISION-020)
 - persistence beyond committed artifacts, deployment/infrastructure
 
 Retrieval strategy is recorded as DECISION-009 (baseline configuration:

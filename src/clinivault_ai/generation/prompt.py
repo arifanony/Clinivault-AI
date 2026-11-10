@@ -48,9 +48,15 @@ def build_prompt(bundle: dict[str, Any]) -> str:
         "supported by the supplied evidence.\n"
         "If the supplied evidence does not contain enough information to "
         "answer, say so explicitly and do NOT fabricate an answer.\n"
+        "When the evidence is insufficient or the question is outside the "
+        "supplied scope, begin your answer with the sentinel ABSTAIN: "
+        "followed by the reason.\n"
         "Do not add external knowledge, outside sources, or assumptions.\n"
         "Where possible, tie your answer to the specific evidence items you "
         "used (cite their rank, chunk_id, document_id, and page).\n"
+        "Cite evidence only with the exact identifiers printed above "
+        "(EVIDENCE_ITEM_RANK and EVIDENCE_ITEM_CHUNK_ID); never invent "
+        "ranks or chunk ids.\n"
     )
 
     lines: list[str] = []

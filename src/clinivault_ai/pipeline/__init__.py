@@ -28,6 +28,7 @@ def run_query(
     *,
     top_k: int = 5,
     run_log_path=None,
+    max_chars: int | None = None,
 ) -> dict:
     """Run retrieval -> context -> generation, collecting all traces.
 
@@ -40,11 +41,12 @@ def run_query(
          result,            # the generation result dict
          run_id,            # unique id for this run (M4)
          timestamp,         # UTC ISO-8601 time of this run (M4)
-         execution_record}  # small Errata-contract record (M4)
+         execution_record}  # small Errata-contract record (M4, M5)
 
     Does not change any stage behavior; each stage behaves exactly as
     when called directly. Provider and context errors propagate
-    unchanged.
+    unchanged. ``max_chars`` is passed to ``context.build_context``
+    (M5 budget; default None keeps everything).
 
     Persistence: the small execution record (never prompts, vectors,
     keys, or environment values) is appended as one JSON line to
@@ -56,7 +58,7 @@ def run_query(
     generation_trace: dict = {}
 
     results = search(store, query, embedding_provider, top_k, trace=retrieval_trace)
-    bundle = build_context(results, query, trace=context_trace)
+    bundle = build_context(results, query, trace=context_trace, max_chars=max_chars)
     result = generate_answer(
         bundle, generation_provider, trace=generation_trace
     )

@@ -16,8 +16,11 @@ from __future__ import annotations
 import time
 from typing import Any
 
+from clinivault_ai.generation.citations import check_citations
 from clinivault_ai.generation.errors import GenerationError
 from clinivault_ai.generation.prompt import build_prompt
+
+ABSTAIN_SENTINEL = "ABSTAIN:"
 
 
 def generate_answer(
@@ -46,7 +49,16 @@ def generate_answer(
     Returns:
         A dict containing at least:
             query, answer, status, provider, model, evidence,
-            prompt_text, timings, usage, nested_timings.
+            prompt_text, timings, usage, nested_timings, attempts,
+            invalid_citations.
+
+        ``status`` is ``"ok"``, ``"no_evidence"`` (empty evidence, no
+        provider call, answer None, zero attempts), or ``"abstained"``
+        (evidence present but the answer begins with the ``ABSTAIN:``
+        sentinel). ``invalid_citations`` lists cited ranks/chunk ids
+        that match no supplied evidence item (``[]`` when clean).
+        ``attempts`` counts provider calls (0 when never called; the
+        provider's own count when it reports one, else 1).
 
     Raises:
         GenerationError on malformed input or provider failure.
@@ -114,6 +126,8 @@ def generate_answer(
             },
             "usage": None,
             "nested_timings": _extract_nested_timings(bundle),
+            "attempts": 0,
+            "invalid_citations": [],
         }
 
     # LLM generation timing.
@@ -128,11 +142,15 @@ def generate_answer(
         raise GenerationError("LLM returned an empty response")
 
     usage = response.get("usage") or None
+    answer = text.strip()
+    status = (
+        "abstained" if answer.startswith(ABSTAIN_SENTINEL) else "ok"
+    )
 
     result = {
         "query": query,
-        "status": "ok",
-        "answer": text.strip(),
+        "status": status,
+        "answer": answer,
         "provider": getattr(provider, "name", None),
         "model": getattr(provider, "model", None),
         "evidence": evidence,
@@ -144,6 +162,8 @@ def generate_answer(
         },
         "usage": usage,
         "nested_timings": _extract_nested_timings(bundle),
+        "attempts": _coerce_attempts(response.get("attempts")),
+        "invalid_citations": check_citations(answer, evidence),
     }
 
     if trace is not None:
@@ -151,6 +171,13 @@ def generate_answer(
         trace["provider_called"] = True
 
     return result
+
+
+def _coerce_attempts(value: Any) -> int:
+    """Return a sane attempt count (providers that predate M5 report none)."""
+    if isinstance(value, bool) or not isinstance(value, int):
+        return 1
+    return value if value >= 1 else 1
 
 
 def _extract_nested_timings(bundle: dict[str, Any]) -> dict[str, Any] | None:

@@ -6,7 +6,9 @@ provenance-preserving evidence bundle for a future generation layer:
     ranked retrieval results -> evidence bundle
 
 Out of scope (deliberately): LLM/answer generation, prompt text, model
-providers, context-limit/truncation policies, reranking, abstention.
+providers, reranking, abstention. The one packaging-side budget is the
+M5 ``max_chars`` char budget (whole-item tail drop with
+``truncated_chunk_ids``); summarization and mid-text cuts stay out.
 """
 
 from __future__ import annotations

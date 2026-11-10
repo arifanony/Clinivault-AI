@@ -10,16 +10,16 @@
 
 - **Current project:** Clinivault AI
 - **Branch:** `master`
-- **Last completed milestone:** **M4** — persisted structured query
-  execution records (DECISION-019).
-- **Last pushed commit:** `a569b04` (`feat: retrieve across the
-  nine-document Stage-1 corpus`). M3 is committed locally as `d803d3a`
-  (`feat: add document metadata passthrough and ingestion reports`) but
-  **not yet pushed**; M4 is implemented, tested, and documented in the
-  working tree but **not yet committed** — review, commit as
-  `feat: persist structured query execution records`, then push M3+M4.
-  After that, confirm with `git rev-parse HEAD` / `git log -1 --oneline`.
-- **Working-tree expectation:** M4 files modified (see below); `runs/`
+- **Last completed milestone:** **M5** — deterministic answer
+  reliability (DECISION-020).
+- **Last pushed commit:** `6e46024` (`feat: persist structured query
+  execution records`). M3 (`d803d3a`) and M4 (`6e46024`) are pushed;
+  `master` matches `origin/master`. M5 is implemented, tested, and
+  documented in the working tree but **not yet committed** — review,
+  commit as `feat: check citations, abstention sentinel, and context
+  budget`, then push. After that, confirm with `git rev-parse HEAD` /
+  `git log -1 --oneline`.
+- **Working-tree expectation:** M5 files modified (see below); `runs/`
   stays gitignored and unwritten by default; untracked scratch removed
   before commit.
 - **Intentionally ignored/protected local files:** `.env` is ignored and must
@@ -28,36 +28,44 @@
 
 ## Last Completed Unit
 
-- **Unit/task:** M4 / persisted structured query execution records
-  (DECISION-019)
-- **What was completed:** `run_query` keeps all existing keys and adds
-  `run_id`, `timestamp`, and `execution_record` with the M4 schema
-  (`retrieval.top_k/chunks`, `context.chunk_ids_used`,
-  `generation.{model, answer, abstained, status}`,
-  `sources[{document_id, page_number, chunk_id}]`; `abstained` is true
-  exactly when status is `no_evidence`). New
-  `src/clinivault_ai/pipeline/records.py` builds the record and appends
-  one JSON line only when `run_log_path` is given or
-  `$CLINIVAULT_RUN_LOG` is set (default: no write; `runs/` gitignored).
-  No stage behavior changed; no keys, prompts, or vectors are recorded.
+- **Unit/task:** M5 / deterministic answer reliability (DECISION-020)
+- **What was completed:** citation-ref parsing (`EVIDENCE_ITEM_RANK` /
+  `EVIDENCE_ITEM_CHUNK_ID` checked against supplied evidence;
+  `invalid_citations[{kind, value}]` on the result), `ABSTAIN:` refusal
+  sentinel (status `abstained`, `abstained: true` in the record),
+  `max_chars` context budget (lowest-rank tail dropped whole items,
+  `truncated_chunk_ids` in bundle/trace/record; rank 1 always kept),
+  Gemini retry on 429/5xx only (`max_attempts=3`, doubling backoff;
+  `attempts` on success and failure; 401/403 raise at once), and a
+  3-case labeled set (in-scope supported, DECISION-005 out-of-scope
+  refusal, empty evidence) with citation-validity and
+  abstention-correctness metrics. No AI judges, no score threshold.
 - **Important files:**
-  - `src/clinivault_ai/pipeline/records.py` (new)
+  - `src/clinivault_ai/generation/citations.py` (new)
+  - `src/clinivault_ai/generation/generator.py`
+  - `src/clinivault_ai/generation/prompt.py`
+  - `src/clinivault_ai/generation/provider.py`
+  - `src/clinivault_ai/generation/__init__.py`
+  - `src/clinivault_ai/context/builder.py`
+  - `src/clinivault_ai/context/__init__.py`
   - `src/clinivault_ai/pipeline/__init__.py`
-  - `tests/test_execution_records.py` (new, 6 tests)
-  - `docs/decisions/DECISION-019-query-execution-records.md` (new)
-  - `docs/pipelines/execution-recording.md` (new)
-  - `.gitignore` (`runs/`)
+  - `src/clinivault_ai/pipeline/records.py`
+  - `tests/test_answer_reliability.py` (new, 31 tests)
+  - `docs/decisions/DECISION-020-answer-reliability.md` (new)
+  - `docs/pipelines/answer-reliability.md` (new)
+  - `docs/engineering-log/2026-11-10-m5-answer-reliability.md` (new)
   - `docs/decisions/README.md`, `docs/architecture/README.md`, `README.md`
 - **Tests/gates:**
-  - `python -m unittest tests.test_execution_records` — 6 tests OK
-  - `python -m unittest discover -s tests` — 262 tests; only known failure
-    is `test_ui.HandlerRequestTests` under the sandbox proxy (passes with
-    loopback excluded from proxy); 4 E5 tests skip without the HF cache
-  - `benchmark --provider e5` numbers unchanged by M4 (no retrieval-math
+  - `python -m unittest tests.test_answer_reliability` — 31 tests OK
+    (written first; failed honestly before the source change)
+  - `python -m unittest discover -s tests` — full gate per the loop
+    below (E5 tests skip without the HF cache; the sandbox-proxy
+    `test_ui` note from M4 still applies)
+  - `benchmark --provider e5` numbers unchanged by M5 (no retrieval-math
     change): Hit@1 **20/46**, Hit@5 **36/46**, MRR **0.5583**
 - **Relevant Decision / Pipeline:**
-  - `docs/decisions/DECISION-019-query-execution-records.md`
-  - `docs/pipelines/execution-recording.md`
+  - `docs/decisions/DECISION-020-answer-reliability.md`
+  - `docs/pipelines/answer-reliability.md`
 
 ## Current Technical Understanding
 
@@ -81,12 +89,20 @@
   `execution_record` (M4, DECISION-019); JSONL persists only when
   `run_log_path` or `$CLINIVAULT_RUN_LOG` is set, under gitignored
   `runs/`, with no keys, prompts, or vectors.
+- Generation results carry `status ∈ ok/no_evidence/abstained`,
+  `attempts`, and `invalid_citations` (M5, DECISION-020); the
+  `ABSTAIN:` sentinel marks refusals on non-empty evidence.
+- `build_context` accepts `max_chars` (M5): lowest-rank tail dropped
+  whole items, `truncated_chunk_ids` in bundle/trace/record; rank 1
+  always kept; `None` is exact pre-M5 behavior.
+- `GeminiProvider` retries 429/5xx up to `max_attempts` (default 3)
+  with doubling backoff; 401/403 raise at once (M5, DECISION-020).
 
 ### INFERENCE
 
-- M5 (answer reliability: citation checks, abstention sentinel, context
-  budget) is the next measured product gap; retrieval math is unchanged
-  by M4, so M6 stays deferred.
+- M5 is done; retrieval math is unchanged by M5, so M6 stays a
+  measurement question (deferred unless a concrete retrieval weakness
+  appears after M1–M5).
 
 ### NOT YET VALIDATED
 
@@ -97,12 +113,11 @@
 
 ## Next Authorized Action
 
-**M5 only** — answer reliability (no AI judges): citation parsing,
-abstention sentinel, context budget, Gemini retry on 429/5xx only. See
-[M1-M7-IMPLEMENTATION-GUIDE.md](./M1-M7-IMPLEMENTATION-GUIDE.md) §M5.
-
-**Do not start M6–M7 in the same session.** One milestone, tests, docs,
-commit, stop.
+**M6-scope check only** — per [M1-M7-IMPLEMENTATION-GUIDE.md](./M1-M7-IMPLEMENTATION-GUIDE.md)
+§M6: if M1–M5 show no specific retrieval weakness, write the M6-deferred
+log and skip hybrid/rerank/BM25/Top-K changes; a one-variable experiment
+needs its own decision. **Do not start M7 in the same session.** One
+milestone, tests, docs, commit, stop.
 
 ## Resume Procedure (other device)
 
@@ -126,7 +141,7 @@ cache), then retry. Do not change `local_files_only=True`.
 Genesis CLI is optional; skip if Node/`genesis` is missing. **Never
 hand-edit** `.genesis/project.json`.
 
-Then open the M1–M7 guide and implement **M5 only**.
+Then open the M1–M7 guide and run the **M6-scope check only**.
 
 ## Important Rules
 

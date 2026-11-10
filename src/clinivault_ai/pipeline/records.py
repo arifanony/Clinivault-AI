@@ -1,9 +1,10 @@
-"""Structured query execution records for the Errata contract (M4).
+"""Structured query execution records for the Errata contract (M4, M5).
 
 One record per :func:`clinivault_ai.pipeline.run_query` call: a small
-JSON-serializable dict with exactly the M4 schema. Records carry
-provenance and outcomes only — never prompts, vectors, API keys, or
-environment values.
+JSON-serializable dict with the M4 schema plus the M5 extensions
+(``"abstained"`` status abstention, ``truncated_chunk_ids``). Records
+carry provenance and outcomes only — never prompts, vectors, API keys,
+or environment values.
 """
 
 from __future__ import annotations
@@ -41,12 +42,16 @@ def build_execution_record(
 
     Only the contracted fields are kept: chunk provenance, the ordered
     chunk ids used as context, and the generation outcome. ``abstained``
-    is true exactly when generation status is ``"no_evidence"`` (M4;
-    M5 may extend it).
+    is true when generation status is ``"no_evidence"`` (M4) or the M5
+    ``"abstained"`` sentinel refusal. ``context`` also carries the M5
+    ``truncated_chunk_ids`` (``[]`` when the budget kept everything).
     """
     evidence = bundle.get("evidence") if isinstance(bundle, dict) else []
     if not isinstance(evidence, list):
         evidence = []
+    truncated = bundle.get("truncated_chunk_ids") if isinstance(bundle, dict) else []
+    if not isinstance(truncated, list):
+        truncated = []
     status = result.get("status") if isinstance(result, dict) else None
     chunks = [
         {
@@ -63,12 +68,13 @@ def build_execution_record(
         "query": query,
         "retrieval": {"top_k": top_k, "chunks": chunks},
         "context": {
-            "chunk_ids_used": [item["chunk_id"] for item in evidence]
+            "chunk_ids_used": [item["chunk_id"] for item in evidence],
+            "truncated_chunk_ids": list(truncated),
         },
         "generation": {
             "model": result.get("model"),
             "answer": result.get("answer"),
-            "abstained": status == "no_evidence",
+            "abstained": status in ("no_evidence", "abstained"),
             "status": status,
         },
         "sources": [

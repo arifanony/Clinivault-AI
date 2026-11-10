@@ -49,12 +49,15 @@ Early-stage MVP development (status as of 2026-10-06):
   (`run_id`, `timestamp`, `execution_record` on every `run_query` return,
   opt-in JSONL under gitignored `runs/` via `run_log_path` or
   `CLINIVAULT_RUN_LOG`, never persisting keys; DECISION-019).
-- **In progress:** answer-reliability checks
-  (see the roadmap in
+- **Done (M5):** answer-reliability checks — citation-ref parsing with
+  `invalid_citations`, `ABSTAIN:` refusal sentinel (`abstained` status),
+  `max_chars` context budget with `truncated_chunk_ids`, Gemini retry on
+  429/5xx with recorded `attempts`, and a tiny labeled reliability set
+  (DECISION-020). No AI judges, no retrieval-score threshold.
+- **Not yet built:** a production API, containerization, CI, and
+  deployment infrastructure (see the roadmap in
   [docs/architecture/README.md](./docs/architecture/README.md)
   and [docs/handoff/M1-M7-IMPLEMENTATION-GUIDE.md](./docs/handoff/M1-M7-IMPLEMENTATION-GUIDE.md)).
-- **Not yet built:** citation validation, abstention beyond "no evidence",
-  a production API, containerization, CI, and deployment infrastructure.
 - Architecture documentation is written as components actually take shape,
   not before — see [docs/architecture/](./docs/architecture/README.md).
 

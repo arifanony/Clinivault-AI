@@ -19,9 +19,14 @@ Invariants:
 
 - Retrieval order is preserved exactly; ``rank`` is the explicit 1-based
   position in that order.
-- Every provenance field is copied verbatim -- nothing is discarded,
-  reformatted, or truncated. Chunk text stays per-item and intact
-  (context limits are a generation-stage concern, not packaging).
+- Every provenance field is copied verbatim -- nothing is discarded or
+  reformatted. Chunk text stays per-item and intact unless the caller
+  passes ``max_chars`` (M5): then the lowest-rank tail is dropped whole
+  items at a time and every dropped ``chunk_id`` is reported in
+  ``truncated_chunk_ids``. Items are never cut mid-text.
+- Rank 1 is always kept when results are non-empty: an empty bundle
+  means empty retrieval, never a budget. (Whether to answer or abstain
+  belongs to the generation stage.)
 - The bundle is multi-document safe: evidence is grouped per
   ``document_id`` in the ``documents`` summary, and no code assumes a
   single document exists.
@@ -73,23 +78,43 @@ def _validate_result(item, index: int) -> dict:
     return item
 
 
-def build_context(results, query: str | None = None, trace: dict | None = None) -> dict:
+def build_context(
+    results,
+    query: str | None = None,
+    trace: dict | None = None,
+    max_chars: int | None = None,
+) -> dict:
     """Package ranked retrieval results into an inspectable evidence bundle.
 
     ``results`` is the best-first output of ``retrieval.search``. The
     order is preserved; rank is explicit. Raises ContextError on
     malformed input; empty results yield an explicit empty bundle.
 
+    ``max_chars`` (M5) is an optional total budget over evidence text
+    length: the best-first prefix that fits is kept and the lowest-rank
+    tail is dropped whole items at a time, reported in the bundle's
+    ``truncated_chunk_ids``. ``None`` (default) keeps everything and
+    preserves the pre-M5 behavior exactly. Rank 1 is always kept, so a
+    budget alone can never produce an empty bundle from non-empty
+    results. Non-positive or non-integer budgets raise ContextError.
+
     If *trace* is provided (a dict), it is populated with observability
     metadata: input query, input retrieval count, constructed evidence
     (with exact text and provenance), the documents summary, evidence
-    count, and construction timing. The returned bundle is unchanged,
-    preserving backward compatibility with downstream callers.
+    count, the budget, the truncated chunk ids, and construction
+    timing. The returned bundle is unchanged, preserving backward
+    compatibility with downstream callers.
     """
     import time as _time
 
     if not isinstance(results, (list, tuple)):
         raise ContextError("results must be a list of retrieval results")
+    if max_chars is not None and (
+        isinstance(max_chars, bool)
+        or not isinstance(max_chars, int)
+        or max_chars < 1
+    ):
+        raise ContextError("max_chars must be a positive integer or None")
 
     t_start = _time.perf_counter()
 
@@ -123,6 +148,18 @@ def build_context(results, query: str | None = None, trace: dict | None = None) 
             entry["document_name"] = document_name
         evidence.append(entry)
 
+    truncated_chunk_ids = _apply_char_budget(evidence, max_chars)
+    if truncated_chunk_ids:
+        dropped = set(truncated_chunk_ids)
+        evidence = [item for item in evidence if item["chunk_id"] not in dropped]
+        for doc_id in list(documents):
+            kept = [item for item in evidence if item["document_id"] == doc_id]
+            if kept:
+                documents[doc_id]["chunk_count"] = len(kept)
+                documents[doc_id]["pages"] = {item["page_number"] for item in kept}
+            else:
+                del documents[doc_id]
+
     documents_summary = []
     for doc in documents.values():
         summary_item: dict = {
@@ -139,6 +176,7 @@ def build_context(results, query: str | None = None, trace: dict | None = None) 
         "evidence_count": len(evidence),
         "documents": documents_summary,
         "evidence": evidence,
+        "truncated_chunk_ids": truncated_chunk_ids,
     }
 
     if trace is not None:
@@ -147,6 +185,29 @@ def build_context(results, query: str | None = None, trace: dict | None = None) 
         trace["evidence_count"] = len(evidence)
         trace["documents"] = documents_summary
         trace["evidence"] = evidence
+        trace["max_chars"] = max_chars
+        trace["truncated_chunk_ids"] = truncated_chunk_ids
         trace["context_ms"] = (_time.perf_counter() - t_start) * 1000.0
 
     return bundle
+
+
+def _apply_char_budget(evidence: list[dict], max_chars: int | None) -> list[str]:
+    """Return the chunk ids the budget drops (best-first prefix is kept).
+
+    ``None`` drops nothing. Rank 1 (index 0) is always kept so a budget
+    alone never empties a non-empty bundle. Items are dropped whole
+    from the tail; text is never cut mid-item.
+    """
+    if max_chars is None:
+        return []
+    kept_chars = 0
+    cutoff = len(evidence)
+    for index, item in enumerate(evidence):
+        text = item.get("text")
+        size = len(text) if isinstance(text, str) else 0
+        if index > 0 and kept_chars + size > max_chars:
+            cutoff = index
+            break
+        kept_chars += size
+    return [item["chunk_id"] for item in evidence[cutoff:]]
