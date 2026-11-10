@@ -10,58 +10,54 @@
 
 - **Current project:** Clinivault AI
 - **Branch:** `master`
-- **Last completed milestone:** **M3** — document metadata passthrough and
-  ingestion reports (DECISION-018).
+- **Last completed milestone:** **M4** — persisted structured query
+  execution records (DECISION-019).
 - **Last pushed commit:** `a569b04` (`feat: retrieve across the
-  nine-document Stage-1 corpus`). M2 is committed and pushed. M3 is
-  implemented, tested, and documented in the working tree but **not yet
-  committed** — review, commit as
-  `feat: add document metadata passthrough and ingestion reports`, then push.
+  nine-document Stage-1 corpus`). M3 is committed locally as `d803d3a`
+  (`feat: add document metadata passthrough and ingestion reports`) but
+  **not yet pushed**; M4 is implemented, tested, and documented in the
+  working tree but **not yet committed** — review, commit as
+  `feat: persist structured query execution records`, then push M3+M4.
   After that, confirm with `git rev-parse HEAD` / `git log -1 --oneline`.
-- **Working-tree expectation:** M3 files modified (see below), plus nine new
-  reports under `data/ingestion-report/`; untracked scratch removed before
-  commit.
+- **Working-tree expectation:** M4 files modified (see below); `runs/`
+  stays gitignored and unwritten by default; untracked scratch removed
+  before commit.
 - **Intentionally ignored/protected local files:** `.env` is ignored and must
   never be staged or committed. Copy `.env.example` locally and set
   `GOOGLE_API_KEY` only on the machine. Never print or paste keys.
 
 ## Last Completed Unit
 
-- **Unit/task:** M3 / document metadata passthrough and ingestion reports
-  (DECISION-018)
-- **What was completed:** `src/clinivault_ai/corpus/catalog.py` holds the
-  nine catalog entries transcribed from `docs/corpus/corpus-manifest.md`
-  (T2D-004 excluded by design). The retrieval store attaches
-  `document_name` to in-memory records for catalogued documents;
-  `search()` propagates it to results and trace candidates;
-  `context.build_context()` preserves it in evidence entries and the
-  documents summary (optional everywhere; synthetic/legacy IDs keep their
-  exact contract). `build_ingestion_report()` / `write_ingestion_report()`
-  produce the brief-shaped report per document; all nine reports under
-  `data/ingestion-report/stage-1-clean-baseline-corpus/<DOC>/` are
-  `success` (181 pages, 727 chunks). `section` stays absent by decision.
+- **Unit/task:** M4 / persisted structured query execution records
+  (DECISION-019)
+- **What was completed:** `run_query` keeps all existing keys and adds
+  `run_id`, `timestamp`, and `execution_record` with the M4 schema
+  (`retrieval.top_k/chunks`, `context.chunk_ids_used`,
+  `generation.{model, answer, abstained, status}`,
+  `sources[{document_id, page_number, chunk_id}]`; `abstained` is true
+  exactly when status is `no_evidence`). New
+  `src/clinivault_ai/pipeline/records.py` builds the record and appends
+  one JSON line only when `run_log_path` is given or
+  `$CLINIVAULT_RUN_LOG` is set (default: no write; `runs/` gitignored).
+  No stage behavior changed; no keys, prompts, or vectors are recorded.
 - **Important files:**
-  - `src/clinivault_ai/corpus/catalog.py` (new), `src/clinivault_ai/corpus/__init__.py` (new)
-  - `src/clinivault_ai/ingestion/report.py` (new)
-  - `src/clinivault_ai/retrieval/store.py`
-  - `src/clinivault_ai/retrieval/search.py`
-  - `src/clinivault_ai/context/builder.py`
-  - `tests/test_metadata.py` (new, 14 tests)
-  - `data/ingestion-report/stage-1-clean-baseline-corpus/<DOC>/` (nine reports)
-  - `docs/decisions/DECISION-018-document-metadata-and-ingestion-reports.md` (new)
-  - `docs/pipelines/ingestion-report.md` (new)
-  - `docs/decisions/README.md`, `docs/architecture/README.md`,
-    `docs/corpus/README.md`, `README.md`
+  - `src/clinivault_ai/pipeline/records.py` (new)
+  - `src/clinivault_ai/pipeline/__init__.py`
+  - `tests/test_execution_records.py` (new, 6 tests)
+  - `docs/decisions/DECISION-019-query-execution-records.md` (new)
+  - `docs/pipelines/execution-recording.md` (new)
+  - `.gitignore` (`runs/`)
+  - `docs/decisions/README.md`, `docs/architecture/README.md`, `README.md`
 - **Tests/gates:**
-  - `python -m unittest tests.test_metadata` — 14 tests OK
-  - `python -m unittest discover -s tests` — 256 tests; only known failure
+  - `python -m unittest tests.test_execution_records` — 6 tests OK
+  - `python -m unittest discover -s tests` — 262 tests; only known failure
     is `test_ui.HandlerRequestTests` under the sandbox proxy (passes with
     loopback excluded from proxy); 4 E5 tests skip without the HF cache
-  - `benchmark --provider e5` numbers unchanged by M3 (no retrieval-math
+  - `benchmark --provider e5` numbers unchanged by M4 (no retrieval-math
     change): Hit@1 **20/46**, Hit@5 **36/46**, MRR **0.5583**
 - **Relevant Decision / Pipeline:**
-  - `docs/decisions/DECISION-018-document-metadata-and-ingestion-reports.md`
-  - `docs/pipelines/ingestion-report.md`
+  - `docs/decisions/DECISION-019-query-execution-records.md`
+  - `docs/pipelines/execution-recording.md`
 
 ## Current Technical Understanding
 
@@ -81,11 +77,16 @@
   (M3, DECISION-018); unknown IDs keep their exact historical shape.
 - Nine ingestion reports under `data/ingestion-report/` are all `success`
   (181 pages, 727 chunks).
+- Every `run_query` return carries `run_id`, `timestamp`, and
+  `execution_record` (M4, DECISION-019); JSONL persists only when
+  `run_log_path` or `$CLINIVAULT_RUN_LOG` is set, under gitignored
+  `runs/`, with no keys, prompts, or vectors.
 
 ### INFERENCE
 
-- M4 (persisted execution records, DECISION-019) is the next measured
-  product gap; retrieval math is unchanged by M3, so M6 stays deferred.
+- M5 (answer reliability: citation checks, abstention sentinel, context
+  budget) is the next measured product gap; retrieval math is unchanged
+  by M4, so M6 stays deferred.
 
 ### NOT YET VALIDATED
 
@@ -96,11 +97,11 @@
 
 ## Next Authorized Action
 
-**M4 only** — persisted execution records (DECISION-019): JSONL under
-gitignored `runs/`, never persisting keys. See
-[M1-M7-IMPLEMENTATION-GUIDE.md](./M1-M7-IMPLEMENTATION-GUIDE.md) §M4.
+**M5 only** — answer reliability (no AI judges): citation parsing,
+abstention sentinel, context budget, Gemini retry on 429/5xx only. See
+[M1-M7-IMPLEMENTATION-GUIDE.md](./M1-M7-IMPLEMENTATION-GUIDE.md) §M5.
 
-**Do not start M5–M7 in the same session.** One milestone, tests, docs,
+**Do not start M6–M7 in the same session.** One milestone, tests, docs,
 commit, stop.
 
 ## Resume Procedure (other device)
@@ -125,12 +126,12 @@ cache), then retry. Do not change `local_files_only=True`.
 Genesis CLI is optional; skip if Node/`genesis` is missing. **Never
 hand-edit** `.genesis/project.json`.
 
-Then open the M1–M7 guide and implement **M3 only**.
+Then open the M1–M7 guide and implement **M5 only**.
 
 ## Important Rules
 
 - One milestone per session; stop after commit.
-- Do not expand into M4+ without a new authorization.
+- Do not expand into M6+ without a new authorization.
 - Protect `.env`; never commit secrets or put Gemini keys in URLs (`?key=`).
   Use `x-goog-api-key` header only.
 - Distinguish OBSERVED / INFERENCE / NOT YET VALIDATED in engineering logs.

@@ -15,3 +15,6 @@ wheels/
 .env
 .env.*
 !.env.example
+
+# M4 execution records (JSONL per query; never commit)
+runs/

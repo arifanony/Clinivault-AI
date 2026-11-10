@@ -30,7 +30,8 @@ Clinical PDF
   -> retrieval/search.py      query embedding + deterministic top-k
   -> context/builder.py       inspectable evidence bundle
   -> generation/generator.py  grounded prompt + provider seam -> answer
-  -> pipeline/__init__.py     run_query: retrieval -> context -> generation traces
+  -> pipeline/__init__.py     run_query: retrieval -> context -> generation traces + execution record (M4)
+  -> pipeline/records.py      execution record builder + opt-in JSONL log (M4)
   -> ui/app.py                observability console; nine-doc index loaded once (M2)
 ```
 
@@ -44,6 +45,7 @@ Stage contracts (all plain dicts, JSON-serializable):
 | retrieval | chunk output + embedding artifact | `[{chunk_id, document_id, page_number, score, text}]` (best first; plus optional `document_name` for catalogued documents) |
 | context | retrieval results (+ optional query) | `{query, evidence_count, documents, evidence:[{rank, chunk_id, document_id, page_number, score, text}]}` (each level carries optional `document_name` when the result had it) |
 | ingestion report | parsed document + chunk output + embedding artifact | `{document_id, total_pages, parsed_pages, failed_pages, total_chunks, embedded_chunks, indexed_chunks, ingestion_status}` under `data/ingestion-report/<corpus-version>/<DOC-ID>/` |
+| execution record | run_query outputs (results + bundle + result) | `{run_id, timestamp, query, retrieval:{top_k, chunks}, context:{chunk_ids_used}, generation:{model, answer, abstained, status}, sources}` appended as JSONL only when `run_log_path` or `CLINIVAULT_RUN_LOG` is set (default: no write; `runs/` gitignored) |
 
 Provenance survives every boundary: document -> page -> chunk ->
 embedding -> retrieval result -> evidence bundle. Each stage re-validates
@@ -83,10 +85,10 @@ and no Errata logic lives here.
 
 ## Not yet built
 
-Citation validation, abstention beyond the "no evidence" path, persisted
-per-query execution records (M4), answer reliability (M5), `section`
-detection (deferred in M3 until a deterministic detector is measured), a
-production API, containerization, CI, and deployment/infrastructure.
-Catalog titles and ingestion reports are done (M3, DECISION-018). The
-ordered roadmap for the rest lives in the audit plan milestones M1–M7 and
-is tracked as Genesis tasks.
+Citation validation, abstention beyond the "no evidence" path, answer
+reliability (M5), `section` detection (deferred in M3 until a
+deterministic detector is measured), a production API, containerization,
+CI, and deployment/infrastructure. Catalog titles and ingestion reports
+are done (M3, DECISION-018); per-query execution records are done (M4,
+DECISION-019). The ordered roadmap for the rest lives in the audit plan
+milestones M1–M7 and is tracked as Genesis tasks.

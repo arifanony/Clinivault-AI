@@ -33,6 +33,7 @@ never rewritten — if it changes, mark it Replaced and write a new document.
 | [DECISION-016](./DECISION-016-retrieval-representation.md) | Retrieval representation for the next integration phase: select local semantic retrieval, with raw `intfloat/e5-small-v2` as the leading candidate; no production change in this decision | Chosen | 2026-09-23 |
 | [DECISION-017](./DECISION-017-production-e5-retrieval.md) | Production retrieval representation: raw `intfloat/e5-small-v2`; hash retained as comparison baseline | Chosen | 2026-09-25 |
 | [DECISION-018](./DECISION-018-document-metadata-and-ingestion-reports.md) | Document metadata passthrough and ingestion reports: catalog Titles joined at index time, brief-shaped per-document reports | Chosen | 2026-11-10 |
+| [DECISION-019](./DECISION-019-query-execution-records.md) | Persisted structured query execution records: run_id/timestamp/execution_record on run_query plus opt-in JSONL under gitignored runs/, never persisting keys | Chosen | 2026-11-10 |
 
 
 
