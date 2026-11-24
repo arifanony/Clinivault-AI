@@ -1,3 +1,14 @@
+---
+title: Clinivault AI
+emoji: 🏥
+colorFrom: blue
+colorTo: green
+sdk: docker
+pinned: false
+app_port: 8000
+base_path: /docs
+---
+
 # Clinivault AI
 
 Clinivault AI is an **evidence-grounded clinical knowledge system**. Users ask

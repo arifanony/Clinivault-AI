@@ -18,12 +18,23 @@
 FROM python:3.14-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/srv/clinivault/src
 
 WORKDIR /srv/clinivault
 
 COPY pyproject.toml uv.lock README.md ./
 COPY src ./src
+
+# Corpus artifacts: the API loads its 727-chunk index from data/ at
+# startup (load_store resolves paths from the repo root), so the image
+# must carry the parsed corpus and the production E5 embeddings.
+# Only the E5 tree is copied - the other embedded-* trees are
+# experiment baselines, not needed at runtime. Without these lines
+# the container crashes on boot with FileNotFoundError for
+# data/parsed/.../T2D-001.parsed.json and /health never serves.
+COPY data/parsed ./data/parsed
+COPY data/embedded-intfloat--e5-small-v2 ./data/embedded-intfloat--e5-small-v2
 
 RUN pip install --no-cache-dir .
 
