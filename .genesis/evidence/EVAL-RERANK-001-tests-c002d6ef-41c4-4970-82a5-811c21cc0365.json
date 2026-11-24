@@ -1,0 +1,30 @@
+{
+  "task": "EVAL-RERANK-001",
+  "gate": "tests",
+  "kind": "command",
+  "attempt": "c002d6ef-41c4-4970-82a5-811c21cc0365",
+  "command": "python3 -m unittest discover -s tests",
+  "started_at": "2026-11-24T03:20:09.143Z",
+  "observed_at": "2026-11-24T03:20:44.377Z",
+  "exit_code": 0,
+  "signal": null,
+  "stdout": "",
+  "stderr": "/home/hatch/workspace/clinivault-inspect/.venv/lib/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n  from starlette.testclient import TestClient as TestClient  # noqa\n...................../home/hatch/.local/share/uv/python/cpython-3.14.10-linux-x86_64-gnu/lib/python3.14/tempfile.py:538: ResourceWarning: Implicitly cleaning up <HTTPError 403: 'error'>\n  _warnings.warn(self.warn_message, ResourceWarning)\n........../home/hatch/.local/share/uv/python/cpython-3.14.10-linux-x86_64-gnu/lib/python3.14/tempfile.py:538: ResourceWarning: Implicitly cleaning up <HTTPError 500: 'error'>\n  _warnings.warn(self.warn_message, ResourceWarning)\n/home/hatch/.local/share/uv/python/cpython-3.14.10-linux-x86_64-gnu/lib/python3.14/tempfile.py:538: ResourceWarning: Implicitly cleaning up <HTTPError 503: 'error'>\n  _warnings.warn(self.warn_message, ResourceWarning)\n/home/hatch/.local/share/uv/python/cpython-3.14.10-linux-x86_64-gnu/lib/python3.14/tempfile.py:538: ResourceWarning: Implicitly cleaning up <HTTPError 401: 'error'>\n  _warnings.warn(self.warn_message, ResourceWarning)\n/home/hatch/.local/share/uv/python/cpython-3.14.10-linux-x86_64-gnu/lib/python3.14/tempfile.py:538: ResourceWarning: Implicitly cleaning up <HTTPError 429: 'error'>\n  _warnings.warn(self.warn_message, ResourceWarning)\n............................................................s.ssss...........................................................................................................................................................................................................................\n----------------------------------------------------------------------\nRan 316 tests in 1.075s\n\nOK (skipped=5)\n",
+  "failure": null,
+  "receipt": null,
+  "revision": {
+    "commit": "362d4755510942e1a8643156592e701d8aa86345",
+    "dirty": true
+  },
+  "source_hash": "a5fafd564ea158c447843452aad1639659900dfd2c12884be717a562917c7d00",
+  "before_hash": "a5fafd564ea158c447843452aad1639659900dfd2c12884be717a562917c7d00",
+  "config_hash": "1565fe8c79302af79c5fbb349a0f0d57c7a58587bf4006e5b99b785936af646d",
+  "environment": {
+    "node": "v24.22.1",
+    "platform": "linux",
+    "arch": "x64",
+    "verifier": "cbdddbf25e5ed5f3406b93881ae54f64d11a8c54f0bfe177d19d9d9946a6a971",
+    "variables": {}
+  },
+  "hash": "25955c1fac17d0045eec3614bd8e21104caeef891ff35f8a058400b4627113e7"
+}

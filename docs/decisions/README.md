@@ -36,6 +36,8 @@ never rewritten — if it changes, mark it Replaced and write a new document.
 | [DECISION-019](./DECISION-019-query-execution-records.md) | Persisted structured query execution records: run_id/timestamp/execution_record on run_query plus opt-in JSONL under gitignored runs/, never persisting keys | Chosen | 2026-11-10 |
 | [DECISION-020](./DECISION-020-answer-reliability.md) | Answer reliability: citation-ref checks, ABSTAIN sentinel refusal, max_chars context budget, 429/5xx Gemini retry, tiny labeled set; no AI judges, no score threshold (successor to the DECISION-011 prompt/status contract) | Chosen | 2026-11-10 |
 | [DECISION-021](./DECISION-021-production-api-container-ci.md) | Production deploy slice: FastAPI query API over the unchanged pipeline, secret-free JSON access logs, in-memory index (no Qdrant), Dockerfile, GitHub Actions CI | Chosen | 2026-11-10 |
+| [DECISION-022](./DECISION-022-m6-failure-class-analysis.md) | Failure-class analysis of E5 residual misses (RANKING 16, NEAR_MISS 6, DEEP_MISS 4 of 46): M6 reopened for one cross-encoder reranking experiment; hybrid, Top-K and re-chunking not run on this evidence | Chosen | 2026-11-24 |
+| [DECISION-023](./DECISION-023-reranking-experiment-outcome.md) | Cross-encoder reranking experiment (M6): candidate failed the pre-registered bar (Hit@5 36→35, MRR +0.0069); not adopted, production stays on DECISION-017, hybrid closed as not run | Chosen | 2026-11-24 |
 
 
 

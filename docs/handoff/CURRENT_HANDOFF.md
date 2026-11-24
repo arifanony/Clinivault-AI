@@ -17,7 +17,13 @@
   changes, no measured weakness`). M5 (`51d89c2`) and M6 are pushed.
 - **M6-scope check:** complete — deferred with no code change (see
   `docs/engineering-log/2026-11-10-m6-deferred.md`); no specific
-  measured retrieval weakness after M1–M5.
+  measured retrieval weakness after M1–M5. **Reopened and closed
+  2026-11-24** under DECISION-022/023 (see the 2026-11-24 unit
+  below): failure-class analysis measured, one reranking experiment
+  run and not adopted, production retrieval unchanged.
+- **Latest unit (2026-11-24):** live end-to-end validation passed
+  (`docs/live-validation-2026-11-24.md`) and the M6-reopened unit
+  completed; committed locally, push pending.
 - **Working-tree expectation:** M7 files (see below); `runs/`
   stays gitignored and unwritten by default; untracked scratch removed
   before commit.
@@ -78,6 +84,45 @@
   - `docs/decisions/DECISION-021-production-api-container-ci.md`
   - `docs/pipelines/production-api.md`
 
+## 2026-11-24 Unit — Live Validation and M6 Reopened
+
+- **Live end-to-end validation (passed):** full test gate, frozen E5
+  benchmark reproduced exactly (Hit@1 20/46, Hit@5 36/46,
+  MRR 0.5583), and the FastAPI API served live with a free-tier
+  Gemini key — grounded, validly cited answers for HbA1c and
+  screening questions, correct ABSTAIN refusal out of scope. Record:
+  `docs/live-validation-2026-11-24.md`. Clinivault is still not
+  deployed anywhere.
+- **Failure-class analysis (DECISION-022, task
+  EVAL-FAILURE-CLASS-002):** full-ranking classification of the
+  frozen 46 under E5 — HIT1 20, RANKING 16, NEAR_MISS 6, DEEP_MISS 4.
+  Ordering inside the top 20 is the dominant failure; the deep
+  misses are paraphrase/label cases, not lexical gaps. New module
+  `src/clinivault_ai/evaluation/failure_analysis.py` (+ tests).
+  Log: `docs/engineering-log/2026-11-24-e5-failure-class-analysis.md`.
+- **Reranking experiment (DECISION-023, task EVAL-RERANK-001):**
+  `cross-encoder/ms-marco-MiniLM-L-6-v2` over the E5 top-20 —
+  Hit@1 20→21, **Hit@5 36→35**, MRR 0.5583→0.5652; 10 improved /
+  8 regressed / 28 unchanged, including three rank-1 destructions.
+  Failed the pre-registered adoption bar on both conditions; **not
+  adopted**. Module `src/clinivault_ai/evaluation/rerank_experiment.py`
+  (+ tests) stays as the reproducible record. Log:
+  `docs/engineering-log/2026-11-24-rerank-experiment-negative-result.md`.
+- **Hybrid/BM25 (task EVAL-HYBRID-001):** closed as **not run** —
+  DECISION-022's start condition (a measured lexical failure class)
+  was not met.
+- **Production state:** unchanged. Retrieval remains raw E5
+  (DECISION-017); the unchanged path reproduced the frozen numbers
+  inside the experiment's baseline arm.
+- **Tests/gates:** suite now 311 tests. In full local configuration
+  on the validation machine, exactly one failure:
+  `test_e5_provider` bit-exact reproduction (float noise at ~3e-9,
+  cosine 0.9999999999997 — pre-existing, diagnosed in the live
+  validation record). In the project's CI configuration (E5 live
+  tests skip without a loadable model, as in GitHub Actions) the
+  Genesis `tests` gates pass; the analysis gate also passed as
+  executable proof inside Genesis.
+
 ## Current Technical Understanding
 
 ### OBSERVED
@@ -121,19 +166,27 @@
 
 ### NOT YET VALIDATED
 
-- End-to-end Gemini answers over the API or UI with E5 evidence over
-  the corpus (needs key + model cache; never run from this machine).
 - `section` detection — deliberately absent until a deterministic detector
   is measured (DECISION-018).
-- A failure-class breakdown of E5's residual benchmark misses — the
-  prerequisite that would reopen M6.
+- Deployment: the validated system has never run on a public host;
+  auth/rate limits do not exist yet (DECISION-021 scope).
+
+Closed since the M7 handoff: end-to-end Gemini answers over the API
+with E5 evidence (validated live 2026-11-24,
+`docs/live-validation-2026-11-24.md`) and the failure-class breakdown
+of E5's residual misses (DECISION-022, 2026-11-24).
 
 ## Next Authorized Action
 
-**Nothing is queued — the M1–M7 MVP is complete** (M6 deferred,
-docs-only). Any further work (Stage-2 corpus, workers/Qdrant,
-auth/rate-limits, claim-level verification) needs its own decision
-and an explicit fresh authorization. Do not start anything unasked.
+**Nothing is queued.** The M1–M7 MVP is complete and the 2026-11-24
+unit (live validation; M6 reopened and closed under
+DECISION-022/023) is complete. Named candidates for a future
+authorization, each needing its own decision: Stage-2 corpus with
+benchmark expansion; human label review of the flagged cases
+(8 BOUNDARY_SUSPECT, 3 LABEL_REVIEW in DECISION-022's analysis) with
+an openly re-frozen benchmark; a domain-appropriate reranker
+experiment judged on rank-1 destruction (DECISION-023); deployment
+with auth/rate limits. Do not start anything unasked.
 
 ## Resume Procedure (other device)
 

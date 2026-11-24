@@ -1,0 +1,30 @@
+{
+  "task": "EVAL-FAILURE-CLASS-002",
+  "gate": "tests",
+  "kind": "command",
+  "attempt": "979ffa3a-59ba-4f1e-9c84-6821cbc7c71e",
+  "command": "python -m unittest discover -s tests",
+  "started_at": "2026-11-24T03:07:44.193Z",
+  "observed_at": "2026-11-24T03:08:58.192Z",
+  "exit_code": 1,
+  "signal": null,
+  "stdout": "",
+  "stderr": "/home/hatch/workspace/clinivault-inspect/.venv/lib/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n  from starlette.testclient import TestClient as TestClient  # noqa\n\rLoading weights:   0%|          | 0/199 [00:00<?, ?it/s]\rLoading weights:  30%|███       | 60/199 [00:00<00:00, 596.15it/s]\rLoading weights:  60%|██████    | 120/199 [00:00<00:00, 577.65it/s]\rLoading weights: 100%|██████████| 199/199 [00:00<00:00, 689.76it/s]\n.............................../home/hatch/.local/share/uv/python/cpython-3.14.10-linux-x86_64-gnu/lib/python3.14/tempfile.py:538: ResourceWarning: Implicitly cleaning up <HTTPError 403: 'error'>\n  _warnings.warn(self.warn_message, ResourceWarning)\n/home/hatch/.local/share/uv/python/cpython-3.14.10-linux-x86_64-gnu/lib/python3.14/tempfile.py:538: ResourceWarning: Implicitly cleaning up <HTTPError 429: 'error'>\n  _warnings.warn(self.warn_message, ResourceWarning)\n/home/hatch/.local/share/uv/python/cpython-3.14.10-linux-x86_64-gnu/lib/python3.14/tempfile.py:538: ResourceWarning: Implicitly cleaning up <HTTPError 500: 'error'>\n  _warnings.warn(self.warn_message, ResourceWarning)\n/home/hatch/.local/share/uv/python/cpython-3.14.10-linux-x86_64-gnu/lib/python3.14/tempfile.py:538: ResourceWarning: Implicitly cleaning up <HTTPError 503: 'error'>\n  _warnings.warn(self.warn_message, ResourceWarning)\n/home/hatch/.local/share/uv/python/cpython-3.14.10-linux-x86_64-gnu/lib/python3.14/tempfile.py:538: ResourceWarning: Implicitly cleaning up <HTTPError 401: 'error'>\n  _warnings.warn(self.warn_message, ResourceWarning)\n............................................................s.\rLoading weights:   0%|          | 0/199 [00:00<?, ?it/s]\rLoading weights: 100%|██████████| 199/199 [00:00<00:00, 4549.93it/s]\n...F......................................................................................................................................................................................................................\n======================================================================\nFAIL: test_t2d001_first_chunk_matches_committed_artifact (test_e5_provider.E5ProviderLiveTests.test_t2d001_first_chunk_matches_committed_artifact)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/hatch/workspace/clinivault-inspect/tests/test_e5_provider.py\", line 94, in test_t2d001_first_chunk_matches_committed_artifact\n    self.assertEqual(encoded, first_record[\"vector\"])\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Lists differ: [-0.0620817169547081, 0.03295685723423958, 0.00996268[8353 chars]9622] != [-0.0620817132294178, 0.03295687586069107, 0.00996264[8370 chars]9324]\n\nFirst differing element 0:\n-0.0620817169547081\n-0.0620817132294178\n\nDiff is 19932 characters long. Set self.maxDiff to None to see it.\n\n----------------------------------------------------------------------\nRan 311 tests in 6.762s\n\nFAILED (failures=1, skipped=1)\n",
+  "failure": "command-failed",
+  "receipt": null,
+  "revision": {
+    "commit": "362d4755510942e1a8643156592e701d8aa86345",
+    "dirty": true
+  },
+  "source_hash": "d79afd17c6028ab0506968ca1647168103f0a3ccc19c3cefeb2dc1edd13974e4",
+  "before_hash": "d79afd17c6028ab0506968ca1647168103f0a3ccc19c3cefeb2dc1edd13974e4",
+  "config_hash": "e8a136d369f92ef1eb19de44f64df6196adcd12460ce450105ff0843d10bb20a",
+  "environment": {
+    "node": "v24.22.1",
+    "platform": "linux",
+    "arch": "x64",
+    "verifier": "cbdddbf25e5ed5f3406b93881ae54f64d11a8c54f0bfe177d19d9d9946a6a971",
+    "variables": {}
+  },
+  "hash": "ab5785a8e15125aefda59da8eb0be5e8bc40765e4e2eaf4a20628591fbe7d28d"
+}
